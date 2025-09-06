@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dragon Fly Signal</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin:0; font-family:'Poppins',sans-serif;
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:#fff; display:flex; flex-direction:column; align-items:center; padding:20px;
+  }
+  h1 { margin-bottom:20px; color:#00e5ff; text-align:center;}
+  .controls { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-bottom:20px; }
+  select,input[type=number] { padding:10px; border-radius:10px; border:none; background:rgba(255,255,255,0.1); color:#fff; outline:none; }
+  button { padding:10px 20px; border:none; border-radius:10px; font-weight:bold; cursor:pointer; background:linear-gradient(135deg,#00e5ff,#00ff9d); color:#000; transition:0.3s; }
+  button:hover { transform:scale(1.05); box-shadow:0 0 15px #00ffcc; }
+  #output { width:100%; max-width:500px; margin-top:20px; }
+  .signal-card { background:rgba(255,255,255,0.1); backdrop-filter:blur(8px); padding:12px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; transition:0.3s; }
+  .signal-card:hover { transform:scale(1.02); box-shadow:0 0 15px #00ffcc; }
+  .call { color:#00ff00; font-weight:bold; }
+  .put { color:#ff3b3b; font-weight:bold; }
+</style>
+</head>
+<body>
+
+<h1>Quotex Dragon Fly Signal</h1>
+
+<div class="controls">
+  <select id="utc">
+    <option value="+0">UTC +00:00</option>
+    <option value="+1">UTC +01:00</option>
+    <option value="+2">UTC +02:00</option>
+    <option value="+3">UTC +03:00</option>
+    <option value="+4">UTC +04:00</option>
+    <option value="+5">UTC +05:00</option>
+    <option value="+6" selected>UTC +06:00 🇧🇩</option>
+    <option value="+7">UTC +07:00</option>
+    <option value="+8">UTC +08:00</option>
+  </select>
+
+  <select id="marketType" onchange="updateAssets()">
+    <option value="Real">Real</option>
+    <option value="OTC">OTC</option>
+  </select>
+
+  <select id="asset"></select>
+
+  <select id="timeframe">
+    <option value="1">1 MIN</option>
+    <option value="5">5 MIN</option>
+    <option value="15">15 MIN</option>
+  </select>
+
+  <input type="number" id="numSignals" placeholder="Number of Signals" min="1" max="20" value="5">
+
+  <select id="signalType">
+    <option value="Call">Call</option>
+    <option value="Put">Put</option>
+    <option value="Both">Both</option>
+  </select>
+
+  <button onclick="generateSignals()">Generate Signals</button>
+  <button onclick="copySignals()">Copy All</button>
+  <button onclick="resetSignals()">Reset</button>
+</div>
+
+<div id="output"></div>
+
+<script>
+const realAssets = ["EUR/JPY","USD/JPY","CAD/JPY","NZD/USD","EUR/USD","GBP/USD","AUD/JPY","GBP/CAD","USD/CAD","AUD/CAD","AUD/USD","GBP/AUD","GBP/JPY","USD/CHF","EUR/GBP"];
+const otcAssets = [
+"EUR/USD (OTC)","NZD/CAD (OTC)","USD/INR (OTC)","AUD/JPY (OTC)","AUD/USD (OTC)","CAD/CHF (OTC)","USD/DZD (OTC)","USD/PKR (OTC)","AUD/NZD (OTC)","EUR/SGD (OTC)","USD/CHF (OTC)","USD/BRL (OTC)","EUR/CAD (OTC)","NZD/CHF (OTC)","NZD/JPY (OTC)","USD/NGN (OTC)","USD/TRY (OTC)","USD/COP (OTC)","USD/EGP (OTC)","CHF/JPY (OTC)","GBP/CAD (OTC)","NZD/USD (OTC)","USD/MXN (OTC)","AUD/CAD (OTC)","AUD/CHF (OTC)","EUR/AUD (OTC)","EUR/CHF (OTC)","EUR/GBP (OTC)","GBP/JPY (OTC)","USD/CAD (OTC)","USD/PHP (OTC)","USD/BDT (OTC)","GBP/AUD (OTC)","USD/ARS (OTC)","USD/IDR (OTC)","USD/JPY (OTC)","USD/ZAR (OTC)","GBP/USD (OTC)","CAD/JPY (OTC)","GBP/CHF (OTC)","GBP/NZD (OTC)","EUR/NZD (OTC)"];
+function updateAssets(){
+  const marketType = document.getElementById("marketType").value;
+  const assetDropdown = document.getElementById("asset");
+  assetDropdown.innerHTML = "";
+  const list = marketType==="Real"? realAssets : otcAssets;
+  list.forEach(a=>{ const opt=document.createElement("option"); opt.value=a; opt.textContent=a; assetDropdown.appendChild(opt); });
+}
+updateAssets();
+
+function generateSignals(){
+  const num = parseInt(document.getElementById("numSignals").value)||5;
+  const type = document.getElementById("signalType").value;
+  const asset = document.getElementById("asset").value;
+  const output = document.getElementById("output");
+  output.innerHTML = "";
+  let now = new Date();
+  for(let i=0;i<num;i++){
+    const randomGap = Math.floor(Math.random()*6)+5; //5-10 min
+    now.setMinutes(now.getMinutes()+randomGap);
+    let h=now.getHours().toString().padStart(2,'0');
+    let m=now.getMinutes().toString().padStart(2,'0');
+    let sigTime=`${h}:${m}`;
+    let sigType=type==="Both"? (Math.random()>0.5?"Call":"Put") : type;
+    const card=document.createElement("div");
+    card.className="signal-card";
+    card.innerHTML=`<span>${sigTime} | ${asset}</span> <span class="${sigType.toLowerCase()}">${sigType}</span>`;
+    output.appendChild(card);
+  }
+}
+
+function copySignals(){
+  const output = document.getElementById("output");
+  const text = Array.from(output.children).map(c=>c.innerText).join("\n");
+  navigator.clipboard.writeText(text).then(()=>alert("Signals copied!"));
+}
+
+function resetSignals(){
+  document.getElementById("output").innerHTML="";
+}
+</script>
+
+</body>
+</html>
