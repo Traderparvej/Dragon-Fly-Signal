@@ -8,23 +8,19 @@
 <style>
 body {
   margin:0; font-family:'Poppins',sans-serif;
-  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  background: linear-gradient(135deg,#0f0c29,#302b63,#24243e);
   color:#00fff7; display:flex; flex-direction:column; align-items:center; padding:20px;
 }
 
 h1 {
-  margin-bottom:20px; 
-  color:#00e5ff; 
-  text-align:center;
+  margin-bottom:20px;
   font-size:2.5rem;
   font-weight:700;
-  text-shadow: 0 0 10px #00e5ff, 0 0 20px #00fff7, 0 0 30px #0ff;
-  letter-spacing: 1px;
-  transition: 0.3s;
-}
-
-h1:hover {
-  text-shadow: 0 0 15px #00e5ff, 0 0 25px #00fff7, 0 0 35px #0ff;
+  background: linear-gradient(90deg,#00f0ff,#00ff99);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align:center;
+  letter-spacing:1px;
 }
 
 .controls {
@@ -33,50 +29,44 @@ h1:hover {
 }
 
 .controls select, .controls input[type=number], #license {
-  padding:10px; border-radius:10px; border:none; background:rgba(255,255,255,0.1);
-  color:#00fff7; outline:none; min-width:120px; flex:1 1 120px;
+  padding:10px; border-radius:8px; border:2px solid #00fff7;
+  background:rgba(0,0,0,0.2); color:#00fff7; outline:none; min-width:120px; flex:1 1 120px;
   transition:0.3s;
 }
 
 .controls select:hover, .controls input[type=number]:hover, #license:hover {
-  background:rgba(255,255,255,0.2);
+  border-color:#00ff99;
+  background:rgba(0,0,0,0.3);
 }
 
 .controls button {
-  padding:10px 20px; border:none; border-radius:10px; font-weight:bold; cursor:pointer; 
-  background:linear-gradient(135deg,#00e5ff,#00ff9d); color:#000; transition:0.3s;
+  padding:10px 20px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;
+  background:linear-gradient(135deg,#00f0ff,#00ff99);
+  color:#000; transition:0.3s;
   flex:1 1 120px;
 }
 
-.controls button:hover { transform:scale(1.05); box-shadow:0 0 15px #00ffcc; }
+.controls button:hover { transform:scale(1.05); }
 
 #output { width:100%; max-width:900px; margin-top:20px; }
 
 .signal-card {
-  background:rgba(0,0,0,0.3); backdrop-filter:blur(8px); padding:12px; border-radius:12px; 
-  margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; transition:0.3s;
-  color:#00fff7;
-  font-weight:600;
+  background:rgba(255,255,255,0.05); padding:12px; border-radius:10px;
+  margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;
+  border-left:4px solid #00fff7; transition:0.3s;
 }
 
-.signal-card:hover { transform:scale(1.02); box-shadow:0 0 15px #00ffcc; }
+.signal-card:hover { transform:scale(1.02); border-left-color:#00ff99; }
 
 .call { color:#00ff00; font-weight:bold; }
 .put { color:#ff3b3b; font-weight:bold; }
-
-#output p, #output a { color:#00fff7; font-weight:bold; text-decoration:none; }
-#output a:hover { text-decoration:underline; }
+.time-asset { color:#00fff7; font-weight:bold; }
 
 #license { outline:none; }
 
-/* Responsive tweaks for desktop */
-@media (min-width: 1024px) {
-  h1 { font-size:3rem; }
-  .controls { gap:15px; }
-  .controls select, .controls input[type=number], #license, .controls button {
-    padding:12px 15px;
-    font-size:1rem;
-  }
+@media (min-width:1024px){
+  h1{font-size:3rem;}
+  .controls select, .controls input[type=number], #license, .controls button{padding:12px 15px; font-size:1rem;}
 }
 </style>
 </head>
@@ -149,32 +139,28 @@ async function generateSignals(){
   const licenseInput = document.getElementById("license");
   const output = document.getElementById("output");
 
-  if(licenseInput.style.display === "none"){
-    licenseInput.style.display = "block";
-    output.innerHTML = `
-      <p>❌ License নিতে Telegram এ যোগাযোগ করুন:</p>
+  if(licenseInput.style.display==="none"){
+    licenseInput.style.display="block";
+    output.innerHTML=`<p style="color:#ff4d4d;">❌ License নিতে Telegram এ যোগাযোগ করুন:</p>
       <p><a href="https://t.me/QxParvej" target="_blank">QxParvej</a></p>
-      <p><a href="https://t.me/+SsTMPgPVYoVlNTQ1" target="_blank">Telegram Group</a></p>
-    `;
+      <p><a href="https://t.me/+SsTMPgPVYoVlNTQ1" target="_blank">Telegram Group</a></p>`;
     licenseInput.focus();
     return;
   }
 
   const license = licenseInput.value.trim();
   if(license !== "DragonFly100"){
-    output.innerHTML = `
-      <p>❌ License নিতে Telegram এ যোগাযোগ করুন:</p>
+    output.innerHTML=`<p style="color:#ff4d4d;">❌ License নিতে Telegram এ যোগাযোগ করুন:</p>
       <p><a href="https://t.me/QxParvej" target="_blank">QxParvej</a></p>
-      <p><a href="https://t.me/+SsTMPgPVYoVlNTQ1" target="_blank">Telegram Group</a></p>
-    `;
+      <p><a href="https://t.me/+SsTMPgPVYoVlNTQ1" target="_blank">Telegram Group</a></p>`;
     licenseInput.focus();
     return;
   }
 
-  output.innerHTML = `<p style="color:#0ff;">⚡ Generating signals...</p>`;
-  await new Promise(r=>setTimeout(r,10000)); // 10s delay before showing signals
+  output.innerHTML=`<p style="color:#00ccff;">⚡ Generating signals...</p>`;
+  await new Promise(r=>setTimeout(r,10000)); // 10s delay
 
-  output.innerHTML = "";
+  output.innerHTML="";
   const num = parseInt(document.getElementById("numSignals").value)||5;
   const type = document.getElementById("signalType").value;
   const asset = document.getElementById("asset").value;
@@ -190,7 +176,7 @@ async function generateSignals(){
 
     const card=document.createElement("div");
     card.className="signal-card";
-    card.innerHTML=`<span>${sigTime} | ${asset}</span> <span class="${sigType.toLowerCase()}">${sigType}</span>`;
+    card.innerHTML=`<span class="time-asset">${sigTime} | ${asset}</span> <span class="${sigType.toLowerCase()}">${sigType}</span>`;
     output.appendChild(card);
   }
 }
@@ -201,9 +187,7 @@ function copySignals(){
   navigator.clipboard.writeText(text).then(()=>alert("Signals copied!"));
 }
 
-function resetSignals(){
-  document.getElementById("output").innerHTML="";
-}
+function resetSignals(){document.getElementById("output").innerHTML="";}
 </script>
 
 </body>
