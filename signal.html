@@ -3,14 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dragon Fly Signal - Cyber Pro</title>
+<title>Dragon Fly Signal - PC Optimized</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
 body {
   margin:0;
   font-family:'Poppins',sans-serif;
   background:#0b0b0b;
-  overflow-x:hidden;
   color:#fff;
 }
 h1 {
@@ -24,18 +23,6 @@ h1 {
   letter-spacing:2px;
   text-shadow:0 0 20px rgba(0,255,255,0.3);
 }
-
-/* Animated digital grid background */
-body::before {
-  content:"";
-  position:fixed;
-  top:0; left:0; right:0; bottom:0;
-  background: repeating-linear-gradient(0deg, rgba(0,255,255,0.05) 0 1px, transparent 1px 20px),
-              repeating-linear-gradient(90deg, rgba(0,255,255,0.05) 0 1px, transparent 1px 20px);
-  z-index:-1;
-  animation: moveGrid 20s linear infinite;
-}
-@keyframes moveGrid { 0%{background-position:0 0,0 0;} 100%{background-position:200px 200px,200px 200px;} }
 
 .controls {
   display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-bottom:25px;
@@ -67,7 +54,7 @@ body::before {
 #output { width:100%; max-width:900px; margin-top:20px; }
 .signal-card {
   background:rgba(0,0,0,0.3); padding:14px; border-radius:14px;
-  margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;
   border-left:5px solid #00fff7; transition:0.5s; backdrop-filter:blur(6px);
   opacity:0; transform:translateY(-10px);
 }
@@ -193,7 +180,7 @@ async function generateSignals(){
     card.className="signal-card";
     card.innerHTML=`<span class="time-asset">${sigTime} | ${asset}</span> <span class="${sigType.toLowerCase()}">${sigType}</span>`;
     output.appendChild(card);
-    setTimeout(()=>card.classList.add("show"),i*300); // fade-in animation
+    setTimeout(()=>card.classList.add("show"),i*300);
   }
 }
 
@@ -204,8 +191,8 @@ function copySignals(){
   const dateStr = now.toLocaleDateString('en-GB');
   const timeframe = document.getElementById("timeframe").value;
 
-  let header = `▶️ DATE: ${dateStr} ◀️\n\n⏰ UTC ${utcOffset} ; MTG :- 1 STEP➕\nOwner: @TraderParvej\n🐬 DragonFly 🐬\n⌛️ ${timeframe} minutes :-\n\n`;
-  const text = Array.from(output.children).map(c=>c.innerText).join("\n");
+  let header = `▶️ DATE: ${dateStr} ◀️\n\n⏰ UTC ${utcOffset} ; MTG :- 1 STEP➕\nOwner: @TraderParvej\n🐬 DragonFly 🐬\n⌛️ ${timeframe} minutes :-\n`;
+  const text = Array.from(output.children).map(c=>c.innerText.trim()).join("\n");
   navigator.clipboard.writeText(header + text).then(()=>alert("Signals copied!"));
 }
 
