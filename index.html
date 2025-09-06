@@ -101,6 +101,13 @@ button:hover{background:#4dc9f3;}
 </div>
 
 <script>
+/*
+  Credentials (as requested):
+  username:  Dragonfly11
+  password:  12580
+
+  If login succeeds you can redirect by editing location.href below.
+*/
 const form = document.getElementById('loginForm');
 const msg = document.getElementById('msg');
 
@@ -112,6 +119,8 @@ form.addEventListener('submit', (e) => {
   if(user === 'Dragonfly11' && pass === '12580'){
     msg.style.color = 'limegreen';
     msg.textContent = '✅ Login successful! Welcome DragonFly Trader.';
+    // Example redirect (uncomment to enable):
+    // setTimeout(()=> location.href = 'signal.html', 700);
   } else {
     msg.style.color = 'tomato';
     msg.textContent = '❌ Invalid username or password';
