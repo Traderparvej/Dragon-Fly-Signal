@@ -189,7 +189,6 @@ async function generateSignals(){
     return;
   }
 
-  // Full license: show generating
   output.innerHTML=`<p style="color:#00ccff;">⚡ Generating signals <span class="loader"></span></p>`;
   await new Promise(r=>setTimeout(r,10000)); // 10s delay
 
@@ -198,6 +197,7 @@ async function generateSignals(){
   const type = document.getElementById("signalType").value;
   const asset = document.getElementById("asset").value;
   let now = new Date();
+  const utcOffset = document.getElementById("utc").value;
 
   for(let i=0;i<num;i++){
     const randomGap = Math.floor(Math.random()*6)+5;
@@ -216,8 +216,14 @@ async function generateSignals(){
 
 function copySignals(){
   const output = document.getElementById("output");
+  const utcOffset = document.getElementById("utc").value;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB'); // DD/MM/YYYY
+  const timeframe = document.getElementById("timeframe").value;
+
+  let header = `▶️ DATE: ${dateStr} ◀️\n\n⏰ UTC ${utcOffset} ; MTG :- 1 STEP➕\nOwner: @TraderParvej\n🐬 DragonFly 🐬\n⌛️ ${timeframe} minutes :-\n\n`;
   const text = Array.from(output.children).map(c=>c.innerText).join("\n");
-  navigator.clipboard.writeText(text).then(()=>alert("Signals copied!"));
+  navigator.clipboard.writeText(header + text).then(()=>alert("Signals copied!"));
 }
 
 function resetSignals(){document.getElementById("output").innerHTML="";}
