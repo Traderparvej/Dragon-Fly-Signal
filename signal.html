@@ -35,15 +35,7 @@ select,input[type=date],input[type=number],button{
   font-weight:600;
 }
 .controls{display:flex;gap:10px;margin-top:12px;}
-.controls button{
-  flex:1;
-  background:var(--accent);
-  color:#000;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:600;
-}
+.controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:600;}
 .output{
   margin-top:12px;
   padding:12px;
@@ -116,7 +108,7 @@ a.owner-link:hover{text-decoration:underline;}
 
 <div>
 <label>Asset Selection</label>
-<select id="asset" multiple size="10"></select>
+<select id="asset"></select>
 </div>
 </div>
 
@@ -146,18 +138,12 @@ const generateBtn = document.getElementById('generate');
 const resetBtn = document.getElementById('reset');
 const copyBtn = document.getElementById('copyOut');
 
-// Pairs
+// OTC pairs
 const OTCpairs = [
-  'AUD/USD (OTC)','USD/BRL (OTC)','EUR/USD (OTC)','NZD/CAD (OTC)','USD/ARS (OTC)',
-  'AUD/CAD (OTC)','CAD/JPY (OTC)','USD/IDR (OTC)','EUR/GBP (OTC)','USD/BDT (OTC)',
-  'USD/PHP (OTC)','USD/EGP (OTC)','EUR/CHF (OTC)','EUR/AUD (OTC)','USD/ZAR (OTC)',
-  'AUD/CHF (OTC)','AUD/JPY (OTC)','CAD/CHF (OTC)','CHF/JPY (OTC)','EUR/CAD (OTC)',
-  'EUR/JPY (OTC)','GBP/AUD (OTC)','NZD/CHF (OTC)','USD/CAD (OTC)','USD/CHF (OTC)',
-  'USD/COP (OTC)','USD/INR (OTC)','USD/JPY (OTC)','USD/MXN (OTC)','USD/NGN (OTC)',
-  'USD/PKR (OTC)','AUD/NZD (OTC)','EUR/SGD (OTC)','GBP/JPY (OTC)','USD/TRY (OTC)',
-  'EUR/NZD (OTC)','GBP/NZD (OTC)','NZD/USD (OTC)','GBP/CHF (OTC)','GBP/CAD (OTC)',
-  'GBP/USD (OTC)'
+  "AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)","USD/PHP (OTC)","USD/EGP (OTC)","EUR/CHF (OTC)","EUR/AUD (OTC)","USD/ZAR (OTC)","AUD/CHF (OTC)","AUD/JPY (OTC)","CAD/CHF (OTC)","CHF/JPY (OTC)","EUR/CAD (OTC)","EUR/JPY (OTC)","GBP/AUD (OTC)","NZD/CHF (OTC)","USD/CAD (OTC)","USD/CHF (OTC)","USD/COP (OTC)","USD/INR (OTC)","USD/JPY (OTC)","USD/MXN (OTC)","USD/NGN (OTC)","USD/PKR (OTC)","AUD/NZD (OTC)","EUR/SGD (OTC)","GBP/JPY (OTC)","USD/TRY (OTC)","EUR/NZD (OTC)","GBP/NZD (OTC)","NZD/USD (OTC)","GBP/CHF (OTC)","GBP/CAD (OTC)","GBP/USD (OTC)"
 ];
+
+// REAL pairs
 const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
 // Fill asset select
@@ -173,52 +159,52 @@ function fillAssetPairs(){
   });
 }
 
-// Initial fill on page load
+// Initial fill
 fillAssetPairs();
-
-// Update asset list when market changes
 marketSel.addEventListener('change',fillAssetPairs);
 
 // Utilities
-function fmtDate(d){ const dd=String(d.getDate()).padStart(2,'0'); const mm=String(d.getMonth()+1).padStart(2,'0'); return `${dd}.${mm}.${d.getFullYear()}`;}
+function fmtDate(d){ const dd=String(d.getDate()).padStart(2,'0'); const mm=String(d.getMonth()+1).padStart(2,'0'); const yy=d.getFullYear(); return `${dd}.${mm}.${yy}`;}
 function pad2(n){return String(n).padStart(2,'0');}
-function randDir(){return Math.random()>0.5?'CALL':'PUT';}
 
 // Signal generation
+function randDir(){return Math.random()>0.5?'CALL':'PUT';}
 function buildSignals(opts){
   const out = [];
   let {startDateObj,count} = opts;
   let cursor = new Date(startDateObj.getTime() + 10*60*1000); // start 10 min later
-  const selectedAssets = Array.from(assetSel.selectedOptions).map(o=>o.value);
-  const pairs = selectedAssets.length>0 ? selectedAssets : [OTCpairs[0]]; // default if none selected
+  const selectedAsset = assetSel.value || 'USD/NGN';
   for(let i=0;i<count;i++){
-    const pair = pairs[i % pairs.length];
     const dir = randDir();
-    cursor = new Date(cursor.getTime() + 5*60*1000 + Math.floor(Math.random()*3*60*1000)); // random 5-8 min gap
+    cursor = new Date(cursor.getTime() + (2+Math.floor(Math.random()*4))*60*1000); // random 2–5 min gap
     const hh=pad2(cursor.getHours()), mm=pad2(cursor.getMinutes());
-    out.push(`${pair} : ${hh}:${mm} : ${dir}`);
+    out.push(`${selectedAsset} : ${hh}:${mm} : ${dir}`);
   }
   return out;
 }
 
-// Generate output
+// Generate output with 10s delay
 function generateOutput(){
-  const dateStr = dateInp.value ? fmtDate(new Date(dateInp.value)) : fmtDate(new Date());
-  const count = Number(countInp.value||8);
-  const signals = buildSignals({startDateObj:new Date(), count});
-  let lines = [];
-  lines.push(`▶️ DATE: ${dateStr} ◀️\n`);
-  lines.push(`⏰ UTC ${utcSel.value} 🇧🇩 ;  MTG :- 1 STEP➕\n`);
-  lines.push('              🐉DragonFly 🐉\n');
-  lines.push(`⌛️ ${tf.value} :- \n`);
-  signals.forEach(s=>lines.push(s));
-  lines.push('\nSoftware: DragonFly');
-  lines.push('Owner: @TraderParvej');
-  outDiv.textContent = lines.join('\n');
+  outDiv.textContent = "⏳ Generating... (10s)";
+  setTimeout(()=>{
+    const dateStr = dateInp.value ? fmtDate(new Date(dateInp.value)) : fmtDate(new Date());
+    const count = Number(countInp.value||8);
+    const signals = buildSignals({startDateObj:new Date(), count});
+    let lines = [];
+    lines.push(`▶️ DATE: ${dateStr} ◀️\n`);
+    lines.push(`⏰ UTC ${utcSel.value} 🇧🇩 ;  MTG :- 1 STEP➕\n`);
+    lines.push('              🐉DragonFly 🐉\n');
+    lines.push(`⌛️ ${tf.value} :- \n`);
+    signals.forEach(s=>lines.push(s));
+    lines.push('\nSoftware: DragonFly');
+    lines.push('Owner: @TraderParvej');
+    outDiv.textContent = lines.join('\n');
+  }, 10000);
 }
 
 generateBtn.addEventListener('click',generateOutput);
 
+// Reset
 resetBtn.addEventListener('click',()=>{
   dateInp.value='2025-08-26';
   countInp.value='8';
@@ -228,13 +214,22 @@ resetBtn.addEventListener('click',()=>{
   outDiv.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';
 });
 
-copyBtn.addEventListener('click',async()=>{
-  try{
-    await navigator.clipboard.writeText(outDiv.textContent);
+// Copy Output (fallback for all browsers)
+copyBtn.addEventListener('click',()=>{
+  const text = outDiv.textContent;
+  if (!text) return;
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand("copy");
     copyBtn.textContent='Copied ✔';
     setTimeout(()=>copyBtn.textContent='Copy Output',900);
-  }catch(e){
-    alert('Copy failed — allow clipboard permission');
+  } catch(e){
+    alert('Copy failed — please copy manually');
+  }
+  document.body.removeChild(ta);
 });
 
 // Auto-generate initial
