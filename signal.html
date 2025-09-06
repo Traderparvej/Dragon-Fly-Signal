@@ -13,9 +13,18 @@ body {
 }
 
 h1 {
-  margin-bottom:20px; color:#00e5ff; text-align:center;
-  font-size:2rem;
-  text-shadow:0 0 8px #00fff7,0 0 15px #0ff;
+  margin-bottom:20px; 
+  color:#00e5ff; 
+  text-align:center;
+  font-size:2.5rem;
+  font-weight:700;
+  text-shadow: 0 0 10px #00e5ff, 0 0 20px #00fff7, 0 0 30px #0ff;
+  letter-spacing: 1px;
+  transition: 0.3s;
+}
+
+h1:hover {
+  text-shadow: 0 0 15px #00e5ff, 0 0 25px #00fff7, 0 0 35px #0ff;
 }
 
 .controls {
@@ -26,6 +35,11 @@ h1 {
 .controls select, .controls input[type=number], #license {
   padding:10px; border-radius:10px; border:none; background:rgba(255,255,255,0.1);
   color:#00fff7; outline:none; min-width:120px; flex:1 1 120px;
+  transition:0.3s;
+}
+
+.controls select:hover, .controls input[type=number]:hover, #license:hover {
+  background:rgba(255,255,255,0.2);
 }
 
 .controls button {
@@ -42,6 +56,7 @@ h1 {
   background:rgba(0,0,0,0.3); backdrop-filter:blur(8px); padding:12px; border-radius:12px; 
   margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; transition:0.3s;
   color:#00fff7;
+  font-weight:600;
 }
 
 .signal-card:hover { transform:scale(1.02); box-shadow:0 0 15px #00ffcc; }
@@ -56,7 +71,7 @@ h1 {
 
 /* Responsive tweaks for desktop */
 @media (min-width: 1024px) {
-  h1 { font-size:2.5rem; }
+  h1 { font-size:3rem; }
   .controls { gap:15px; }
   .controls select, .controls input[type=number], #license, .controls button {
     padding:12px 15px;
@@ -157,7 +172,7 @@ async function generateSignals(){
   }
 
   output.innerHTML = `<p style="color:#0ff;">⚡ Generating signals...</p>`;
-  await new Promise(r=>setTimeout(r,1000)); // short wait for generating notice
+  await new Promise(r=>setTimeout(r,10000)); // 10s delay before showing signals
 
   output.innerHTML = "";
   const num = parseInt(document.getElementById("numSignals").value)||5;
@@ -166,7 +181,7 @@ async function generateSignals(){
   let now = new Date();
 
   for(let i=0;i<num;i++){
-    const randomGap = Math.floor(Math.random()*6)+5; // 5-10 min random
+    const randomGap = Math.floor(Math.random()*6)+5;
     now.setMinutes(now.getMinutes()+randomGap);
     let h=now.getHours().toString().padStart(2,'0');
     let m=now.getMinutes().toString().padStart(2,'0');
@@ -177,8 +192,6 @@ async function generateSignals(){
     card.className="signal-card";
     card.innerHTML=`<span>${sigTime} | ${asset}</span> <span class="${sigType.toLowerCase()}">${sigType}</span>`;
     output.appendChild(card);
-
-    await new Promise(r=>setTimeout(r,10000)); // 10s delay
   }
 }
 
