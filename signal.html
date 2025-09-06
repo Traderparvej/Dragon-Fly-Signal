@@ -3,57 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dragon Fly Signal - PC Optimized</title>
+<title>Dragon Fly Signal - Professional PC Version</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
 body {
   margin:0;
   font-family:'Poppins',sans-serif;
-  background:#0b0b0b;
+  background:#0a0a0a;
   color:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:20px;
 }
 h1 {
   font-size:3rem;
   font-weight:700;
   text-align:center;
-  margin:20px 0;
+  margin-bottom:25px;
   background: linear-gradient(90deg,#00f0ff,#00ff99);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
   letter-spacing:2px;
   text-shadow:0 0 20px rgba(0,255,255,0.3);
 }
-
 .controls {
-  display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-bottom:25px;
-  max-width:900px;
+  display:flex; flex-wrap:wrap; justify-content:center; gap:15px; margin-bottom:25px;
+  max-width:1000px;
 }
 .controls select, .controls input[type=number], #license {
   padding:12px; border-radius:12px; border:2px solid rgba(0,255,255,0.3);
   background: rgba(0,0,0,0.35); color:#00fff7; outline:none;
-  min-width:140px; flex:1 1 140px; backdrop-filter:blur(6px);
+  min-width:150px; flex:1 1 150px; backdrop-filter:blur(6px);
   transition:0.3s;
 }
 .controls select:hover, .controls input[type=number]:hover, #license:hover{
   border-color:#00ff99;
   background: rgba(0,0,0,0.45);
 }
-
 .controls button {
   padding:12px 25px; border:none; border-radius:12px; font-weight:bold; cursor:pointer;
   background: linear-gradient(135deg,#00f0ff,#00ff99);
   color:#000; transition:0.3s;
-  flex:1 1 140px;
+  flex:1 1 150px;
   box-shadow:0 3px 12px rgba(0,255,255,0.3);
 }
 .controls button:hover {
   transform:scale(1.05);
   box-shadow:0 0 20px rgba(0,255,255,0.6);
 }
-
-#output { width:100%; max-width:900px; margin-top:20px; }
+#output { width:100%; max-width:1000px; margin-top:20px; }
 .signal-card {
-  background:rgba(0,0,0,0.3); padding:14px; border-radius:14px;
+  background:rgba(0,0,0,0.35); padding:14px; border-radius:14px;
   margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;
   border-left:5px solid #00fff7; transition:0.5s; backdrop-filter:blur(6px);
   opacity:0; transform:translateY(-10px);
@@ -162,7 +163,7 @@ async function generateSignals(){
   }
 
   output.innerHTML=`<p style="color:#00ccff;">⚡ Generating signals <span class="loader"></span></p>`;
-  await new Promise(r=>setTimeout(r,10000)); // 10s delay
+  await new Promise(r=>setTimeout(r,10000));
 
   output.innerHTML="";
   const num = parseInt(document.getElementById("numSignals").value)||5;
