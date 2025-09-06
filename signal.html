@@ -13,7 +13,7 @@
   }
   h1 { margin-bottom:20px; color:#00e5ff; text-align:center;}
   .controls { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-bottom:20px; }
-  select,input[type=number] { padding:10px; border-radius:10px; border:none; background:rgba(255,255,255,0.1); color:#fff; outline:none; }
+  select,input[type=number],#license { padding:10px; border-radius:10px; border:none; background:rgba(255,255,255,0.1); color:#000; outline:none; }
   button { padding:10px 20px; border:none; border-radius:10px; font-weight:bold; cursor:pointer; background:linear-gradient(135deg,#00e5ff,#00ff9d); color:#000; transition:0.3s; }
   button:hover { transform:scale(1.05); box-shadow:0 0 15px #00ffcc; }
   #output { width:100%; max-width:500px; margin-top:20px; }
@@ -21,6 +21,8 @@
   .signal-card:hover { transform:scale(1.02); box-shadow:0 0 15px #00ffcc; }
   .call { color:#00ff00; font-weight:bold; }
   .put { color:#ff3b3b; font-weight:bold; }
+  #output p, #output a { color:#00e5ff; font-weight:bold; text-decoration:none; }
+  #output a:hover { text-decoration:underline; }
 </style>
 </head>
 <body>
@@ -61,6 +63,8 @@
     <option value="Both">Both</option>
   </select>
 
+  <input type="text" id="license" placeholder="Enter License Key" style="display:none;">
+
   <button onclick="generateSignals()">Generate Signals</button>
   <button onclick="copySignals()">Copy All</button>
   <button onclick="resetSignals()">Reset</button>
@@ -70,23 +74,54 @@
 
 <script>
 const realAssets = ["EUR/JPY","USD/JPY","CAD/JPY","NZD/USD","EUR/USD","GBP/USD","AUD/JPY","GBP/CAD","USD/CAD","AUD/CAD","AUD/USD","GBP/AUD","GBP/JPY","USD/CHF","EUR/GBP"];
-const otcAssets = [
-"EUR/USD (OTC)","NZD/CAD (OTC)","USD/INR (OTC)","AUD/JPY (OTC)","AUD/USD (OTC)","CAD/CHF (OTC)","USD/DZD (OTC)","USD/PKR (OTC)","AUD/NZD (OTC)","EUR/SGD (OTC)","USD/CHF (OTC)","USD/BRL (OTC)","EUR/CAD (OTC)","NZD/CHF (OTC)","NZD/JPY (OTC)","USD/NGN (OTC)","USD/TRY (OTC)","USD/COP (OTC)","USD/EGP (OTC)","CHF/JPY (OTC)","GBP/CAD (OTC)","NZD/USD (OTC)","USD/MXN (OTC)","AUD/CAD (OTC)","AUD/CHF (OTC)","EUR/AUD (OTC)","EUR/CHF (OTC)","EUR/GBP (OTC)","GBP/JPY (OTC)","USD/CAD (OTC)","USD/PHP (OTC)","USD/BDT (OTC)","GBP/AUD (OTC)","USD/ARS (OTC)","USD/IDR (OTC)","USD/JPY (OTC)","USD/ZAR (OTC)","GBP/USD (OTC)","CAD/JPY (OTC)","GBP/CHF (OTC)","GBP/NZD (OTC)","EUR/NZD (OTC)"];
+const otcAssets = ["EUR/USD (OTC)","NZD/CAD (OTC)","USD/INR (OTC)","AUD/JPY (OTC)","AUD/USD (OTC)","CAD/CHF (OTC)","USD/DZD (OTC)","USD/PKR (OTC)","AUD/NZD (OTC)","EUR/SGD (OTC)","USD/CHF (OTC)","USD/BRL (OTC)","EUR/CAD (OTC)","NZD/CHF (OTC)","NZD/JPY (OTC)","USD/NGN (OTC)","USD/TRY (OTC)","USD/COP (OTC)","USD/EGP (OTC)","CHF/JPY (OTC)","GBP/CAD (OTC)","NZD/USD (OTC)","USD/MXN (OTC)","AUD/CAD (OTC)","AUD/CHF (OTC)","EUR/AUD (OTC)","EUR/CHF (OTC)","EUR/GBP (OTC)","GBP/JPY (OTC)","USD/CAD (OTC)","USD/PHP (OTC)","USD/BDT (OTC)","GBP/AUD (OTC)","USD/ARS (OTC)","USD/IDR (OTC)","USD/JPY (OTC)","USD/ZAR (OTC)","GBP/USD (OTC)","CAD/JPY (OTC)","GBP/CHF (OTC)","GBP/NZD (OTC)","EUR/NZD (OTC)"];
+
 function updateAssets(){
   const marketType = document.getElementById("marketType").value;
   const assetDropdown = document.getElementById("asset");
   assetDropdown.innerHTML = "";
   const list = marketType==="Real"? realAssets : otcAssets;
-  list.forEach(a=>{ const opt=document.createElement("option"); opt.value=a; opt.textContent=a; assetDropdown.appendChild(opt); });
+  list.forEach(a=>{
+    const opt=document.createElement("option");
+    opt.value=a;
+    opt.textContent=a;
+    assetDropdown.appendChild(opt);
+  });
 }
 updateAssets();
 
 function generateSignals(){
+  const licenseInput = document.getElementById("license");
+  const output = document.getElementById("output");
+
+  // License field hidden হলে দেখাও
+  if(licenseInput.style.display === "none"){
+    licenseInput.style.display = "block";
+    output.innerHTML = `
+      <p>❌ License নিতে Telegram এ যোগাযোগ করুন:</p>
+      <p><a href="https://t.me/QxParvej" target="_blank">QxParvej</a></p>
+      <p><a href="https://t.me/+SsTMPgPVYoVlNTQ1" target="_blank">Telegram Group</a></p>
+    `;
+    licenseInput.focus();
+    return;
+  }
+
+  const license = licenseInput.value.trim();
+  if(license !== "DragonFly100"){
+    output.innerHTML = `
+      <p>❌ License নিতে Telegram এ যোগাযোগ করুন:</p>
+      <p><a href="https://t.me/QxParvej" target="_blank">QxParvej</a></p>
+      <p><a href="https://t.me/+SsTMPgPVYoVlNTQ1" target="_blank">Telegram Group</a></p>
+    `;
+    licenseInput.focus();
+    return;
+  }
+
+  // License ঠিক থাকলে signal generation
+  output.innerHTML = "";
   const num = parseInt(document.getElementById("numSignals").value)||5;
   const type = document.getElementById("signalType").value;
   const asset = document.getElementById("asset").value;
-  const output = document.getElementById("output");
-  output.innerHTML = "";
   let now = new Date();
   for(let i=0;i<num;i++){
     const randomGap = Math.floor(Math.random()*6)+5; //5-10 min
