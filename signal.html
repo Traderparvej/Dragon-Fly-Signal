@@ -6,61 +6,63 @@
 <title>Dragon Fly Signal</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  body {
-    margin:0; font-family:'Poppins',sans-serif;
-    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    color:#fff; display:flex; flex-direction:column; align-items:center; padding:20px;
+body {
+  margin:0; font-family:'Poppins',sans-serif;
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:#00fff7; display:flex; flex-direction:column; align-items:center; padding:20px;
+}
+
+h1 {
+  margin-bottom:20px; color:#00e5ff; text-align:center;
+  font-size:2rem;
+  text-shadow:0 0 8px #00fff7,0 0 15px #0ff;
+}
+
+.controls {
+  display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-bottom:20px;
+  max-width:900px;
+}
+
+.controls select, .controls input[type=number], #license {
+  padding:10px; border-radius:10px; border:none; background:rgba(255,255,255,0.1);
+  color:#00fff7; outline:none; min-width:120px; flex:1 1 120px;
+}
+
+.controls button {
+  padding:10px 20px; border:none; border-radius:10px; font-weight:bold; cursor:pointer; 
+  background:linear-gradient(135deg,#00e5ff,#00ff9d); color:#000; transition:0.3s;
+  flex:1 1 120px;
+}
+
+.controls button:hover { transform:scale(1.05); box-shadow:0 0 15px #00ffcc; }
+
+#output { width:100%; max-width:900px; margin-top:20px; }
+
+.signal-card {
+  background:rgba(0,0,0,0.3); backdrop-filter:blur(8px); padding:12px; border-radius:12px; 
+  margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; transition:0.3s;
+  color:#00fff7;
+}
+
+.signal-card:hover { transform:scale(1.02); box-shadow:0 0 15px #00ffcc; }
+
+.call { color:#00ff00; font-weight:bold; }
+.put { color:#ff3b3b; font-weight:bold; }
+
+#output p, #output a { color:#00fff7; font-weight:bold; text-decoration:none; }
+#output a:hover { text-decoration:underline; }
+
+#license { outline:none; }
+
+/* Responsive tweaks for desktop */
+@media (min-width: 1024px) {
+  h1 { font-size:2.5rem; }
+  .controls { gap:15px; }
+  .controls select, .controls input[type=number], #license, .controls button {
+    padding:12px 15px;
+    font-size:1rem;
   }
-
-  h1 {
-    margin-bottom:20px; color:#00e5ff; text-align:center;
-    font-size:2rem;
-  }
-
-  .controls {
-    display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-bottom:20px;
-    max-width:900px;
-  }
-
-  .controls select, .controls input[type=number], #license {
-    padding:10px; border-radius:10px; border:none; background:rgba(255,255,255,0.1);
-    color:#000; outline:none; min-width:120px; flex:1 1 120px;
-  }
-
-  .controls button {
-    padding:10px 20px; border:none; border-radius:10px; font-weight:bold; cursor:pointer; 
-    background:linear-gradient(135deg,#00e5ff,#00ff9d); color:#000; transition:0.3s;
-    flex:1 1 120px;
-  }
-
-  .controls button:hover { transform:scale(1.05); box-shadow:0 0 15px #00ffcc; }
-
-  #output { width:100%; max-width:900px; margin-top:20px; }
-
-  .signal-card {
-    background:rgba(255,255,255,0.1); backdrop-filter:blur(8px); padding:12px; border-radius:12px; 
-    margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; transition:0.3s;
-  }
-
-  .signal-card:hover { transform:scale(1.02); box-shadow:0 0 15px #00ffcc; }
-
-  .call { color:#00ff00; font-weight:bold; }
-  .put { color:#ff3b3b; font-weight:bold; }
-
-  #output p, #output a { color:#00e5ff; font-weight:bold; text-decoration:none; }
-  #output a:hover { text-decoration:underline; }
-
-  #license { outline:none; }
-
-  /* Responsive tweaks for desktop */
-  @media (min-width: 1024px) {
-    h1 { font-size:2.5rem; }
-    .controls { gap:15px; }
-    .controls select, .controls input[type=number], #license, .controls button {
-      padding:12px 15px;
-      font-size:1rem;
-    }
-  }
+}
 </style>
 </head>
 <body>
@@ -128,7 +130,7 @@ function updateAssets(){
 }
 updateAssets();
 
-function generateSignals(){
+async function generateSignals(){
   const licenseInput = document.getElementById("license");
   const output = document.getElementById("output");
 
@@ -154,22 +156,29 @@ function generateSignals(){
     return;
   }
 
+  output.innerHTML = `<p style="color:#0ff;">⚡ Generating signals...</p>`;
+  await new Promise(r=>setTimeout(r,1000)); // short wait for generating notice
+
   output.innerHTML = "";
   const num = parseInt(document.getElementById("numSignals").value)||5;
   const type = document.getElementById("signalType").value;
   const asset = document.getElementById("asset").value;
   let now = new Date();
+
   for(let i=0;i<num;i++){
-    const randomGap = Math.floor(Math.random()*6)+5;
+    const randomGap = Math.floor(Math.random()*6)+5; // 5-10 min random
     now.setMinutes(now.getMinutes()+randomGap);
     let h=now.getHours().toString().padStart(2,'0');
     let m=now.getMinutes().toString().padStart(2,'0');
     let sigTime=`${h}:${m}`;
     let sigType=type==="Both"? (Math.random()>0.5?"Call":"Put") : type;
+
     const card=document.createElement("div");
     card.className="signal-card";
     card.innerHTML=`<span>${sigTime} | ${asset}</span> <span class="${sigType.toLowerCase()}">${sigType}</span>`;
     output.appendChild(card);
+
+    await new Promise(r=>setTimeout(r,10000)); // 10s delay
   }
 }
 
