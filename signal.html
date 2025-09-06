@@ -3,68 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dragon Fly Signal - Cyber Hacking Pro</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<title>Dragon Fly Signal - Premium</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
 body {
-  margin:0; font-family:'Share Tech Mono','Poppins',sans-serif;
-  background:#0d0d0d; color:#00ff88;
+  margin:0; font-family:'Orbitron','Poppins',sans-serif;
+  background:linear-gradient(135deg,#0a0a0a,#111111);
+  color:#00fff7;
   display:flex; flex-direction:column; align-items:center; padding:20px;
-  background-image: radial-gradient(circle at 20% 20%, #0f0, transparent 25%), radial-gradient(circle at 80% 80%, #0ff, transparent 25%);
-  background-size: cover;
 }
-
 h1 {
-  color:#00ff88; text-shadow:0 0 5px #0f0, 0 0 10px #0ff;
-  margin-bottom:20px; text-align:center; font-size:2rem;
-  letter-spacing:2px;
+  color:#00fff7; text-shadow:0 0 10px #00fff7, 0 0 20px #0ff;
+  margin-bottom:20px; text-align:center; font-size:2rem; letter-spacing:2px;
 }
-
 .controls {
   display:flex; flex-wrap:wrap; justify-content:center; gap:15px; margin-bottom:20px;
   max-width:950px;
 }
-
 .controls select, .controls input[type=number], #license {
-  padding:12px; border-radius:8px; border:1px solid #0ff;
-  background: rgba(0,0,0,0.4); color:#0ff;
-  flex:1 1 140px; min-width:140px; text-align:center;
-  font-weight:bold; transition:0.3s;
+  padding:12px; border-radius:12px; border:none;
+  background: rgba(0,255,255,0.05); backdrop-filter: blur(8px);
+  color:#00fff7; font-weight:bold; text-align:center;
+  flex:1 1 140px; min-width:140px; transition:0.3s;
 }
-
 .controls select:focus, .controls input:focus {
-  outline:none; border-color:#0f0; box-shadow:0 0 10px #0f0;
+  box-shadow:0 0 15px #0ff inset;
+  outline:none; color:#fff;
 }
-
 .controls button {
-  padding:12px 25px; border:none; border-radius:8px; font-weight:bold;
-  cursor:pointer; background:#000; color:#0ff; border:1px solid #0ff;
-  flex:1 1 140px; transition:0.3s;
+  padding:12px 25px; border:none; border-radius:12px; font-weight:bold;
+  cursor:pointer; background: linear-gradient(45deg,#00fff7,#0ff,#00fff7);
+  color:#000; text-shadow:0 0 2px #fff; transition:0.3s;
+  flex:1 1 140px;
 }
-
 .controls button:hover {
-  background:#0f0; color:#000; box-shadow:0 0 10px #0f0;
+  transform:scale(1.05);
+  box-shadow:0 0 20px #0ff, 0 0 40px #0ff inset;
 }
-
-#output { width:100%; max-width:950px; margin-top:20px; font-family:'Share Tech Mono', monospace; }
-
+#output { width:100%; max-width:950px; margin-top:20px; }
 .signal-card {
-  background: rgba(0,0,0,0.4);
-  border:1px solid #0f0;
-  padding:14px; border-radius:10px;
-  margin-bottom:12px; display:flex; justify-content:space-between;
-  color:#0ff; font-weight:bold;
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(10px);
+  border:1px solid #0ff;
+  padding:14px; border-radius:14px;
+  margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;
   transition:0.3s;
 }
-
-.signal-card:hover { box-shadow:0 0 15px #0f0; }
-
-.call { color:#0f0; font-weight:bold; }
-.put { color:#f00; font-weight:bold; }
-
-#output p, #output a { color:#0ff; font-weight:bold; text-decoration:none; }
+.signal-card:hover {
+  transform:scale(1.02);
+  box-shadow:0 0 20px #0ff, 0 0 40px #0ff inset;
+}
+.signal-card span { font-weight:bold; color:#0ff; text-shadow:0 0 3px #00fff7; }
+.call { color:#00ff00; font-weight:bold; text-shadow:0 0 5px #0f0; }
+.put { color:#ff0044; font-weight:bold; text-shadow:0 0 5px #f0f; }
+#output p, #output a { color:#00fff7; font-weight:bold; text-decoration:none; }
 #output a:hover { text-decoration:underline; }
-
 @media (min-width:1024px){
   h1{ font-size:2.8rem; }
   .controls select,.controls input,#license,.controls button{
@@ -160,8 +153,7 @@ async function generateSignals(){
   }
 
   output.innerHTML=`<p style="color:#0ff;">Generating...</p>`;
-
-  await new Promise(r=>setTimeout(r,1000)); // small pause
+  await new Promise(r=>setTimeout(r,1000));
 
   output.innerHTML="";
   const num = parseInt(document.getElementById("numSignals").value)||5;
@@ -180,7 +172,7 @@ async function generateSignals(){
     card.className="signal-card";
     card.innerHTML=`<span>${sigTime} | ${asset}</span> <span class="${sigType.toLowerCase()}">${sigType}</span>`;
     output.appendChild(card);
-    await new Promise(r=>setTimeout(r,10000)); // 10s delay for each signal
+    await new Promise(r=>setTimeout(r,10000)); // 10s delay
   }
 }
 
