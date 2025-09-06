@@ -168,17 +168,18 @@ function fmtDate(d){ const dd=String(d.getDate()).padStart(2,'0'); const mm=Stri
 function pad2(n){return String(n).padStart(2,'0');}
 
 // Signal generation
-function randDir(){return Math.random()>0.5?'CALL':'PUT';}
+function randDir(){return Math.random()>0.5?'𝙱𝚄𝚈':'𝙿𝚄𝚃';}
 function buildSignals(opts){
   const out = [];
   let {startDateObj,count} = opts;
   let cursor = new Date(startDateObj.getTime() + 10*60*1000); // start 10 min later
   const selectedAsset = assetSel.value || 'USD/NGN';
+  const market = marketSel.value;
   for(let i=0;i<count;i++){
     const dir = randDir();
     cursor = new Date(cursor.getTime() + (2+Math.floor(Math.random()*4))*60*1000); // random 2–5 min gap
     const hh=pad2(cursor.getHours()), mm=pad2(cursor.getMinutes());
-    out.push(`${selectedAsset} : ${hh}:${mm} : ${dir}`);
+    out.push(`${selectedAsset} : ${market} : ${hh}:${mm} : ${dir}`);
   }
   return out;
 }
@@ -190,13 +191,23 @@ function generateOutput(){
     const dateStr = dateInp.value ? fmtDate(new Date(dateInp.value)) : fmtDate(new Date());
     const count = Number(countInp.value||8);
     const signals = buildSignals({startDateObj:new Date(), count});
+
+    // Map select value to readable string
+    const tfMap = {
+      '1m':'1 minutes',
+      '5m':'5 minutes',
+      '15m':'15 minutes',
+      '1h':'1 hour'
+    };
+    const tfStr = tfMap[tf.value] || tf.value;
+
     let lines = [];
     lines.push(`▶️ DATE: ${dateStr} ◀️\n`);
-    lines.push(`⏰ UTC ${utcSel.value} 🇧🇩 ;  MTG :- 1 STEP➕\n`);
+    lines.push(`⏰ UTC ${utcSel.value} ;  MTG :- 1 STEP➕\n`);
     lines.push('              🐉DragonFly 🐉\n');
-    lines.push(`⌛️ ${tf.value} :- \n`);
+    lines.push(`⌛️ ${tfStr} :- \n`);
     signals.forEach(s=>lines.push(s));
-    lines.push('\nSoftware: DragonFly');
+    lines.push('\nSoftware:DragonFly');
     lines.push('Owner: @TraderParvej');
     outDiv.textContent = lines.join('\n');
   }, 10000);
@@ -232,8 +243,8 @@ copyBtn.addEventListener('click',()=>{
   document.body.removeChild(ta);
 });
 
-// Auto-generate initial
-generateOutput();
+// Auto-generate initial removed
+// generateOutput();  <-- this line is now commented out
 </script>
 </body>
 </html>
