@@ -51,6 +51,16 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
 a.owner-link{color:var(--accent);text-decoration:none;font-weight:bold;}
 a.owner-link:hover{text-decoration:underline;}
 @media (max-width:880px){.grid{grid-template-columns:1fr;}}
+
+/* 🔒 Modal Style */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999;}
+.modal{background:#0f1530;padding:20px;border-radius:12px;width:90%;max-width:400px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.5);}
+.modal h2{margin-top:0;margin-bottom:10px;}
+.modal input{width:100%;padding:10px;border-radius:8px;border:1px solid #333;margin-bottom:12px;}
+.modal button{padding:10px 16px;border:none;border-radius:8px;background:var(--accent);font-weight:bold;cursor:pointer;}
+.modal .error{color:#ff8a8a;font-size:13px;display:none;margin-top:6px;}
+.modal .expired a{color:#6dd6ff;text-decoration:none;}
+.modal .expired a:hover{text-decoration:underline;}
 </style>
 </head>
 <body>
@@ -66,18 +76,9 @@ a.owner-link:hover{text-decoration:underline;}
 <label>UTC Offset (eg. +6:00)</label>
 <select id="utcSelect">
 <option value="+0:00">UTC +0:00</option>
-<option value="+1:00">UTC +1:00</option>
-<option value="+2:00">UTC +2:00</option>
-<option value="+3:00">UTC +3:00</option>
-<option value="+4:00">UTC +4:00</option>
-<option value="+5:00">UTC +5:00</option>
 <option value="+6:00" selected>UTC +6:00 (BD)</option>
-<option value="+7:00">UTC +7:00</option>
-<option value="+8:00">UTC +8:00</option>
-<option value="-4:00">UTC -4:00</option>
 </select>
 </div>
-
 <div>
 <label>Market</label>
 <select id="market">
@@ -85,9 +86,8 @@ a.owner-link:hover{text-decoration:underline;}
 <option value="REAL">REAL</option>
 </select>
 </div>
-
 <div>
-<label>Timeframe (signal candle)</label>
+<label>Timeframe</label>
 <select id="timeframe">
 <option value="1m" selected>1 minute</option>
 <option value="5m">5 minutes</option>
@@ -95,19 +95,16 @@ a.owner-link:hover{text-decoration:underline;}
 <option value="1h">1 hour</option>
 </select>
 </div>
-
 <div>
 <label>Start Date</label>
 <input id="date" type="date">
 </div>
-
 <div>
 <label>Signal Count</label>
-<input type="number" id="count" min="1" value="8" placeholder="Enter number of signals">
+<input type="number" id="count" min="1" value="8">
 </div>
-
 <div>
-<label>Asset Selection</label>
+<label>Asset</label>
 <select id="asset"></select>
 </div>
 </div>
@@ -126,125 +123,127 @@ a.owner-link:hover{text-decoration:underline;}
 <footer>© DragonFly — Advance signals. Use responsibly.</footer>
 </div>
 
-<script>
-const utcSel = document.getElementById('utcSelect');
-const marketSel = document.getElementById('market');
-const tf = document.getElementById('timeframe');
-const dateInp = document.getElementById('date');
-const countInp = document.getElementById('count');
-const assetSel = document.getElementById('asset');
-const outDiv = document.getElementById('output');
-const generateBtn = document.getElementById('generate');
-const resetBtn = document.getElementById('reset');
-const copyBtn = document.getElementById('copyOut');
+<!-- 🔒 License Modal -->
+<div class="modal-backdrop" id="licenseModal" style="display:none;">
+  <div class="modal">
+    <h2>🔑 License Required</h2>
+    <div id="licenseContent">
+      <p>Please enter your license key to unlock signals:</p>
+      <input type="password" id="licenseKey" placeholder="Enter license key">
+      <button id="submitLicense">Activate</button>
+      <div class="error" id="licenseError">❌ Invalid license, try again.</div>
+    </div>
+    <div class="expired" style="display:none;">
+      <p>License Expired. Please contact for a new license:</p>
+      <a href="https://t.me/+SsTMPgPVYoVlNTQ1" target="_blank">Contact via Telegram</a>
+    </div>
+  </div>
+</div>
 
-// OTC pairs (updated with your new pairs)
-const OTCpairs = [
-  "AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)","USD/PHP (OTC)","USD/EGP (OTC)","EUR/CHF (OTC)","EUR/AUD (OTC)","USD/ZAR (OTC)","AUD/CHF (OTC)","AUD/JPY (OTC)","CAD/CHF (OTC)","CHF/JPY (OTC)","EUR/CAD (OTC)","EUR/JPY (OTC)","GBP/AUD (OTC)","NZD/CHF (OTC)","USD/CAD (OTC)","USD/CHF (OTC)","USD/COP (OTC)","USD/INR (OTC)","USD/JPY (OTC)","USD/MXN (OTC)","USD/NGN (OTC)","USD/PKR (OTC)","AUD/NZD (OTC)","EUR/SGD (OTC)","GBP/JPY (OTC)","USD/TRY (OTC)","EUR/NZD (OTC)","GBP/NZD (OTC)","NZD/USD (OTC)","GBP/CHF (OTC)","GBP/CAD (OTC)","GBP/USD (OTC)",
-  "Arbitrum (OTC)","Cosmos (OTC)","Bonk (OTC)","Dogecoin (OTC)","Polkadot (OTC)","Ethereum Classic (OTC)","Ethereum (OTC)","Floki (OTC)","Gala (OTC)","Hamster Kombat (OTC)","Chainlink (OTC)","Litecoin (OTC)","Melania Meme (OTC)","Notcoin (OTC)","Pepe (OTC)","Shiba Inu (OTC)","Solana (OTC)","Celestia (OTC)","Toncoin (OTC)","TRON (OTC)","Dogwifhat (OTC)","Zcash (OTC)","Avalanche (OTC)","Dash (OTC)","Axie Infinity (OTC)","Binance Coin (OTC)","Decentraland (OTC)","Cardano (OTC)","Trump (OTC)","Beam (OTC)","Aptos (OTC)","Ripple (OTC)","Bitcoin (OTC)","Bitcoin Cash (OTC)","USCrude (OTC)","Gold (OTC)","UKBrent (OTC)","Boeing Company (OTC)","FACEBOOK INC (OTC)","Intel (OTC)","Johnson & Johnson (OTC)","McDonald's (OTC)","Pfizer Inc (OTC)","American Express (OTC)","Microsoft (OTC)"
+<script>
+const utcSel=document.getElementById('utcSelect');
+const marketSel=document.getElementById('market');
+const tf=document.getElementById('timeframe');
+const dateInp=document.getElementById('date');
+const countInp=document.getElementById('count');
+const assetSel=document.getElementById('asset');
+const outDiv=document.getElementById('output');
+const generateBtn=document.getElementById('generate');
+const resetBtn=document.getElementById('reset');
+const copyBtn=document.getElementById('copyOut');
+
+const licenseModal=document.getElementById('licenseModal');
+const submitLicense=document.getElementById('submitLicense');
+const licenseKey=document.getElementById('licenseKey');
+const licenseError=document.getElementById('licenseError');
+const licenseContent=document.getElementById('licenseContent');
+const expiredContent=document.querySelector('.modal .expired');
+
+let licenseOk=false;
+const LICENSE_KEY='dragonflyvip';
+const LICENSE_DAYS=30;
+let licenseExpiry=null;
+
+// Full OTC + REAL pairs
+const OTCpairs=[
+"AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)","USD/PHP (OTC)","USD/EGP (OTC)","EUR/CHF (OTC)","EUR/AUD (OTC)","USD/ZAR (OTC)","AUD/CHF (OTC)","AUD/JPY (OTC)","CAD/CHF (OTC)","CHF/JPY (OTC)","EUR/CAD (OTC)","EUR/JPY (OTC)","GBP/AUD (OTC)","NZD/CHF (OTC)","USD/CAD (OTC)","USD/CHF (OTC)","USD/COP (OTC)","USD/INR (OTC)","USD/JPY (OTC)","USD/MXN (OTC)","USD/NGN (OTC)","USD/PKR (OTC)","AUD/NZD (OTC)","EUR/SGD (OTC)","GBP/JPY (OTC)","USD/TRY (OTC)","EUR/NZD (OTC)","GBP/NZD (OTC)","NZD/USD (OTC)","GBP/CHF (OTC)","GBP/CAD (OTC)","GBP/USD (OTC)",
+"Arbitrum (OTC)","Cosmos (OTC)","Bonk (OTC)","Dogecoin (OTC)","Polkadot (OTC)","Ethereum Classic (OTC)","Ethereum (OTC)","Floki (OTC)","Gala (OTC)","Hamster Kombat (OTC)","Chainlink (OTC)","Litecoin (OTC)","Melania Meme (OTC)","Notcoin (OTC)","Pepe (OTC)","Shiba Inu (OTC)","Solana (OTC)","Celestia (OTC)","Toncoin (OTC)","TRON (OTC)","Dogwifhat (OTC)","Zcash (OTC)","Avalanche (OTC)","Dash (OTC)","Axie Infinity (OTC)","Binance Coin (OTC)","Decentraland (OTC)","Cardano (OTC)","Trump (OTC)","Beam (OTC)","Aptos (OTC)","Ripple (OTC)","Bitcoin (OTC)","Bitcoin Cash (OTC)","USCrude (OTC)","Gold (OTC)","UKBrent (OTC)","Boeing Company (OTC)","FACEBOOK INC (OTC)","Intel (OTC)","Johnson & Johnson (OTC)","McDonald's (OTC)","Pfizer Inc (OTC)","American Express (OTC)","Microsoft (OTC)"
 ];
 
-// REAL pairs
-const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
+const REALpairs=['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
-// Fill asset select
+// Fill dropdown
 function fillAssetPairs(){
-  assetSel.innerHTML = '';
-  const market = marketSel.value;
-  const pairs = market==='REAL'? REALpairs : OTCpairs;
+  assetSel.innerHTML='';
+  const pairs=marketSel.value==='REAL'? REALpairs:OTCpairs;
   pairs.forEach(p=>{
-    const opt = document.createElement('option');
-    opt.value = p;
-    opt.text = p;
+    const opt=document.createElement('option');
+    opt.value=p; opt.text=p;
     assetSel.appendChild(opt);
   });
 }
-
-// Initial fill
 fillAssetPairs();
 marketSel.addEventListener('change',fillAssetPairs);
 
 // Utilities
-function fmtDate(d){ const dd=String(d.getDate()).padStart(2,'0'); const mm=String(d.getMonth()+1).padStart(2,'0'); const yy=d.getFullYear(); return `${dd}.${mm}.${yy}`;}
+function fmtDate(d){return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;}
 function pad2(n){return String(n).padStart(2,'0');}
-
-// Signal generation
 function randDir(){return Math.random()>0.5?'𝙱𝚄𝚈':'𝙿𝚄𝚃';}
-function buildSignals(opts){
-  const out = [];
-  let {startDateObj,count} = opts;
-  let cursor = new Date(startDateObj.getTime() + 10*60*1000); // start 10 min later
-  const selectedAsset = assetSel.value || 'USD/NGN';
-  const market = marketSel.value;
+
+// Build signals using user-selected asset
+function buildSignals(count){
+  const out=[];
+  const asset=assetSel.value || 'USD/JPY';
+  let cursor=new Date();
   for(let i=0;i<count;i++){
-    const dir = randDir();
-    cursor = new Date(cursor.getTime() + (2+Math.floor(Math.random()*4))*60*1000); // random 2–5 min gap
-    const hh=pad2(cursor.getHours()), mm=pad2(cursor.getMinutes());
-    out.push(`${selectedAsset} : ${market} : ${hh}:${mm} : ${dir}`);
+    cursor=new Date(cursor.getTime()+(2+Math.floor(Math.random()*4))*60000);
+    out.push(`${asset} : ${marketSel.value} : ${pad2(cursor.getHours())}:${pad2(cursor.getMinutes())} : ${randDir()}`);
   }
   return out;
 }
 
-// Generate output with 10s delay
 function generateOutput(){
-  outDiv.textContent = "⏳ Generating... (10s)";
+  const now=new Date().getTime();
+  if(!licenseOk){
+    licenseModal.style.display='flex';
+    return;
+  }
+  if(licenseExpiry && now>licenseExpiry){
+    licenseContent.style.display='none';
+    expiredContent.style.display='block';
+    licenseModal.style.display='flex';
+    return;
+  }
+  outDiv.textContent="⏳ Generating... (10s)";
   setTimeout(()=>{
-    const dateStr = dateInp.value ? fmtDate(new Date(dateInp.value)) : fmtDate(new Date());
-    const count = Number(countInp.value||8);
-    const signals = buildSignals({startDateObj:new Date(), count});
-
-    const tfMap = {
-      '1m':'1 minutes',
-      '5m':'5 minutes',
-      '15m':'15 minutes',
-      '1h':'1 hour'
-    };
-    const tfStr = tfMap[tf.value] || tf.value;
-
-    let lines = [];
-    lines.push(`▶️ DATE: ${dateStr} ◀️\n`);
+    const dateStr=dateInp.value?fmtDate(new Date(dateInp.value)):fmtDate(new Date());
+    const count=Number(countInp.value||8);
+    const signals=buildSignals(count);
+    let lines=[];lines.push(`▶️ DATE: ${dateStr} ◀️\n`);
     lines.push(`⏰ UTC ${utcSel.value} ;  MTG :- 1 STEP➕\n`);
-    lines.push('              🐉DragonFly 🐉\n');
-    lines.push(`⌛️ ${tfStr} :- \n`);
+    lines.push('🐉 DragonFly 🐉\n');
     signals.forEach(s=>lines.push(s));
-    lines.push('\nSoftware:DragonFly');
-    lines.push('Owner: @TraderParvej');
-    outDiv.textContent = lines.join('\n');
-  }, 10000);
+    outDiv.textContent=lines.join('\n');
+  },10000);
 }
 
-generateBtn.addEventListener('click',generateOutput);
-
-// Reset
-resetBtn.addEventListener('click',()=>{
-  dateInp.value='2025-08-26';
-  countInp.value='8';
-  utcSel.value='+6:00';
-  marketSel.value='OTC';
-  fillAssetPairs();
-  outDiv.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';
-});
-
-// Copy Output (fallback for all browsers)
-copyBtn.addEventListener('click',()=>{
-  const text = outDiv.textContent;
-  if (!text) return;
-  const ta = document.createElement("textarea");
-  ta.value = text;
-  document.body.appendChild(ta);
-  ta.select();
-  try {
-    document.execCommand("copy");
-    copyBtn.textContent='Copied ✔';
-    setTimeout(()=>copyBtn.textContent='Copy Output',900);
-  } catch(e){
-    alert('Copy failed — please copy manually');
+// License activation
+submitLicense.addEventListener('click',()=>{
+  if(licenseKey.value.trim()===LICENSE_KEY){
+    licenseOk=true;
+    licenseExpiry=new Date().getTime()+LICENSE_DAYS*24*60*60*1000;
+    licenseModal.style.display='none';
+    licenseContent.style.display='block';
+    expiredContent.style.display='none';
+    generateOutput();
+  }else{
+    licenseError.style.display='block';
   }
-  document.body.removeChild(ta);
 });
 
-// Auto-generate initial removed
-// generateOutput();  <-- this line is now commented out
+generateBtn.addEventListener('click',generateOutput);
+resetBtn.addEventListener('click',()=>{outDiv.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
+copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(outDiv.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
 </script>
 </body>
 </html>
