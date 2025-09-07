@@ -190,16 +190,23 @@ function fmtDate(d){return `${String(d.getDate()).padStart(2,'0')}.${String(d.ge
 function pad2(n){return String(n).padStart(2,'0');}
 function randDir(){return Math.random()>0.5?'𝙱𝚄𝚈':'𝙿𝚄𝚃';}
 
-// Build signals using user-selected asset
+// Build signals (formatted)
 function buildSignals(count){
   const out=[];
   const asset=assetSel.value || 'USD/JPY';
   let cursor=new Date();
   for(let i=0;i<count;i++){
     cursor=new Date(cursor.getTime()+(2+Math.floor(Math.random()*4))*60000);
-    out.push(`${asset} : ${marketSel.value} : ${pad2(cursor.getHours())}:${pad2(cursor.getMinutes())} : ${randDir()}`);
+    out.push(`${pad2(cursor.getHours())}:${pad2(cursor.getMinutes())} — ${asset} : ${randDir()}`);
   }
   return out;
+}
+
+// Timeframe text converter
+function tfText(tfVal){
+  if(tfVal.endsWith("m")) return tfVal.replace("m"," minutes");
+  if(tfVal.endsWith("h")) return tfVal.replace("h"," hours");
+  return tfVal;
 }
 
 function generateOutput(){
@@ -219,10 +226,14 @@ function generateOutput(){
     const dateStr=dateInp.value?fmtDate(new Date(dateInp.value)):fmtDate(new Date());
     const count=Number(countInp.value||8);
     const signals=buildSignals(count);
-    let lines=[];lines.push(`▶️ DATE: ${dateStr} ◀️\n`);
+
+    let lines=[];
+    lines.push(`▶️ DATE: ${dateStr} ◀️\n`);
     lines.push(`⏰ UTC ${utcSel.value} ;  MTG :- 1 STEP➕\n`);
-    lines.push('🐉 DragonFly 🐉\n');
+    lines.push(`              🐉DragonFly 🐉\n`);
+    lines.push(`⌛️ ${tfText(tf.value)} :- \n`);
     signals.forEach(s=>lines.push(s));
+    lines.push(`\nSoftware:DragonFly\nOwner: @TraderParvej`);
     outDiv.textContent=lines.join('\n');
   },10000);
 }
