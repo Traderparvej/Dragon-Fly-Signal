@@ -192,12 +192,12 @@ function randDir(){return Math.random()>0.5?'𝙱𝚄𝚈':'𝙿𝚄𝚃';}
 
 // Build signals (formatted)
 function buildSignals(count){
-  const out=[]; 
+  const out=[];
   const asset=assetSel.value || 'USD/JPY';
   let cursor=new Date();
   for(let i=0;i<count;i++){
     cursor=new Date(cursor.getTime()+(2+Math.floor(Math.random()*4))*60000);
-    out.push(`${pad2(cursor.getHours())}:${pad2(cursor.getMinutes())} — ${asset} : ${randDir()}`);
+    out.push(`${pad2(cursor.getHours())}:${pad2(cursor.getMinutes())} — ${asset};${randDir()}`);
   }
   return out;
 }
@@ -209,7 +209,7 @@ function tfText(tfVal){
   return tfVal;
 }
 
-// ✅ Updated generateOutput for requested format
+// Generate output
 function generateOutput(){
   const now = new Date().getTime();
   if(!licenseOk){
@@ -231,19 +231,20 @@ function generateOutput(){
     const signals = buildSignals(count);
 
     let lines = [];
-    lines.push(`DATE: ${dateStr} \n`);
-    lines.push(`⏰ UTC ${utcSel.value} ;  MTG :- 1 STEP\n`);
-    lines.push(`\n              🐉DragonFly 🐉\n`);
-    lines.push(`\n⌛️ ${tfText(tf.value)} :- \n`);
+    lines.push(`DATE: ${dateStr}`);
+    lines.push(`⏰ UTC ${utcSel.value} ;  MTG :- 1 STEP`);
+    lines.push(`              🐉DragonFly 🐉`);
+    lines.push(`⌛️ ${tfText(tf.value)} :-`);
 
     signals.forEach(s => {
       const [time, assetDir] = s.split(' — ');
-      const [asset, dir] = assetDir.split(' : ');
+      const [asset, dir] = assetDir.split(';');
       const dirText = dir === '𝙱𝚄𝚈' ? 'CALL' : 'PUT';
       lines.push(`M1;${asset.replace(/\//g,'')};${time};${dirText}`);
     });
 
-    lines.push(`\nSoftware:DragonFly\nOwner: @TraderParvej`);
+    lines.push(`Software:DragonFly`);
+    lines.push(`Owner: @TraderParvej`);
     outDiv.textContent = lines.join('\n');
   }, 10000);
 }
