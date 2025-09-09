@@ -42,7 +42,7 @@ select,input[type=date],input[type=number],button{
   border-radius:12px;
   background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.02));
   border:1px solid rgba(255,255,255,0.03);
-  min-height:220px;
+  min-height:180px;
   white-space:pre-wrap;
   font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   color:#fff;
@@ -115,19 +115,9 @@ a.owner-link:hover{text-decoration:underline;}
 <button id="copyOut">Copy Output</button>
 </div>
 
-<div class="output" id="output">DATE: —  
+<div class="output" id="output">▶️ DATE: — ◀️
 
-⏰ UTC +6:00 ;  MTG :- 1 STEP  
-
-              🐉DragonFly 🐉  
-
-⌛️ 1 minutes :-  
-
-(Press Generate to produce signals)  
-
-Software:DragonFly  
-Owner: @TraderParvej
-</div>
+(Press Generate to produce signals)</div>
 </section>
 
 <footer>© DragonFly — Advance signals. Use responsibly.</footer>
@@ -200,28 +190,34 @@ function fmtDate(d){return `${String(d.getDate()).padStart(2,'0')}.${String(d.ge
 function pad2(n){return String(n).padStart(2,'0');}
 function randDir(){return Math.random()>0.5?'CALL':'PUT';}
 
-// Build signals
+// Build signals (M1;PAIR;TIME;CALL/PUT)
 function buildSignals(count){
   const out=[];
-  const asset=assetSel.value || 'USD/JPY-OTC';
+  const asset=assetSel.value || 'USD/JPY';
   let cursor=new Date();
   for(let i=0;i<count;i++){
     cursor=new Date(cursor.getTime()+(2+Math.floor(Math.random()*4))*60000);
-    out.push(`M1;${asset.replace(/\//g,'')};${pad2(cursor.getHours())}:${pad2(cursor.getMinutes())};${randDir()}`);
+    const time=`${pad2(cursor.getHours())}:${pad2(cursor.getMinutes())}`;
+    const pair=asset
+      .replace("/","")
+      .replace(" ","")
+      .replace("(","-")
+      .replace(")","")
+      .replace(" ","");
+    out.push(`M1;${pair};${time};${randDir()}`);
   }
   return out;
 }
 
-// Timeframe text
+// Timeframe text converter
 function tfText(tfVal){
   if(tfVal.endsWith("m")) return tfVal.replace("m"," minutes");
   if(tfVal.endsWith("h")) return tfVal.replace("h"," hours");
   return tfVal;
 }
 
-// Generate output
 function generateOutput(){
-  const now = new Date().getTime();
+  const now=new Date().getTime();
   if(!licenseOk){
     licenseModal.style.display='flex';
     return;
@@ -232,29 +228,28 @@ function generateOutput(){
     licenseModal.style.display='flex';
     return;
   }
+  outDiv.textContent="⏳ Generating... (10s)";
+  setTimeout(()=>{
+    const dateStr=dateInp.value?fmtDate(new Date(dateInp.value)):fmtDate(new Date());
+    const count=Number(countInp.value||8);
+    const signals=buildSignals(count);
 
-  const dateStr = dateInp.value ? fmtDate(new Date(dateInp.value)) : fmtDate(new Date());
-  const count = Number(countInp.value || 8);
-  const signals = buildSignals(count);
-
-  let lines = [];
-  lines.push(`DATE: ${dateStr}`);
-  lines.push(`⏰ UTC ${utcSel.value} ;  MTG :- 1 STEP`);
-  lines.push(`              🐉DragonFly 🐉`);
-  lines.push(`⌛️ ${tfText(tf.value)} :-`);
-  lines.push('');
-  signals.forEach(s=>lines.push(s));
-  lines.push('');
-  lines.push(`Software:DragonFly`);
-  lines.push(`Owner: @TraderParvej`);
-  outDiv.textContent = lines.join('\n');
+    let lines=[];
+    lines.push(`DATE: ${dateStr}\n`);
+    lines.push(`⏰ UTC ${utcSel.value} ;  MTG :- 1 STEP\n`);
+    lines.push(`              🐉DragonFly 🐉\n`);
+    lines.push(`⌛️ ${tfText(tf.value)} :- \n`);
+    lines.push(signals.join("\n"));
+    lines.push(`\nSoftware:DragonFly\nOwner: @TraderParvej`);
+    outDiv.textContent=lines.join('\n');
+  },10000);
 }
 
 // License activation
 submitLicense.addEventListener('click',()=>{
   if(licenseKey.value.trim()===LICENSE_KEY){
     licenseOk=true;
-    licenseExpiry=new Date().getTime()+30*24*60*60*1000;
+    licenseExpiry=new Date().getTime()+LICENSE_DAYS*24*60*60*1000;
     licenseModal.style.display='none';
     licenseContent.style.display='block';
     expiredContent.style.display='none';
@@ -265,7 +260,7 @@ submitLicense.addEventListener('click',()=>{
 });
 
 generateBtn.addEventListener('click',generateOutput);
-resetBtn.addEventListener('click',()=>{outDiv.textContent='DATE: —  \n\n⏰ UTC +6:00 ;  MTG :- 1 STEP  \n\n              🐉DragonFly 🐉  \n\n⌛️ 1 minutes :-  \n\n(Press Generate to produce signals)  \n\nSoftware:DragonFly  \nOwner: @TraderParvej';});
+resetBtn.addEventListener('click',()=>{outDiv.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
 copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(outDiv.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
 </script>
 </body>
