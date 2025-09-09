@@ -192,7 +192,7 @@ function randDir(){return Math.random()>0.5?'𝙱𝚄𝚈':'𝙿𝚄𝚃';}
 
 // Build signals (formatted)
 function buildSignals(count){
-  const out=[];
+  const out=[]; 
   const asset=assetSel.value || 'USD/JPY';
   let cursor=new Date();
   for(let i=0;i<count;i++){
@@ -209,8 +209,9 @@ function tfText(tfVal){
   return tfVal;
 }
 
+// ✅ Updated generateOutput for requested format
 function generateOutput(){
-  const now=new Date().getTime();
+  const now = new Date().getTime();
   if(!licenseOk){
     licenseModal.style.display='flex';
     return;
@@ -221,21 +222,30 @@ function generateOutput(){
     licenseModal.style.display='flex';
     return;
   }
-  outDiv.textContent="⏳ Generating... (10s)";
-  setTimeout(()=>{
-    const dateStr=dateInp.value?fmtDate(new Date(dateInp.value)):fmtDate(new Date());
-    const count=Number(countInp.value||8);
-    const signals=buildSignals(count);
 
-    let lines=[];
-    lines.push(`▶️ DATE: ${dateStr} ◀️\n`);
-    lines.push(`⏰ UTC ${utcSel.value} ;  MTG :- 1 STEP➕\n`);
-    lines.push(`              🐉DragonFly 🐉\n`);
-    lines.push(`⌛️ ${tfText(tf.value)} :- \n`);
-    signals.forEach(s=>lines.push(s));
+  outDiv.textContent = "⏳ Generating... (10s)";
+
+  setTimeout(()=>{
+    const dateStr = dateInp.value ? fmtDate(new Date(dateInp.value)) : fmtDate(new Date());
+    const count = Number(countInp.value || 8);
+    const signals = buildSignals(count);
+
+    let lines = [];
+    lines.push(`DATE: ${dateStr} \n`);
+    lines.push(`⏰ UTC ${utcSel.value} ;  MTG :- 1 STEP\n`);
+    lines.push(`\n              🐉DragonFly 🐉\n`);
+    lines.push(`\n⌛️ ${tfText(tf.value)} :- \n`);
+
+    signals.forEach(s => {
+      const [time, assetDir] = s.split(' — ');
+      const [asset, dir] = assetDir.split(' : ');
+      const dirText = dir === '𝙱𝚄𝚈' ? 'CALL' : 'PUT';
+      lines.push(`M1;${asset.replace(/\//g,'')};${time};${dirText}`);
+    });
+
     lines.push(`\nSoftware:DragonFly\nOwner: @TraderParvej`);
-    outDiv.textContent=lines.join('\n');
-  },10000);
+    outDiv.textContent = lines.join('\n');
+  }, 10000);
 }
 
 // License activation
