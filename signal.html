@@ -47,7 +47,6 @@ select,input[type=date],input[type=number],button{
   font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   color:#fff;
 }
-.output .normal-font{font-family:Arial, sans-serif; font-weight:normal; font-size:14px;}
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
 a.owner-link{color:var(--accent);text-decoration:none;font-weight:bold;}
 a.owner-link:hover{text-decoration:underline;}
@@ -124,7 +123,6 @@ a.owner-link:hover{text-decoration:underline;}
 <footer>© DragonFly — Advance signals. Use responsibly.</footer>
 </div>
 
-<!-- 🔒 License Modal -->
 <div class="modal-backdrop" id="licenseModal" style="display:none;">
   <div class="modal">
     <h2>🔑 License Required</h2>
@@ -134,8 +132,7 @@ a.owner-link:hover{text-decoration:underline;}
       <button id="submitLicense">Activate</button>
       <div class="error" id="licenseError">❌ Invalid license, try again.</div>
       <p style="margin-top:10px; font-size:13px; color:#6dd6ff;">
-        বৈধ লাইসেন্স পেতে, অনুগ্রহ করে আমাদের টেলিগ্রাম গ্রুপে যোগ দিন: 
-        <a href="https://t.me/+SsTMPgPVYoVlNTQ1" target="_blank" style="color:#ffffff; text-decoration:underline;">এখান ক্লিক করে যোগ দিন</a>
+        বৈধ লাইসেন্স পেতে, আমাদের <a href="https://t.me/+SsTMPgPVYoVlNTQ1" target="_blank" style="color:#ffffff;text-decoration:underline;">টেলিগ্রাম গ্রুপে যোগ দিন</a>
       </p>
     </div>
     <div class="expired" style="display:none;">
@@ -169,10 +166,9 @@ const LICENSE_KEY='dragonflyvip';
 const LICENSE_DAYS=30;
 let licenseExpiry=null;
 
-const OTCpairs=["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)"];
+const OTCpairs=["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)"];
 const REALpairs=['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD'];
 
-// Fill dropdown
 function fillAssetPairs(){
   assetSel.innerHTML='';
   const pairs=marketSel.value==='REAL'? REALpairs:OTCpairs;
@@ -187,23 +183,16 @@ marketSel.addEventListener('change',fillAssetPairs);
 
 function fmtDate(d){return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;}
 function pad2(n){return String(n).padStart(2,'0');}
-
-function randDirUnicode(){return Math.random()>0.5?'𝙲𝙰𝙻𝙻':'𝙿𝚄𝚃';}
+function randDir(){return Math.random()>0.5?'𝙲𝙰𝙻𝙻':'𝙿𝚄𝚃';}
 
 function buildSignals(count){
   const out=[];
-  const asset=assetSel.value || 'USD/JPY';
+  const asset=assetSel.value.replace("/","").replace(" ","").replace("(","-").replace(")","");
   let cursor=new Date();
   for(let i=0;i<count;i++){
     cursor=new Date(cursor.getTime()+(2+Math.floor(Math.random()*4))*60000);
     const time=`${pad2(cursor.getHours())}:${pad2(cursor.getMinutes())}`;
-    const pairStr=asset.replace("/","").replace(" ","").replace("(","-").replace(")","");
-    if(i<count-2){
-      out.push(`𝙼𝟷 ${pairStr} ${marketSel.value} ${time} ${randDirUnicode()} `);
-    } else {
-      // last 2 signals: normal font
-      out.push(`<span class="normal-font">M1 ${pairStr} ${marketSel.value} ${time} ${randDirUnicode()}</span>`);
-    }
+    out.push(`𝙼𝟷 ${asset} ${marketSel.value} ${time} ${randDir()} `);
   }
   return out;
 }
@@ -235,7 +224,7 @@ function generateOutput(){
   lines.push(`⏰ UTC ${utcSel.value} ;  MTG :- 1 STEP\n`);
   lines.push(`              🐉DragonFly 🐉\n`);
   lines.push(`⌛️ ${tfText(tf.value)} :- \n`);
-  outDiv.innerHTML=lines.join('\n') + signals.join('<br>') + `<br><br>Software:DragonFly<br>Owner: @TraderParvej`;
+  outDiv.textContent=lines.join('\n') + signals.join('\n') + `\n\nSoftware:DragonFly\nOwner: @TraderParvej`;
 }
 
 submitLicense.addEventListener('click',()=>{
