@@ -17,7 +17,7 @@ body{
   margin:0;
   font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
   background:linear-gradient(180deg,#05102a,#081024);
-  color:#fff;
+  color:var(--text);
 }
 .wrap{max-width:1100px;margin:18px auto;padding:18px;}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;}
@@ -44,9 +44,10 @@ select,input[type=date],input[type=number],button{
   border:1px solid rgba(255,255,255,0.03);
   min-height:180px;
   white-space:pre-wrap;
-  font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family:'Courier New', Courier, monospace;
   color:#fff;
 }
+.unicode{font-family: "Arial", "DejaVu Sans", "monospace";} /* Unicode-friendly fallback */
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
 a.owner-link{color:var(--accent);text-decoration:none;font-weight:bold;}
 a.owner-link:hover{text-decoration:underline;}
@@ -115,7 +116,7 @@ a.owner-link:hover{text-decoration:underline;}
 <button id="copyOut">Copy Output</button>
 </div>
 
-<div class="output" id="output">▶️ DATE: — ◀️
+<div class="output unicode" id="output">▶️ DATE: — ◀️
 
 (Press Generate to produce signals)</div>
 </section>
@@ -123,6 +124,7 @@ a.owner-link:hover{text-decoration:underline;}
 <footer>© DragonFly — Advance signals. Use responsibly.</footer>
 </div>
 
+<!-- 🔒 License Modal -->
 <div class="modal-backdrop" id="licenseModal" style="display:none;">
   <div class="modal">
     <h2>🔑 License Required</h2>
@@ -131,9 +133,7 @@ a.owner-link:hover{text-decoration:underline;}
       <input type="password" id="licenseKey" placeholder="Enter license key">
       <button id="submitLicense">Activate</button>
       <div class="error" id="licenseError">❌ Invalid license, try again.</div>
-      <p style="margin-top:10px; font-size:13px; color:#6dd6ff;">
-        বৈধ লাইসেন্স পেতে, আমাদের <a href="https://t.me/+SsTMPgPVYoVlNTQ1" target="_blank" style="color:#ffffff;text-decoration:underline;">টেলিগ্রাম গ্রুপে যোগ দিন</a>
-      </p>
+      <p style="margin-top:10px;font-size:13px;">লাইসেন্স নিতে টেলিগ্রাম গ্রুপে জয়েন করুন: <a href="https://t.me/+SsTMPgPVYoVlNTQ1" target="_blank">Click here</a></p>
     </div>
     <div class="expired" style="display:none;">
       <p>License Expired. Please contact for a new license:</p>
@@ -166,11 +166,11 @@ const LICENSE_KEY='dragonflyvip';
 const LICENSE_DAYS=30;
 let licenseExpiry=null;
 
-// OTC + REAL pairs
-const OTCpairs=["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)","USD/PHP (OTC)","USD/EGP (OTC)","EUR/CHF (OTC)","EUR/AUD (OTC)","USD/ZAR (OTC)","AUD/CHF (OTC)","AUD/JPY (OTC)","CAD/CHF (OTC)","CHF/JPY (OTC)","EUR/CAD (OTC)","EUR/JPY (OTC)","GBP/AUD (OTC)","NZD/CHF (OTC)","USD/CAD (OTC)","USD/CHF (OTC)","USD/COP (OTC)","USD/INR (OTC)","USD/JPY (OTC)","USD/MXN (OTC)","USD/NGN (OTC)","USD/PKR (OTC)","AUD/NZD (OTC)","EUR/SGD (OTC)","GBP/JPY (OTC)","USD/TRY (OTC)","EUR/NZD (OTC)","GBP/NZD (OTC)","NZD/USD (OTC)","GBP/CHF (OTC)","GBP/CAD (OTC)","GBP/USD (OTC)"];
+const OTCpairs=[
+"AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)","USD/PHP (OTC)","USD/EGP (OTC)","EUR/CHF (OTC)","EUR/AUD (OTC)","USD/ZAR (OTC)","AUD/CHF (OTC)","AUD/JPY (OTC)","CAD/CHF (OTC)","CHF/JPY (OTC)","EUR/CAD (OTC)","EUR/JPY (OTC)","GBP/AUD (OTC)","NZD/CHF (OTC)","USD/CAD (OTC)","USD/CHF (OTC)","USD/COP (OTC)","USD/INR (OTC)","USD/JPY (OTC)","USD/MXN (OTC)","USD/NGN (OTC)","USD/PKR (OTC)","AUD/NZD (OTC)","EUR/SGD (OTC)","GBP/JPY (OTC)","USD/TRY (OTC)","EUR/NZD (OTC)","GBP/NZD (OTC)","NZD/USD (OTC)","GBP/CHF (OTC)","GBP/CAD (OTC)","GBP/USD (OTC)"
+];
 const REALpairs=['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
-// Fill asset dropdown
 function fillAssetPairs(){
   assetSel.innerHTML='';
   const pairs=marketSel.value==='REAL'? REALpairs:OTCpairs;
@@ -183,12 +183,10 @@ function fillAssetPairs(){
 fillAssetPairs();
 marketSel.addEventListener('change',fillAssetPairs);
 
-// Utilities
 function fmtDate(d){return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;}
 function pad2(n){return String(n).padStart(2,'0');}
-function randDir(){return Math.random()>0.5?'CALL':'PUT';}
+function randDir(){return Math.random()>0.5?'𝙲𝙰𝙻𝙻':'𝙿𝚄𝚃';}
 
-// Build signals
 function buildSignals(count){
   const out=[];
   const asset=assetSel.value || 'USD/JPY';
@@ -196,14 +194,12 @@ function buildSignals(count){
   for(let i=0;i<count;i++){
     cursor=new Date(cursor.getTime()+(2+Math.floor(Math.random()*4))*60000);
     const time=`${pad2(cursor.getHours())}:${pad2(cursor.getMinutes())}`;
-    // Remove extra OTC
     let pair=asset.replace("/","").replace(" ","").replace("(","-").replace(")","");
     out.push(`𝙼𝟷 ${pair} ${time} ${randDir()}`);
   }
   return out;
 }
 
-// Timeframe text
 function tfText(tfVal){
   if(tfVal.endsWith("m")) return tfVal.replace("m"," minutes");
   if(tfVal.endsWith("h")) return tfVal.replace("h"," hours");
@@ -239,7 +235,6 @@ function generateOutput(){
   },1000);
 }
 
-// License activation
 submitLicense.addEventListener('click',()=>{
   if(licenseKey.value.trim()===LICENSE_KEY){
     licenseOk=true;
