@@ -192,7 +192,9 @@ function buildSignals(count){
   for(let i=0;i<count;i++){
     cursor=new Date(cursor.getTime()+(2+Math.floor(Math.random()*4))*60000);
     const time=`${pad2(cursor.getHours())}:${pad2(cursor.getMinutes())}`;
-    out.push(`𝙼𝟷 ${asset} ${marketSel.value} ${time} ${randDir()} `);
+    // শুধুমাত্র একবারই Market/OTC দেখানো
+    const marketText = i===0 ? ` ${marketSel.value}` : '';
+    out.push(`𝙼𝟷 ${asset}${marketText} ${time} ${randDir()} `);
   }
   return out;
 }
