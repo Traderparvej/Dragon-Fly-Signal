@@ -166,9 +166,14 @@ const LICENSE_KEY='dragonflyvip';
 const LICENSE_DAYS=30;
 let licenseExpiry=null;
 
-const OTCpairs=["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)"];
-const REALpairs=['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD'];
+// Complete OTC + REAL pairs
+const OTCpairs=[
+"AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)","USD/PHP (OTC)","USD/EGP (OTC)","EUR/CHF (OTC)","EUR/AUD (OTC)","USD/ZAR (OTC)","AUD/CHF (OTC)","AUD/JPY (OTC)","CAD/CHF (OTC)","CHF/JPY (OTC)","EUR/CAD (OTC)","EUR/JPY (OTC)","GBP/AUD (OTC)","NZD/CHF (OTC)","USD/CAD (OTC)","USD/CHF (OTC)","USD/COP (OTC)","USD/INR (OTC)","USD/JPY (OTC)","USD/MXN (OTC)","USD/NGN (OTC)","USD/PKR (OTC)","AUD/NZD (OTC)","EUR/SGD (OTC)","GBP/JPY (OTC)","USD/TRY (OTC)","EUR/NZD (OTC)","GBP/NZD (OTC)","NZD/USD (OTC)","GBP/CHF (OTC)","GBP/CAD (OTC)","GBP/USD (OTC)"
+];
 
+const REALpairs=['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
+
+// Fill dropdown
 function fillAssetPairs(){
   assetSel.innerHTML='';
   const pairs=marketSel.value==='REAL'? REALpairs:OTCpairs;
@@ -192,8 +197,7 @@ function buildSignals(count){
   for(let i=0;i<count;i++){
     cursor=new Date(cursor.getTime()+(2+Math.floor(Math.random()*4))*60000);
     const time=`${pad2(cursor.getHours())}:${pad2(cursor.getMinutes())}`;
-    // শুধুমাত্র একবারই Market/OTC দেখানো
-    const marketText = i===0 ? ` ${marketSel.value}` : '';
+    const marketText = (i===0) ? ` ${marketSel.value}` : ''; // শুধুমাত্র প্রথম লাইনে
     out.push(`𝙼𝟷 ${asset}${marketText} ${time} ${randDir()} `);
   }
   return out;
