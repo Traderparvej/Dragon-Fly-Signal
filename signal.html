@@ -132,7 +132,6 @@ a.owner-link:hover{text-decoration:underline;}
       <input type="password" id="licenseKey" placeholder="Enter license key">
       <button id="submitLicense">Activate</button>
       <div class="error" id="licenseError">❌ Invalid license, try again.</div>
-      <!-- Professional note in Bangla -->
       <p style="margin-top:10px; font-size:13px; color:#6dd6ff;">
         বৈধ লাইসেন্স পেতে, অনুগ্রহ করে আমাদের টেলিগ্রাম গ্রুপে যোগ দিন: 
         <a href="https://t.me/+SsTMPgPVYoVlNTQ1" target="_blank" style="color:#ffffff; text-decoration:underline;">এখান ক্লিক করে যোগ দিন</a>
@@ -169,12 +168,7 @@ const LICENSE_KEY='dragonflyvip';
 const LICENSE_DAYS=30;
 let licenseExpiry=null;
 
-// Full OTC + REAL pairs
-const OTCpairs=[
-"AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)","USD/PHP (OTC)","USD/EGP (OTC)","EUR/CHF (OTC)","EUR/AUD (OTC)","USD/ZAR (OTC)","AUD/CHF (OTC)","AUD/JPY (OTC)","CAD/CHF (OTC)","CHF/JPY (OTC)","EUR/CAD (OTC)","EUR/JPY (OTC)","GBP/AUD (OTC)","NZD/CHF (OTC)","USD/CAD (OTC)","USD/CHF (OTC)","USD/COP (OTC)","USD/INR (OTC)","USD/JPY (OTC)","USD/MXN (OTC)","USD/NGN (OTC)","USD/PKR (OTC)","AUD/NZD (OTC)","EUR/SGD (OTC)","GBP/JPY (OTC)","USD/TRY (OTC)","EUR/NZD (OTC)","GBP/NZD (OTC)","NZD/USD (OTC)","GBP/CHF (OTC)","GBP/CAD (OTC)","GBP/USD (OTC)",
-"Arbitrum (OTC)","Cosmos (OTC)","Bonk (OTC)","Dogecoin (OTC)","Polkadot (OTC)","Ethereum Classic (OTC)","Ethereum (OTC)","Floki (OTC)","Gala (OTC)","Hamster Kombat (OTC)","Chainlink (OTC)","Litecoin (OTC)","Melania Meme (OTC)","Notcoin (OTC)","Pepe (OTC)","Shiba Inu (OTC)","Solana (OTC)","Celestia (OTC)","Toncoin (OTC)","TRON (OTC)","Dogwifhat (OTC)","Zcash (OTC)","Avalanche (OTC)","Dash (OTC)","Axie Infinity (OTC)","Binance Coin (OTC)","Decentraland (OTC)","Cardano (OTC)","Trump (OTC)","Beam (OTC)","Aptos (OTC)","Ripple (OTC)","Bitcoin (OTC)","Bitcoin Cash (OTC)","USCrude (OTC)","Gold (OTC)","UKBrent (OTC)","Boeing Company (OTC)","FACEBOOK INC (OTC)","Intel (OTC)","Johnson & Johnson (OTC)","McDonald's (OTC)","Pfizer Inc (OTC)","American Express (OTC)","Microsoft (OTC)"
-];
-
+const OTCpairs=["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)","USD/PHP (OTC)","USD/EGP (OTC)","EUR/CHF (OTC)","EUR/AUD (OTC)","USD/ZAR (OTC)","AUD/CHF (OTC)","AUD/JPY (OTC)","CAD/CHF (OTC)","CHF/JPY (OTC)","EUR/CAD (OTC)","EUR/JPY (OTC)","GBP/AUD (OTC)","NZD/CHF (OTC)","USD/CAD (OTC)","USD/CHF (OTC)","USD/COP (OTC)","USD/INR (OTC)","USD/JPY (OTC)","USD/MXN (OTC)","USD/NGN (OTC)","USD/PKR (OTC)","AUD/NZD (OTC)","EUR/SGD (OTC)","GBP/JPY (OTC)","USD/TRY (OTC)","EUR/NZD (OTC)","GBP/NZD (OTC)","NZD/USD (OTC)","GBP/CHF (OTC)","GBP/CAD (OTC)","GBP/USD (OTC)"];
 const REALpairs=['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
 // Fill dropdown
@@ -193,9 +187,11 @@ marketSel.addEventListener('change',fillAssetPairs);
 // Utilities
 function fmtDate(d){return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;}
 function pad2(n){return String(n).padStart(2,'0');}
-function randDir(){return Math.random()>0.5?'CALL':'PUT';}
 
-// Build signals (M1;PAIR;TIME;CALL/PUT)
+// Rand CALL/PUT in Unicode
+function randDirUnicode(){return Math.random()>0.5?'𝙲𝙰𝙻𝙻':'𝙿𝚄𝚃';}
+
+// Build signals (M1;PAIR;TIME;CALL/PUT Unicode)
 function buildSignals(count){
   const out=[];
   const asset=assetSel.value || 'USD/JPY';
@@ -203,18 +199,12 @@ function buildSignals(count){
   for(let i=0;i<count;i++){
     cursor=new Date(cursor.getTime()+(2+Math.floor(Math.random()*4))*60000);
     const time=`${pad2(cursor.getHours())}:${pad2(cursor.getMinutes())}`;
-    const pair=asset
-      .replace("/","")
-      .replace(" ","")
-      .replace("(","-")
-      .replace(")","")
-      .replace(" ","");
-    out.push(`M1;${pair};${time};${randDir()}`);
+    const pair=asset.replace("/","").replace(" ","").replace("(","-").replace(")","");
+    out.push(`𝙼𝟷 ${pair} ${marketSel.value} ${time} ${randDirUnicode()} `);
   }
   return out;
 }
 
-// Timeframe text converter
 function tfText(tfVal){
   if(tfVal.endsWith("m")) return tfVal.replace("m"," minutes");
   if(tfVal.endsWith("h")) return tfVal.replace("h"," hours");
@@ -247,7 +237,7 @@ function generateOutput(){
     lines.push(signals.join("\n"));
     lines.push(`\nSoftware:DragonFly\nOwner: @TraderParvej`);
     outDiv.textContent=lines.join('\n');
-  },10000);
+  },1000);
 }
 
 // License activation
