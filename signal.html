@@ -132,6 +132,11 @@ a.owner-link:hover{text-decoration:underline;}
       <input type="password" id="licenseKey" placeholder="Enter license key">
       <button id="submitLicense">Activate</button>
       <div class="error" id="licenseError">❌ Invalid license, try again.</div>
+      <!-- Professional note added -->
+      <p style="margin-top:10px; font-size:13px; color:#6dd6ff;">
+        To obtain a valid license, please join our Telegram group: 
+        <a href="https://t.me/+SsTMPgPVYoVlNTQ1" target="_blank" style="color:#ffffff; text-decoration:underline;">Click here to join</a>
+      </p>
     </div>
     <div class="expired" style="display:none;">
       <p>License Expired. Please contact for a new license:</p>
@@ -188,15 +193,7 @@ marketSel.addEventListener('change',fillAssetPairs);
 // Utilities
 function fmtDate(d){return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;}
 function pad2(n){return String(n).padStart(2,'0');}
-
-// Convert pair to Unicode Monospace
-function stylizePair(pair) {
-  const map = {
-    'A':'𝙰','B':'𝙱','C':'𝙲','D':'𝙳','E':'𝙴','F':'𝙵','G':'𝙶','H':'𝙷','I':'𝙸','J':'𝙹','K':'𝙺','L':'𝙻','M':'𝙼','N':'𝙽','O':'𝙾','P':'𝙿','Q':'𝚀','R':'𝚁','S':'𝚂','T':'𝚃','U':'𝚄','V':'𝚅','W':'𝚆','X':'𝚇','Y':'𝚈','Z':'𝚉',
-    '0':'𝟶','1':'𝟷','2':'𝟸','3':'𝟹','4':'𝟺','5':'𝟻','6':'𝟼','7':'𝟽','8':'𝟾','9':'𝟿'
-  };
-  return pair.toUpperCase().split('').map(c=>map[c]||c).join('');
-}
+function randDir(){return Math.random()>0.5?'CALL':'PUT';}
 
 // Build signals (M1;PAIR;TIME;CALL/PUT)
 function buildSignals(count){
@@ -206,10 +203,13 @@ function buildSignals(count){
   for(let i=0;i<count;i++){
     cursor=new Date(cursor.getTime()+(2+Math.floor(Math.random()*4))*60000);
     const time=`${pad2(cursor.getHours())}:${pad2(cursor.getMinutes())}`;
-    let pairName = asset.replace("/","").replace(" ","").replace("(","-").replace(")","");
-    pairName = stylizePair(pairName);
-    const dir = Math.random()>0.5?'𝙲𝙰𝙻𝙻':'𝙿𝚄𝚃';
-    out.push(`𝙼𝟷 ${pairName} ${marketSel.value==='REAL'?'REAL':'OTC'} ${time} ${dir} `);
+    const pair=asset
+      .replace("/","")
+      .replace(" ","")
+      .replace("(","-")
+      .replace(")","")
+      .replace(" ","");
+    out.push(`M1;${pair};${time};${randDir()}`);
   }
   return out;
 }
@@ -245,8 +245,7 @@ function generateOutput(){
     lines.push(`              🐉DragonFly 🐉\n`);
     lines.push(`⌛️ ${tfText(tf.value)} :- \n`);
     lines.push(signals.join("\n"));
-    lines.push(`\nSoftware:DragonFly`);
-    lines.push(`Owner: @TraderParvej`);
+    lines.push(`\nSoftware:DragonFly\nOwner: @TraderParvej`);
     outDiv.textContent=lines.join('\n');
   },10000);
 }
