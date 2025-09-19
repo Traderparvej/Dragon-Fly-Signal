@@ -20,8 +20,8 @@ body{
   color:var(--text);
 }
 .wrap{max-width:1100px;margin:18px auto;padding:18px;}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;}
-header h1{margin:0;font-size:20px;}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+header h1{margin:0;font-size:20px;display:flex;align-items:center;gap:12px;}
 .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px;margin-bottom:12px;}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
@@ -80,13 +80,14 @@ a.owner-link:hover{text-decoration:underline;}
 .modal .error{color:#ff8a8a;font-size:13px;display:none;margin-top:6px;}
 .modal .expired a{color:#6dd6ff;text-decoration:none;}
 .modal .expired a:hover{text-decoration:underline;}
-.modal .license-info{margin-top:8px;font-size:13px;color:#6dd6ff;}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-<h1>🐉 DragonFly — Signal Generator</h1>
+<h1>🐉 DragonFly — Signal Generator
+  <span id="licenseStatus" style="font-size:13px;color:#6dd6ff;font-weight:600;"></span>
+</h1>
 <div class="small">Software: DragonFly &nbsp; Owner: <a class="owner-link" href="https://t.me/TraderParvej" target="_blank">@TraderParvej</a></div>
 </header>
 
@@ -146,8 +147,6 @@ a.owner-link:hover{text-decoration:underline;}
 <div class="output unicode" id="output">▶️ DATE: — ◀️
 
 (Press Generate to produce signals)</div>
-
-<p class="license-info" id="licenseStatus"></p>
 </section>
 
 <footer>© DragonFly — Advance signals. Use responsibly.</footer>
@@ -208,7 +207,6 @@ const OTCpairs = [
 "USD/PKR (OTC)","AUD/NZD (OTC)","EUR/SGD (OTC)","GBP/JPY (OTC)","USD/TRY (OTC)",
 "EUR/NZD (OTC)","GBP/NZD (OTC)","NZD/USD (OTC)","GBP/CHF (OTC)","GBP/CAD (OTC)","GBP/USD (OTC)"
 ];
-
 const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
 // Fill Asset Box
@@ -251,7 +249,7 @@ function mono(str){
     return str.split("").map(ch=>map[ch.toUpperCase()]||ch).join("");
 }
 
-// Generate Direction
+// Generate Direction based on selection
 function randDir(){
     const type = signalType.value;
     if(type === 'call') return '𝙲𝙰𝙻';
@@ -259,7 +257,7 @@ function randDir(){
     return Math.random() > 0.5 ? '𝙲𝙰𝙻' : '𝙿𝚄𝚃';
 }
 
-// Build Signals
+// Build Signals with no back-to-back same pair
 function buildSignals(count){
     if(activeAssets.length===0) activeAssets = ['USD/JPY'];
     const out=[];
@@ -268,7 +266,6 @@ function buildSignals(count){
     for(let i=0;i<count;i++){
         cursor=new Date(cursor.getTime()+(2+Math.floor(Math.random()*4))*60000);
         const time = `${pad2(cursor.getHours())}:${pad2(cursor.getMinutes())}`;
-        
         let pair;
         if(activeAssets.length===1){
             pair = activeAssets[0];
@@ -280,7 +277,6 @@ function buildSignals(count){
             } while(pair === lastPair && attempts < 10);
         }
         lastPair = pair;
-
         let pairFmt = pair.toUpperCase().replace("/","").replace(" ","").replace("(OTC)","-OTC");
         out.push(`${mono("M1")} ${mono(pairFmt)} ${mono(time)} ${randDir()}`);
     }
@@ -299,18 +295,18 @@ function generateOutput(){
     if(!licenseOk){
         licenseModal.style.display='flex'; return;
     }
-    if(licenseExpiry && now>licenseExpiry.getTime()){
+    if(licenseExpiry && now>licenseExpiry){
         licenseContent.style.display='none';
         expiredContent.style.display='block';
         licenseModal.style.display='flex';
+        licenseStatus.textContent = "License Expired ❌";
         return;
     }
-    outDiv.textContent="⏳ Generating... (1s)";
+    outDiv.textContent="⏳ Generating... (10s)";
     setTimeout(()=>{
         const dateStr=dateInp.value?fmtDate(new Date(dateInp.value)):fmtDate(new Date());
         const count=Number(countInp.value||8);
         const signals=buildSignals(count);
-
         let lines=[];
         lines.push(`DATE: ${dateStr}\n`);
         lines.push(`⏰ UTC ${utcSel.value} ;  MTG :- 1 STEP\n`);
@@ -319,17 +315,19 @@ function generateOutput(){
         lines.push(signals.join("\n"));
         lines.push(`\nSoftware:DragonFly\nOwner: @TraderParvej`);
         outDiv.textContent=lines.join('\n');
-    },500);
+    },1000);
 }
 
-// Countdown Timer
+// License
 function updateCountdown(){
     if(licenseOk && licenseExpiry){
-        const now=new Date();
+        const now = new Date();
         let diff = licenseExpiry - now;
-        if(diff<=0){
-            licenseStatus.textContent="License Expired ❌";
-            licenseOk=false;
+        if(diff <= 0){
+            licenseOk = false;
+            licenseExpiry = null;
+            localStorage.removeItem('dragonfly_license_expiry');
+            licenseStatus.textContent = "License Expired ❌";
             return;
         }
         const days = Math.floor(diff/1000/60/60/24);
@@ -337,41 +335,24 @@ function updateCountdown(){
         const mins = Math.floor(diff/1000/60)%60;
         const secs = Math.floor(diff/1000)%60;
         licenseStatus.textContent = `License Active ✅ | Expires in ${days}d ${hrs}h ${mins}m ${secs}s`;
+    } else if(!licenseOk){
+        licenseStatus.textContent = "License Inactive ❌";
     }
 }
 setInterval(updateCountdown,1000);
 
-// License Submit
 submitLicense.addEventListener('click',()=>{
     if(licenseKey.value.trim()===LICENSE_KEY){
         licenseOk=true;
-        const expiry = new Date();
-        expiry.setDate(expiry.getDate()+30);
-        licenseExpiry=expiry;
-        localStorage.setItem('dragonfly_license_expiry',expiry.toISOString());
+        licenseExpiry=new Date().getTime()+30*24*60*60*1000;
+        licenseExpiry = new Date(licenseExpiry);
+        localStorage.setItem('dragonfly_license_expiry', licenseExpiry);
         licenseModal.style.display='none';
         licenseContent.style.display='block';
         expiredContent.style.display='none';
+        updateCountdown();
         generateOutput();
-        updateCountdown();
-    } else {
-        licenseError.style.display='block';
-    }
-});
-
-// Check localStorage on load
-window.addEventListener('load',()=>{
-    if(licenseExpiry && new Date() < licenseExpiry){
-        licenseOk=true;
-        updateCountdown();
-    } else if(licenseExpiry && new Date() >= licenseExpiry){
-        licenseOk=false;
-        licenseExpiry=null;
-        localStorage.removeItem('dragonfly_license_expiry');
-        licenseStatus.textContent="License Expired ❌";
-    } else {
-        licenseModal.style.display='flex';
-    }
+    }else licenseError.style.display='block';
 });
 
 // Buttons
