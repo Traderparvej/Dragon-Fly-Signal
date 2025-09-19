@@ -239,15 +239,29 @@ function mono(str){
     return str.split("").map(ch=>map[ch.toUpperCase()]||ch).join("");
 }
 
-// Build Signals
+// Build Signals with no back-to-back same pair
 function buildSignals(count){
     if(activeAssets.length===0) activeAssets = ['USD/JPY'];
     const out=[];
     let cursor=new Date();
+    let lastPair = null; // Last used pair
     for(let i=0;i<count;i++){
         cursor=new Date(cursor.getTime()+(2+Math.floor(Math.random()*4))*60000);
         const time = `${pad2(cursor.getHours())}:${pad2(cursor.getMinutes())}`;
-        const pair = activeAssets[Math.floor(Math.random()*activeAssets.length)];
+        
+        // Pick a pair different from last one
+        let pair;
+        if(activeAssets.length===1){
+            pair = activeAssets[0]; // Only one asset selected
+        } else {
+            let attempts = 0;
+            do {
+                pair = activeAssets[Math.floor(Math.random()*activeAssets.length)];
+                attempts++;
+            } while(pair === lastPair && attempts < 10);
+        }
+        lastPair = pair;
+
         let pairFmt = pair.toUpperCase().replace("/","").replace(" ","").replace("(OTC)","-OTC");
         out.push(`${mono("M1")} ${mono(pairFmt)} ${mono(time)} ${randDir()}`);
     }
