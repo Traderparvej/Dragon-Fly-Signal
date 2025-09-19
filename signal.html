@@ -80,6 +80,7 @@ a.owner-link:hover{text-decoration:underline;}
 .modal .error{color:#ff8a8a;font-size:13px;display:none;margin-top:6px;}
 .modal .expired a{color:#6dd6ff;text-decoration:none;}
 .modal .expired a:hover{text-decoration:underline;}
+.modal .license-info{margin-top:8px;font-size:13px;color:#6dd6ff;}
 </style>
 </head>
 <body>
@@ -145,6 +146,8 @@ a.owner-link:hover{text-decoration:underline;}
 <div class="output unicode" id="output">▶️ DATE: — ◀️
 
 (Press Generate to produce signals)</div>
+
+<p class="license-info" id="licenseStatus"></p>
 </section>
 
 <footer>© DragonFly — Advance signals. Use responsibly.</footer>
@@ -181,6 +184,7 @@ const generateBtn = document.getElementById('generate');
 const resetBtn = document.getElementById('reset');
 const copyBtn = document.getElementById('copyOut');
 const signalType = document.getElementById('signalType');
+const licenseStatus = document.getElementById('licenseStatus');
 
 const licenseModal = document.getElementById('licenseModal');
 const submitLicense = document.getElementById('submitLicense');
@@ -190,8 +194,8 @@ const licenseContent = document.getElementById('licenseContent');
 const expiredContent = document.querySelector('.modal .expired');
 
 let licenseOk = false;
-const LICENSE_KEY = 'dragonflyvip';
-let licenseExpiry = null;
+const LICENSE_KEY = '63JA-TSGP-XMHD';
+let licenseExpiry = localStorage.getItem('dragonfly_license_expiry') ? new Date(localStorage.getItem('dragonfly_license_expiry')) : null;
 
 // Pairs
 const OTCpairs = [
@@ -247,7 +251,7 @@ function mono(str){
     return str.split("").map(ch=>map[ch.toUpperCase()]||ch).join("");
 }
 
-// Generate Direction based on selection
+// Generate Direction
 function randDir(){
     const type = signalType.value;
     if(type === 'call') return '𝙲𝙰𝙻';
@@ -255,20 +259,19 @@ function randDir(){
     return Math.random() > 0.5 ? '𝙲𝙰𝙻' : '𝙿𝚄𝚃';
 }
 
-// Build Signals with no back-to-back same pair
+// Build Signals
 function buildSignals(count){
     if(activeAssets.length===0) activeAssets = ['USD/JPY'];
     const out=[];
     let cursor=new Date();
-    let lastPair = null; // Last used pair
+    let lastPair = null;
     for(let i=0;i<count;i++){
         cursor=new Date(cursor.getTime()+(2+Math.floor(Math.random()*4))*60000);
         const time = `${pad2(cursor.getHours())}:${pad2(cursor.getMinutes())}`;
         
-        // Pick a pair different from last one
         let pair;
         if(activeAssets.length===1){
-            pair = activeAssets[0]; // Only one asset selected
+            pair = activeAssets[0];
         } else {
             let attempts = 0;
             do {
@@ -296,13 +299,13 @@ function generateOutput(){
     if(!licenseOk){
         licenseModal.style.display='flex'; return;
     }
-    if(licenseExpiry && now>licenseExpiry){
+    if(licenseExpiry && now>licenseExpiry.getTime()){
         licenseContent.style.display='none';
         expiredContent.style.display='block';
         licenseModal.style.display='flex';
         return;
     }
-    outDiv.textContent="⏳ Generating... (10s)";
+    outDiv.textContent="⏳ Generating... (1s)";
     setTimeout(()=>{
         const dateStr=dateInp.value?fmtDate(new Date(dateInp.value)):fmtDate(new Date());
         const count=Number(countInp.value||8);
@@ -316,26 +319,65 @@ function generateOutput(){
         lines.push(signals.join("\n"));
         lines.push(`\nSoftware:DragonFly\nOwner: @TraderParvej`);
         outDiv.textContent=lines.join('\n');
-    },1000);
+    },500);
 }
 
-// License
+// Countdown Timer
+function updateCountdown(){
+    if(licenseOk && licenseExpiry){
+        const now=new Date();
+        let diff = licenseExpiry - now;
+        if(diff<=0){
+            licenseStatus.textContent="License Expired ❌";
+            licenseOk=false;
+            return;
+        }
+        const days = Math.floor(diff/1000/60/60/24);
+        const hrs = Math.floor(diff/1000/60/60)%24;
+        const mins = Math.floor(diff/1000/60)%60;
+        const secs = Math.floor(diff/1000)%60;
+        licenseStatus.textContent = `License Active ✅ | Expires in ${days}d ${hrs}h ${mins}m ${secs}s`;
+    }
+}
+setInterval(updateCountdown,1000);
+
+// License Submit
 submitLicense.addEventListener('click',()=>{
     if(licenseKey.value.trim()===LICENSE_KEY){
         licenseOk=true;
-        licenseExpiry=new Date().getTime()+30*24*60*60*1000;
+        const expiry = new Date();
+        expiry.setDate(expiry.getDate()+30);
+        licenseExpiry=expiry;
+        localStorage.setItem('dragonfly_license_expiry',expiry.toISOString());
         licenseModal.style.display='none';
         licenseContent.style.display='block';
         expiredContent.style.display='none';
         generateOutput();
-    }else licenseError.style.display='block';
+        updateCountdown();
+    } else {
+        licenseError.style.display='block';
+    }
+});
+
+// Check localStorage on load
+window.addEventListener('load',()=>{
+    if(licenseExpiry && new Date() < licenseExpiry){
+        licenseOk=true;
+        updateCountdown();
+    } else if(licenseExpiry && new Date() >= licenseExpiry){
+        licenseOk=false;
+        licenseExpiry=null;
+        localStorage.removeItem('dragonfly_license_expiry');
+        licenseStatus.textContent="License Expired ❌";
+    } else {
+        licenseModal.style.display='flex';
+    }
 });
 
 // Buttons
 generateBtn.addEventListener('click',generateOutput);
 resetBtn.addEventListener('click',()=>{outDiv.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
 copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(outDiv.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
-
 </script>
 </body>
 </html>
