@@ -171,7 +171,7 @@ a.owner-link:hover{text-decoration:underline;}
 </div>
 
 <script>
-// DOM Elements
+// ====== DOM Elements ======
 const utcSel = document.getElementById('utcSelect');
 const marketSel = document.getElementById('market');
 const tf = document.getElementById('timeframe');
@@ -196,7 +196,7 @@ let licenseOk = false;
 const LICENSE_KEY = '63JA-TSGP-XMHD';
 let licenseExpiry = localStorage.getItem('dragonfly_license_expiry') ? new Date(localStorage.getItem('dragonfly_license_expiry')) : null;
 
-// Pairs
+// ====== Pairs ======
 const OTCpairs = [
 "AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)",
 "AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)",
@@ -209,7 +209,7 @@ const OTCpairs = [
 ];
 const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
-// Fill Asset Box
+// ====== Fill Asset Box ======
 let activeAssets = [];
 function fillAssetBox(){
     assetBox.innerHTML = '';
@@ -235,7 +235,7 @@ marketSel.addEventListener('change', ()=>{
     fillAssetBox();
 });
 
-// Utilities
+// ====== Utilities ======
 function pad2(n){ return String(n).padStart(2,'0'); }
 function fmtDate(d){ return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}`; }
 function mono(str){
@@ -249,7 +249,7 @@ function mono(str){
     return str.split("").map(ch=>map[ch.toUpperCase()]||ch).join("");
 }
 
-// Generate Direction based on selection
+// ====== Generate Direction ======
 function randDir(){
     const type = signalType.value;
     if(type === 'call') return '𝙲𝙰𝙻';
@@ -257,7 +257,7 @@ function randDir(){
     return Math.random() > 0.5 ? '𝙲𝙰𝙻' : '𝙿𝚄𝚃';
 }
 
-// Build Signals with no back-to-back same pair
+// ====== Build Signals ======
 function buildSignals(count){
     if(activeAssets.length===0) activeAssets = ['USD/JPY'];
     const out=[];
@@ -283,7 +283,7 @@ function buildSignals(count){
     return out;
 }
 
-// Generate Output
+// ====== Generate Output ======
 function tfText(tfVal){
     if(tfVal.endsWith("m")) return tfVal.replace("m"," minutes");
     if(tfVal.endsWith("h")) return tfVal.replace("h"," hours");
@@ -296,13 +296,16 @@ function generateOutput(){
         licenseModal.style.display='flex'; return;
     }
     if(licenseExpiry && now>licenseExpiry){
+        licenseOk = false;
+        licenseExpiry = null;
+        localStorage.removeItem('dragonfly_license_expiry');
+        licenseStatus.textContent = "License Expired ❌";
+        licenseModal.style.display='flex';
         licenseContent.style.display='none';
         expiredContent.style.display='block';
-        licenseModal.style.display='flex';
-        licenseStatus.textContent = "License Expired ❌";
         return;
     }
-    outDiv.textContent="⏳ Generating... (10s)";
+    outDiv.textContent="⏳ Generating... (1s)";
     setTimeout(()=>{
         const dateStr=dateInp.value?fmtDate(new Date(dateInp.value)):fmtDate(new Date());
         const count=Number(countInp.value||8);
@@ -315,10 +318,10 @@ function generateOutput(){
         lines.push(signals.join("\n"));
         lines.push(`\nSoftware:DragonFly\nOwner: @TraderParvej`);
         outDiv.textContent=lines.join('\n');
-    },1000);
+    },500);
 }
 
-// License
+// ====== License ======
 function updateCountdown(){
     if(licenseOk && licenseExpiry){
         const now = new Date();
@@ -341,6 +344,19 @@ function updateCountdown(){
 }
 setInterval(updateCountdown,1000);
 
+// ====== Check localStorage on load ======
+if(localStorage.getItem('dragonfly_license_expiry')){
+    const exp = new Date(localStorage.getItem('dragonfly_license_expiry'));
+    if(exp.getTime() > new Date().getTime()){
+        licenseExpiry = exp;
+        licenseOk = true;
+        licenseModal.style.display='none';
+    } else {
+        localStorage.removeItem('dragonfly_license_expiry');
+    }
+}
+updateCountdown();
+
 submitLicense.addEventListener('click',()=>{
     if(licenseKey.value.trim()===LICENSE_KEY){
         licenseOk=true;
@@ -355,7 +371,7 @@ submitLicense.addEventListener('click',()=>{
     }else licenseError.style.display='block';
 });
 
-// Buttons
+// ====== Buttons ======
 generateBtn.addEventListener('click',generateOutput);
 resetBtn.addEventListener('click',()=>{outDiv.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
 copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(outDiv.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
