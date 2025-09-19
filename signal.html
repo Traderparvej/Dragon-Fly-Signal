@@ -126,6 +126,14 @@ a.owner-link:hover{text-decoration:underline;}
 <label>Select Asset(s)</label>
 <div class="asset-select-box" id="assetBox"></div>
 </div>
+<div>
+<label>Signal Type</label>
+<select id="signalType">
+<option value="call">Call</option>
+<option value="put">Put</option>
+<option value="both" selected>Both</option>
+</select>
+</div>
 </div>
 
 <div class="controls">
@@ -172,6 +180,7 @@ const outDiv = document.getElementById('output');
 const generateBtn = document.getElementById('generate');
 const resetBtn = document.getElementById('reset');
 const copyBtn = document.getElementById('copyOut');
+const signalType = document.getElementById('signalType');
 
 const licenseModal = document.getElementById('licenseModal');
 const submitLicense = document.getElementById('submitLicense');
@@ -227,7 +236,6 @@ marketSel.addEventListener('change', ()=>{
 // Utilities
 function pad2(n){ return String(n).padStart(2,'0'); }
 function fmtDate(d){ return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}`; }
-function randDir(){ return Math.random()>0.5?'𝙲𝙰𝙻':'𝙿𝚄𝚃'; }
 function mono(str){
     const map = {
       "A":"𝙰","B":"𝙱","C":"𝙲","D":"𝙳","E":"𝙴","F":"𝙵","G":"𝙶","H":"𝙷","I":"𝙸","J":"𝙹",
@@ -237,6 +245,14 @@ function mono(str){
       "-":"-","/":"/"," ":" "
     };
     return str.split("").map(ch=>map[ch.toUpperCase()]||ch).join("");
+}
+
+// Generate Direction based on selection
+function randDir(){
+    const type = signalType.value;
+    if(type === 'call') return '𝙲𝙰𝙻';
+    if(type === 'put') return '𝙿𝚄𝚃';
+    return Math.random() > 0.5 ? '𝙲𝙰𝙻' : '𝙿𝚄𝚃';
 }
 
 // Build Signals with no back-to-back same pair
