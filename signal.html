@@ -25,7 +25,7 @@ header h1{margin:0;font-size:20px;display:flex;align-items:center;gap:12px;}
 .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px;margin-bottom:12px;}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
-select,button{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.9);color:#000;font-weight:600;}
+select,button,input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.9);color:#000;font-weight:600;}
 .controls{display:flex;gap:10px;margin-top:12px;}
 .controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:600;}
 .output{
@@ -40,9 +40,9 @@ a.owner-link:hover{text-decoration:underline;}
 @media (max-width:880px){.grid{grid-template-columns:1fr;}}
 .small-note{font-size:12px;color:var(--muted);}
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999;}
-.modal{background:#0f1530;padding:20px;border-radius:12px;width:90%;max-width:450px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.5);}
+.modal{background:#0f1530;padding:20px;border-radius:12px;width:90%;max-width:400px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.5);}
 .modal h2{margin-top:0;margin-bottom:10px;}
-.modal input, .modal select{width:100%;padding:10px;border-radius:8px;border:1px solid #333;margin-bottom:12px;}
+.modal input{width:100%;padding:10px;border-radius:8px;border:1px solid #333;margin-bottom:12px;}
 .modal button{padding:10px 16px;border:none;border-radius:8px;background:var(--accent);font-weight:bold;cursor:pointer;}
 .modal .info{color:#6dd6ff;font-size:13px;margin-top:6px;}
 .status-text{margin-top:6px;font-size:13px;color:#6dd6ff;font-weight:600;}
@@ -100,7 +100,7 @@ a.owner-link:hover{text-decoration:underline;}
   <button id="copyOut">Copy Output</button>
 </div>
 
-<div class="status-text" id="premiumStatus"></div>
+<div class="status-text" id="licenseStatus"></div>
 
 <div class="output unicode" id="output">▶️ DATE: — ◀️
 
@@ -110,21 +110,13 @@ a.owner-link:hover{text-decoration:underline;}
 <footer>© DragonFly — Advance signals. Use responsibly.</footer>
 </div>
 
-<!-- Premium Modal -->
-<div class="modal-backdrop" id="premiumModal" style="display:none;">
+<!-- License Modal -->
+<div class="modal-backdrop" id="licenseModal" style="display:none;">
   <div class="modal">
-    <h2>💰 Premium Access</h2>
-    <label>Select Package:</label>
-    <select id="premiumPackage">
-      <option value="7days">7 Days - $5</option>
-      <option value="30days">30 Days - $10</option>
-      <option value="90days">90 Days - $20</option>
-    </select>
-    <label>Enter Payment Order ID:</label>
-    <input type="text" id="transactionId" placeholder="Enter Order ID">
-    <button id="submitPremium">Submit for Approval</button>
-    <button id="closePremium">Close</button>
-    <div class="info">After submission, admin will approve to activate your premium signals.</div>
+    <h2>🔑 Enter License Key</h2>
+    <input type="text" id="licenseInput" placeholder="Enter License Key">
+    <button id="submitLicense">Submit</button>
+    <div class="info">Provide the license key to activate 30 days access.</div>
   </div>
 </div>
 
@@ -136,18 +128,13 @@ const output = document.getElementById('output');
 const generateBtn = document.getElementById('generate');
 const resetBtn = document.getElementById('reset');
 const copyBtn = document.getElementById('copyOut');
+const licenseModal = document.getElementById('licenseModal');
+const licenseInput = document.getElementById('licenseInput');
+const submitLicense = document.getElementById('submitLicense');
+const licenseStatus = document.getElementById('licenseStatus');
 
-const premiumModal = document.getElementById('premiumModal');
-const closePremiumBtn = document.getElementById('closePremium');
-const submitPremiumBtn = document.getElementById('submitPremium');
-const premiumPackage = document.getElementById('premiumPackage');
-const transactionId = document.getElementById('transactionId');
-const premiumStatus = document.getElementById('premiumStatus');
-
-let freeCount = 0;
-let premiumActive = false;
-let approvedPackage = null;
-let premiumExpiry = null;
+let licenseActive = false;
+let licenseExpiry = null;
 
 // ===== Assets =====
 const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
@@ -196,45 +183,39 @@ ${analysis}
 // Generate button
 generateBtn.addEventListener('click',()=>{
     const now = new Date();
-    if(premiumActive && premiumExpiry && now>premiumExpiry){
-        premiumActive=false;
-        approvedPackage=null;
-        premiumStatus.textContent='Premium Expired';
-    }
-
-    if(!premiumActive && freeCount>=5){
-        premiumModal.style.display='flex';
+    if(licenseActive && licenseExpiry && now>licenseExpiry){
+        licenseActive=false;
+        licenseStatus.textContent='License Expired';
+        licenseModal.style.display='flex';
         return;
     }
-    if(!premiumActive) freeCount++;
-    output.textContent=generateSignalText();
+    if(!licenseActive){
+        licenseModal.style.display='flex';
+        return;
+    }
+    output.textContent = generateSignalText();
 });
 
 // Reset & Copy
 resetBtn.addEventListener('click',()=>{output.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
 copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(output.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
 
-// Premium Modal
-closePremiumBtn.addEventListener('click',()=>{premiumModal.style.display='none';});
-submitPremiumBtn.addEventListener('click',()=>{
-    if(transactionId.value.trim()===''){alert('Please enter Payment Order ID'); return;}
-    approvedPackage = premiumPackage.value;
-    premiumModal.style.display='none';
-    transactionId.value='';
-    premiumStatus.textContent=`Premium Submitted for Approval (${approvedPackage}). Wait for admin approval.`;
+// License submit
+submitLicense.addEventListener('click',()=>{
+    if(licenseInput.value.trim() === "dragon12580"){
+        licenseActive = true;
+        const now = new Date();
+        licenseExpiry = new Date(now.getTime() + 30*24*60*60*1000);
+        const activeDateStr = `${pad2(now.getDate())}-${pad2(now.getMonth()+1)}-${now.getFullYear()}`;
+        const expiryDateStr = `${pad2(licenseExpiry.getDate())}-${pad2(licenseExpiry.getMonth()+1)}-${licenseExpiry.getFullYear()}`;
+        licenseStatus.textContent = `License Key: dragon12580 | Active: ${activeDateStr} | Expiry: ${expiryDateStr}`;
+        licenseModal.style.display='none';
+        licenseInput.value='';
+        alert("License Activated! You can now generate signals.");
+    } else {
+        alert("Invalid License Key.");
+    }
 });
-
-// Admin Approval Simulation
-function approvePremium(){
-    if(!approvedPackage) return;
-    premiumActive=true;
-    const now = new Date();
-    const days = approvedPackage==='7days'?7:approvedPackage==='30days'?30:90;
-    premiumExpiry = new Date(now.getTime()+days*24*60*60*1000);
-    premiumStatus.textContent=`Premium Active – ${days} Days (${approvedPackage})`;
-}
-
-// For testing, call approvePremium() in console or admin panel after payment
 </script>
 </body>
 </html>
