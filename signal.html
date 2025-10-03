@@ -11,8 +11,8 @@
   --muted:#9fb0d6;
   --text:#ffffff;
   --accent:#6dd6ff;
+  --success:#4ade80;
   --warn:#ff6b6b;
-  --success:#4ade80; /* green for license active */
 }
 *{box-sizing:border-box;}
 body{
@@ -50,7 +50,6 @@ a.owner-link:hover{text-decoration:underline;}
 @media (max-width:880px){.grid{grid-template-columns:1fr;}}
 .small-note{font-size:12px;color:var(--muted);}
 .license-status-small{font-size:14px;font-weight:600;color:var(--success);}
-.license-expired{color:var(--warn);}
 .license-details{display:flex;gap:12px;margin-top:4px;font-size:12px;}
 .license-details div{background:rgba(255,255,255,0.05);padding:4px 8px;border-radius:6px;}
 .get-new-license{margin-top:6px;display:inline-block;background:var(--accent);padding:6px 12px;border-radius:8px;color:#000;text-decoration:none;font-weight:bold;}
@@ -202,7 +201,7 @@ function updateLicenseUI(){
   }
 }
 updateLicenseUI();
-setInterval(updateLicenseUI,60000); // update remaining every minute
+setInterval(updateLicenseUI,60000);
 
 // ====== Signals ======
 function generateSignalText(){
@@ -236,7 +235,6 @@ generateBtn.addEventListener('click',()=>{
   if(signalActive){alert('Previous signal still active. Wait for it to finish.'); return;}
   signalActive = true;
   output.textContent=generateSignalText();
-  // disable generate until 1 minute passed
   setTimeout(()=>{signalActive=false;}, 60*1000); 
 });
 
