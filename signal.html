@@ -12,8 +12,9 @@
 *{box-sizing:border-box;}
 body{margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#05102a,#081024);color:var(--text);}
 .wrap{max-width:1100px;margin:18px auto;padding:18px;}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 header h1{margin:0;font-size:20px;display:flex;align-items:center;gap:12px;}
+header a{font-size:13px;color:#6dd6ff;text-decoration:none;font-weight:600;margin-top:4px;}
 .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:14px;margin-bottom:12px;}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
@@ -65,6 +66,9 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 <div class="wrap">
 <header>
 <h1>🐉 DragonFly — Signal Generator</h1>
+<div>
+  <a href="https://t.me/Bdsecrettrading" target="_blank">Telegram Support — @Bdsecrettrading</a>
+</div>
 <div>
   <span class="license-status" id="licenseStatus">License Inactive ❌</span>
   <div class="small-note" id="deviceIdDiv"></div>
@@ -210,7 +214,15 @@ let lastGenerated=null;
 
 const OTCpairs=["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
 const REALpairs=['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
-function fillAssetSelect(){ assetSelect.innerHTML=''; const pairs = marketSel.value==='REAL'?REALpairs:OTCpairs; pairs.forEach(p=>{ const opt=document.createElement('option'); opt.value=p; opt.textContent=p; assetSelect.appendChild(opt); }); }
+
+function fillAssetSelect(){ 
+  assetSelect.innerHTML=''; 
+  const pairs = marketSel.value==='REAL'?REALpairs:OTCpairs; 
+  pairs.forEach(p=>{
+    const opt=document.createElement('option'); 
+    opt.value=p; opt.textContent=p; assetSelect.appendChild(opt); 
+  }); 
+}
 fillAssetSelect();
 marketSel.addEventListener('change', fillAssetSelect);
 
@@ -261,7 +273,6 @@ generateLicenseBtn.addEventListener('click', ()=>{
   const dev=adminDeviceIdInput.value.trim();
   const days=parseInt(adminDurationInput.value,10);
   if(!dev || !days){ alert("Enter Device ID & duration"); return; }
-
   const localRaw=localStorage.getItem(LICENSE_STORAGE_PREFIX+dev);
   if(localRaw){
     const obj=JSON.parse(localRaw);
@@ -270,16 +281,12 @@ generateLicenseBtn.addEventListener('click', ()=>{
       return;
     }
   }
-
   const res = makeLicenseKeyForDevice(dev, days);
   lastGenerated = { device: dev, key: res.key, expiry: res.expiry };
   saveLicenseToLocal(res.key, res.expiry, dev);
   generatedBox.innerHTML = `<strong>Device:</strong> ${dev}<br><strong>Key:</strong> ${res.key}<br><strong>Expiry:</strong> ${new Date(res.expiry).toLocaleString()}`;
 });
-copyLastLicenseBtn.addEventListener('click', ()=>{
-  if(lastGenerated){ navigator.clipboard.writeText(lastGenerated.key); alert("Copied to clipboard"); }
-  else { alert("No license generated yet."); }
-});
+copyLastLicenseBtn.addEventListener('click', ()=>{ if(lastGenerated){ navigator.clipboard.writeText(lastGenerated.key); alert("Copied to clipboard"); } else { alert("No license generated yet."); } });
 
 generateBtn.addEventListener('click', ()=>{
   const local=localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
@@ -287,22 +294,39 @@ generateBtn.addEventListener('click', ()=>{
   const obj=JSON.parse(local);
   if(Date.now()>obj.expiry){ alert("License expired."); return; }
 
-  // Show loading modal first
   loadingModal.style.display='flex';
   setTimeout(()=>{ loadingModal.style.display='none'; showSignal(); },2000+Math.random()*2000);
 });
 resetBtn.addEventListener('click', ()=>{ marketSel.value='OTC'; timeframe.value='1m'; bollinger.value='upper'; fillAssetSelect(); });
 
 function showSignal(){
-  const pair=assetSelect.value; const tf=timeframe.value; const band=bollinger.value;
+  const pair=assetSelect.value; 
+  const tf=timeframe.value; 
+  const band=bollinger.value;
   const direction = (band==='upper')?"SELL":"BUY";
+
+  // 2 মিনিট gap
   const now=new Date();
+  now.setMinutes(now.getMinutes()+2);
   const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
+
   const candleDir = direction==="BUY"?"up":"down";
   candleBody.style.background=(candleDir==='up'?'#4caf50':'#f44336');
   candleBody.style.animation=(candleDir==='up'?'growUp 1s forwards':'growDown 1s forwards');
 
-  signalText.textContent = `✦━━━━━━━━━━━━━━━━✦\n🐉 DRAGONFLY — AI MARKET ANALYSIS\n✦━━━━━━━━━━━━━━━━✦\n\n📊 Pair        : ${pair}\n⏰ Entry Time  : ${timeStr}\n⏳ Duration    : ${tf}\n🎯 Direction   : ${direction}\n🧾 Analysis    : Based on ${band} Bollinger Band\n\n✦━━━━━━━━━━━━━━━━✦\n✅ Trusted Dragonfly AI Generated Signal`;
+  signalText.textContent = 
+`✦━━━━━━━━━━━━━━━━✦
+🐉 DRAGONFLY — AI MARKET ANALYSIS
+✦━━━━━━━━━━━━━━━━✦
+
+📊 Pair        : ${pair}
+⏰ Entry Time  : ${timeStr}
+⏳ Duration    : ${tf}
+🎯 Direction   : ${direction}
+🧾 Strategy    : Bollinger ${band.toUpperCase()} Zone
+
+✦━━━━━━━━━━━━━━━━✦
+✅ Trusted Dragonfly AI Generated Signal`;
   signalModal.style.display='flex';
 }
 function closeSignal(){ signalModal.style.display='none'; }
