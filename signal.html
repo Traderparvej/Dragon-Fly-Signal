@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>DragonFly — Signal Generator (Admin License)</title>
+<title>DragonFly — Signal Generator (Admin Modal Login)</title>
 <style>
 :root{
   --bg:#081024; --panel:#0f1530; --muted:#9fb0d6; --text:#ffffff;
@@ -37,7 +37,14 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
 .signal-text{text-align:left;white-space:pre-wrap;font-family:'Courier New',monospace;font-size:13px;line-height:1.45;color:#eee;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);border-radius:8px;padding:10px;margin-bottom:8px;}
 .signal-modal button{width:100%;padding:9px;border:none;border-radius:8px;background:var(--accent);font-weight:700;cursor:pointer;}
 .signal-modal button:hover{opacity:0.95;}
-/* admin section small */
+/* admin modal login */
+.admin-login-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center;z-index:1300;}
+.admin-login{background:#0b1220;padding:16px;border-radius:10px;width:90%;max-width:380px;color:#fff;box-shadow:0 12px 40px rgba(0,0,0,0.6);}
+.admin-login h3{margin:0 0 10px 0;}
+.admin-login input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);margin-bottom:8px;}
+.admin-login .row{display:flex;gap:8px;}
+.admin-login .row button{flex:1;padding:10px;border-radius:8px;border:none;cursor:pointer;}
+.admin-note{font-size:13px;color:#9fb0d6;margin-top:6px;}
 #adminPanel{display:none;margin-top:10px;}
 .admin-row{display:flex;gap:8px;}
 .admin-row input{flex:1;}
@@ -149,6 +156,19 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
   </div>
 </div>
 
+<!-- Admin Login Modal -->
+<div class="admin-login-backdrop" id="adminLoginModal">
+  <div class="admin-login">
+    <h3>Admin Login</h3>
+    <input type="password" id="adminPasswordInput" placeholder="Enter admin password">
+    <div class="row" style="margin-top:6px;">
+      <button id="adminLoginSubmit" style="background:#4caf50;color:#fff;">Login</button>
+      <button id="adminLoginCancel" style="background:#f44336;color:#fff;">Cancel</button>
+    </div>
+    <div class="admin-note">Hint: use the password provided by owner.</div>
+  </div>
+</div>
+
 <script>
 // ---------- Config ----------
 const ADMIN_PASSWORD = "@Traderparvej@"; // per your request
@@ -186,6 +206,14 @@ const signalModal = document.getElementById('signalModal');
 const candleBody = document.getElementById('candleBody');
 const signalText = document.getElementById('signalText');
 
+// Admin modal elements
+const adminLoginModal = document.getElementById('adminLoginModal');
+const adminPasswordInput = document.getElementById('adminPasswordInput');
+const adminLoginSubmit = document.getElementById('adminLoginSubmit');
+const adminLoginCancel = document.getElementById('adminLoginCancel');
+
+let lastGenerated = null;
+
 // ---------- Assets ----------
 const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
 const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
@@ -197,12 +225,11 @@ marketSel.addEventListener('change', fillAssetSelect);
 function pad2(n){ return String(n).padStart(2,'0'); }
 
 // Generate license key (base64 encode of deviceId|expiryMillis|random)
-function makeLicenseKeyForDevice(deviceId, days){
+function makeLicenseKeyForDevice(deviceIdParam, days){
   const now = Date.now();
   const expiry = now + (days * 24 * 60 * 60 * 1000);
   const rand = Math.floor(Math.random()*900000+100000);
-  const payload = `${deviceId}|${expiry}|${rand}`;
-  // base64 encode (safe for ASCII payload)
+  const payload = `${deviceIdParam}|${expiry}|${rand}`;
   const key = btoa(payload);
   return { key, expiry };
 }
@@ -215,7 +242,7 @@ function validateLicenseKeyForThisDevice(key, deviceIdToCheck){
     if(parts.length < 2) return { ok:false, reason:'invalid_format' };
     const [dId, expiryStr] = parts;
     const expiry = parseInt(expiryStr,10);
-    if(dId !== String(deviceIdToCheck)) return { ok:false, reason:'device_mismatch' };
+    if(String(dId) !== String(deviceIdToCheck)) return { ok:false, reason:'device_mismatch' };
     if(Date.now() > expiry) return { ok:false, reason:'expired', expiry };
     return { ok:true, expiry };
   }catch(e){
@@ -242,11 +269,9 @@ function loadLicenseLocal(){
     const obj = JSON.parse(raw);
     if(!obj.key || !obj.expiry) return false;
     if(Date.now() > obj.expiry){
-      // expired
       localStorage.removeItem(LICENSE_STORAGE_PREFIX + deviceId);
       return false;
     }
-    // ok
     licenseStatus.textContent = "License Active ✅";
     licenseStatus.classList.add('active');
     return true;
@@ -281,19 +306,34 @@ clearLicenseBtn.addEventListener('click', ()=>{
   }
 });
 
-// ---------- Admin login (reveals admin panel) ----------
-adminLoginBtn.addEventListener('click', ()=>{
-  const pass = prompt("Enter admin password:");
+// ---------- Admin modal login (safer than prompt) ----------
+adminLoginBtn.addEventListener('click', ()=> {
+  adminPasswordInput.value = '';
+  adminLoginModal.style.display = 'flex';
+  adminPasswordInput.focus();
+});
+
+adminLoginCancel.addEventListener('click', ()=> {
+  adminLoginModal.style.display = 'none';
+});
+
+adminLoginSubmit.addEventListener('click', ()=> {
+  const pass = adminPasswordInput.value || '';
   if(pass === ADMIN_PASSWORD){
+    adminLoginModal.style.display = 'none';
     adminPanel.style.display = 'block';
     alert("Admin access granted.");
   } else {
     alert("Wrong admin password.");
+    adminPasswordInput.value = '';
+    adminPasswordInput.focus();
   }
 });
 
+// allow Enter key to submit
+adminPasswordInput.addEventListener('keyup', (e)=>{ if(e.key === 'Enter') adminLoginSubmit.click(); });
+
 // ---------- Admin generate license ----------
-let lastGenerated = null;
 generateLicenseBtn.addEventListener('click', ()=>{
   const dev = String(adminDeviceIdInput.value || '').trim();
   const days = parseInt(adminDurationInput.value || '0', 10);
@@ -301,9 +341,7 @@ generateLicenseBtn.addEventListener('click', ()=>{
   if(!days || days <= 0){ alert("Enter valid duration (days)"); return; }
   const res = makeLicenseKeyForDevice(dev, days);
   lastGenerated = { device:dev, key:res.key, expiry:res.expiry };
-  // Show key for admin to copy
   generatedBox.innerHTML = `<strong>Device:</strong> ${dev}<br><strong>Key:</strong> <span style="word-break:break-word;">${res.key}</span><br><strong>Expiry:</strong> ${new Date(res.expiry).toLocaleString()}`;
-  // If admin is generating for the same device they're on, optionally auto-insert into storage:
   if(String(dev) === String(deviceId)){
     if(confirm("You generated a license for THIS device. Do you want to activate it locally now?")){
       saveLicenseToLocal(res.key, res.expiry);
@@ -322,10 +360,9 @@ copyLastLicenseBtn.addEventListener('click', ()=>{
 
 // ---------- Signals (same behavior) ----------
 function generateSignalText(){
-  // require license active
-  const savedRaw = localStorage.getItem(LICENSE_STORAGE_PREFIX + deviceId);
-  if(!savedRaw){ alert("License inactive. Activate license first."); return null; }
-  const saved = JSON.parse(savedRaw);
+  const raw = localStorage.getItem(LICENSE_STORAGE_PREFIX + deviceId);
+  if(!raw){ alert("License inactive. Activate license first."); return null; }
+  const saved = JSON.parse(raw);
   if(!saved || !saved.key || !saved.expiry || Date.now() > saved.expiry){
     alert("License inactive/expired. Activate license first.");
     clearLicenseLocal();
@@ -402,7 +439,6 @@ function checkLocalExpiry(){
   try{
     const obj = JSON.parse(raw);
     if(Date.now() > obj.expiry){
-      // expired
       localStorage.removeItem(LICENSE_STORAGE_PREFIX + deviceId);
       licenseStatus.textContent = "License Inactive ❌";
       licenseStatus.classList.remove('active');
