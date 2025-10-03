@@ -92,13 +92,6 @@ a.owner-link:hover{text-decoration:underline;}
       <option value="lower">Lower</option>
     </select>
   </div>
-  <div>
-    <label>Signal Mode</label>
-    <select id="modeSelect">
-      <option value="free" selected>Free Analysis</option>
-      <option value="premium">Premium Analysis</option>
-    </select>
-  </div>
 </div>
 
 <div class="controls">
@@ -127,7 +120,7 @@ a.owner-link:hover{text-decoration:underline;}
       <option value="30days">30 Days - $10</option>
       <option value="90days">90 Days - $20</option>
     </select>
-    <label>Enter Payment Transaction/Order ID:</label>
+    <label>Enter Payment Order ID:</label>
     <input type="text" id="transactionId" placeholder="Enter Order ID">
     <button id="submitPremium">Submit for Approval</button>
     <button id="closePremium">Close</button>
@@ -139,13 +132,10 @@ a.owner-link:hover{text-decoration:underline;}
 const marketSel = document.getElementById('market');
 const assetSelect = document.getElementById('assetSelect');
 const bollinger = document.getElementById('bollinger');
-const modeSelect = document.getElementById('modeSelect');
 const output = document.getElementById('output');
 const generateBtn = document.getElementById('generate');
 const resetBtn = document.getElementById('reset');
 const copyBtn = document.getElementById('copyOut');
-const utcSel = document.getElementById('utcSelect');
-const tf = document.getElementById('timeframe');
 
 const premiumModal = document.getElementById('premiumModal');
 const closePremiumBtn = document.getElementById('closePremium');
@@ -162,7 +152,6 @@ let approvedPackage = null;
 const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
 const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
-// Fill assets
 function fillAssetSelect(){
     assetSelect.innerHTML = '';
     const pairs = marketSel.value==='REAL'?REALpairs:OTCpairs;
@@ -205,17 +194,12 @@ ${analysis}
 
 // Generate button
 generateBtn.addEventListener('click',()=>{
-    if(modeSelect.value==='free'){
-        if(freeCount>=5){alert('Free Analysis limit reached (5/day). Upgrade to Premium.'); return;}
-        freeCount++;
-        output.textContent=generateSignalText();
-    } else {
-        if(!premiumActive){
-            premiumModal.style.display='flex';
-            return;
-        }
-        output.textContent=generateSignalText();
+    if(!premiumActive && freeCount>=5){
+        premiumModal.style.display='flex';
+        return;
     }
+    if(!premiumActive) freeCount++;
+    output.textContent=generateSignalText();
 });
 
 // Reset & Copy
@@ -226,7 +210,6 @@ copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(output.textC
 closePremiumBtn.addEventListener('click',()=>{premiumModal.style.display='none';});
 submitPremiumBtn.addEventListener('click',()=>{
     if(transactionId.value.trim()===''){alert('Please enter Payment Order ID'); return;}
-    // simulate admin approval process
     premiumActive = false;
     approvedPackage = premiumPackage.value;
     premiumStatus.textContent = `Premium Submitted for Approval (${approvedPackage}). Wait for admin approval.`;
@@ -234,7 +217,7 @@ submitPremiumBtn.addEventListener('click',()=>{
     transactionId.value='';
 });
 
-// Simulate admin approval (you will manually trigger this in real scenario)
+// Simulate admin approval
 function approvePremium(){
     if(!approvedPackage) return;
     premiumActive = true;
