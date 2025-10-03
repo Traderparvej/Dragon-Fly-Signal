@@ -115,57 +115,54 @@ const licenseStatus=document.getElementById('licenseStatus');
 const licenseInput=document.getElementById('licenseInput');
 const activateBtn=document.getElementById('activateBtn');
 const deviceIdDiv=document.getElementById('deviceIdDiv');
-
 const signalModal=document.getElementById('signalModal');
 const candleBody=document.getElementById('candleBody');
 const signalText=document.getElementById('signalText');
 
+let licenseOk=false;
+
 // ===== Device ID =====
 let deviceId=localStorage.getItem("dragon_device_id");
 if(!deviceId){
-  deviceId=926918825; // fixed device ID
+  deviceId=Math.floor(Math.random()*900000000+100000000);
   localStorage.setItem("dragon_device_id",deviceId);
 }
 deviceIdDiv.textContent="Device ID: "+deviceId;
 
-// ===== License =====
-const VALID_LICENSE="926918825"; // fixed license key
-const LICENSE_DURATION=30; // 30 days
+// ===== License Database (Device-specific) =====
+const licenses={
+  "926918825":"926918825-LIC", // Example: Device ID => License Key
+  "123456789":"123456789-LIC"  // Add more device-license pairs
+};
 
-let licenseOk=false;
+// ===== License Expiry Storage =====
+const licenseStorageKey="dragon_license_"+deviceId;
 
-// check if license already activated
-let licenseData=JSON.parse(localStorage.getItem("dragon_license")) || {};
-if(licenseData.key===VALID_LICENSE && licenseData.device==deviceId){
-  const now=new Date().getTime();
-  if(now<licenseData.expiry){
-    licenseOk=true;
-    licenseStatus.textContent="License Active ✅";
-    licenseStatus.classList.add("active");
-  } else {
-    localStorage.removeItem("dragon_license");
-  }
-}
-
-// ===== Activate License Button =====
+// ===== Activate License =====
 activateBtn.addEventListener('click',()=>{
-  const entered=licenseInput.value.trim();
-  if(entered===VALID_LICENSE){
-    const now=new Date().getTime();
-    const expiry=now + LICENSE_DURATION*24*60*60*1000; // 30 days in ms
-    licenseData={key:VALID_LICENSE, device:deviceId, expiry:expiry};
-    localStorage.setItem("dragon_license", JSON.stringify(licenseData));
+  const enteredKey=licenseInput.value.trim();
+  if(licenses[deviceId] && licenses[deviceId]===enteredKey){
+    const expiry=new Date(new Date().getTime()+30*24*60*60*1000); // 30 days
+    localStorage.setItem(licenseStorageKey,expiry);
     licenseOk=true;
     licenseStatus.textContent="License Active ✅";
     licenseStatus.classList.add("active");
     alert("✅ License Activated Successfully! Valid for 30 days.");
-  } else {
+  }else{
     licenseOk=false;
     licenseStatus.textContent="License Inactive ❌";
     licenseStatus.classList.remove("active");
-    alert("❌ Invalid License Key!");
+    alert("❌ Invalid License Key for this device!");
   }
 });
+
+// ===== Check License on Load =====
+const savedExpiry=localStorage.getItem(licenseStorageKey);
+if(savedExpiry && new Date(savedExpiry).getTime() > new Date().getTime()){
+  licenseOk=true;
+  licenseStatus.textContent="License Active ✅";
+  licenseStatus.classList.add("active");
+}
 
 // ===== Assets =====
 const OTCpairs=["AUD/USD (OTC)","EUR/USD (OTC)","USD/BDT (OTC)"];
@@ -189,38 +186,4 @@ function generateSignalText(){
   const dir=bb==='upper'?'Buy':'Sell';
   const now=new Date();
   const gap=2; const entry=new Date(now.getTime()+gap*60000);
-  let tf=timeframe.value; let duration="1 Minute";
-  if(tf==="5m") duration="5 Minutes"; else if(tf==="15m") duration="15 Minutes"; else if(tf==="1h") duration="1 Hour";
-  const timeStr=`${pad2(entry.getHours())}:${pad2(entry.getMinutes())} (${gap}m later)`;
-  return {text:`📊 ${pair}\n⏰ ${timeStr}\n⌛ Duration: ${duration}\n🎯 Direction: ${dir}`,type:dir};
-}
-
-// ===== Popup =====
-function showSignalPopup(text,type){
-  signalModal.style.display='flex';
-  signalText.textContent=text;
-  candleBody.style.height="0";
-  if(type==="Buy"){candleBody.style.background="limegreen";candleBody.style.animation="growUp 1.2s forwards";}
-  else {candleBody.style.background="crimson";candleBody.style.animation="growDown 1.2s forwards";}
-}
-function closeSignal(){signalModal.style.display='none';}
-
-// ===== Generate =====
-document.getElementById('generate').addEventListener('click',()=>{
-  // check license validity
-  const now=new Date().getTime();
-  if(!licenseOk || now>licenseData.expiry){
-    licenseOk=false;
-    licenseStatus.textContent="License Inactive ❌";
-    licenseStatus.classList.remove("active");
-    localStorage.removeItem("dragon_license");
-    alert("⚠️ License expired or inactive. Please activate again.");
-    return;
-  }
-  const sig=generateSignalText();
-  showSignalPopup(sig.text,sig.type);
-});
-document.getElementById('reset').addEventListener('click',()=>{closeSignal();});
-</script>
-</body>
-</html>
+  let tf=timeframe.value; let duration
