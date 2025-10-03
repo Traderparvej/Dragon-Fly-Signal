@@ -68,13 +68,16 @@ a.owner-link:hover{text-decoration:underline;}
   background:#0f1530;padding:20px;border-radius:12px;width:90%;max-width:400px;color:#fff;
   box-shadow:0 8px 24px rgba(0,0,0,0.5);
   display:flex;flex-direction:column;gap:10px;
+  align-items:center;
 }
-.modal h2{margin-top:0;margin-bottom:10px;font-size:18px;}
+.modal h2{margin-top:0;margin-bottom:10px;font-size:18px;text-align:center;}
 .modal button{padding:10px 16px;border:none;border-radius:8px;background:var(--accent);font-weight:bold;cursor:pointer;}
 .modal input{border:1px solid #333;}
-.modal .info{color:#6dd6ff;font-size:13px;margin-top:6px;}
-.modal .error{color:#f44336;font-size:13px;margin-top:6px;}
-.modal .success{color:#4caf50;font-size:13px;margin-top:6px;}
+.modal .info{color:#6dd6ff;font-size:13px;margin-top:6px;text-align:center;}
+.modal .error{color:#f44336;font-size:13px;margin-top:6px;text-align:center;}
+.modal .success{color:#4caf50;font-size:13px;margin-top:6px;text-align:center;}
+.modal a.admin-link{color:#6dd6ff;text-decoration:none;font-weight:bold;margin-top:5px;}
+.modal a.admin-link:hover{text-decoration:underline;}
 </style>
 </head>
 <body>
@@ -151,6 +154,8 @@ a.owner-link:hover{text-decoration:underline;}
     <div class="info">Enter your unique license key to activate 30 days of signals on this device.</div>
     <div class="error" id="licenseError" style="display:none;">Invalid Key. Try again.</div>
     <div class="success" id="licenseSuccess" style="display:none;">License Activated Successfully ✅</div>
+    <div class="info">If you do not have a key, contact admin:</div>
+    <a class="admin-link" href="https://t.me/TraderParvej" target="_blank">@TraderParvej</a>
   </div>
 </div>
 
@@ -195,7 +200,7 @@ function pad2(n){ return String(n).padStart(2,'0'); }
 function fmtDate(d){ return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}`; }
 
 // ====== License System ======
-const LICENSE_KEY = "dragon12580";
+const LICENSE_KEY = "63JA-TSGP-XMHF";
 let deviceId = localStorage.getItem("dragon_device_id");
 if(!deviceId){
   deviceId = Math.floor(Math.random()*900000000+100000000);
