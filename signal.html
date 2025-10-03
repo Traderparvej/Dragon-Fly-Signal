@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>DragonFly — Signal Generator (Admin Modal Login)</title>
+<title>DragonFly — Signal Generator (Admin Hidden)</title>
 <style>
 :root{
   --bg:#081024; --panel:#0f1530; --muted:#9fb0d6; --text:#ffffff;
@@ -22,10 +22,11 @@ select,input,textarea{background:rgba(255,255,255,0.95);color:#000;font-weight:5
 .controls{display:flex;gap:10px;margin-top:12px;}
 .controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:700;transition:0.18s;}
 .controls button:hover{opacity:0.95;}
-.small-note{font-size:12px;color:var(--muted);}
+.small-note{font-size:12px;color:#9fb0d6;}
 .license-status{margin-top:6px;font-weight:600;font-size:14px;}
 .license-status.active{color:var(--green);}
-footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
+footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;position:relative;}
+.footer-admin{position:absolute;right:0;bottom:0;font-size:12px;color:#6dd6ff;cursor:pointer;}
 /* popup */
 .signal-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1200;}
 .signal-modal{background:#0f1530;padding:14px;border-radius:12px;width:92%;max-width:360px;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,0.6);text-align:center;font-size:13px;}
@@ -37,7 +38,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
 .signal-text{text-align:left;white-space:pre-wrap;font-family:'Courier New',monospace;font-size:13px;line-height:1.45;color:#eee;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);border-radius:8px;padding:10px;margin-bottom:8px;}
 .signal-modal button{width:100%;padding:9px;border:none;border-radius:8px;background:var(--accent);font-weight:700;cursor:pointer;}
 .signal-modal button:hover{opacity:0.95;}
-/* admin modal login */
+/* admin modal login hidden */
 .admin-login-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center;z-index:1300;}
 .admin-login{background:#0b1220;padding:16px;border-radius:10px;width:90%;max-width:380px;color:#fff;box-shadow:0 12px 40px rgba(0,0,0,0.6);}
 .admin-login h3{margin:0 0 10px 0;}
@@ -67,16 +68,9 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
     <label>Enter License Key (Member)</label>
     <input type="text" id="licenseInput" placeholder="Paste license key here">
     <button id="activateBtn" style="margin-top:10px;">Activate License</button>
-    <div class="small-note" style="margin-top:8px;color:#9fb0d6;">
-      If you are admin — click "Admin Login" to open admin tools.
-    </div>
-    <div style="display:flex;gap:8px;margin-top:8px;">
-      <button id="adminLoginBtn" style="flex:1;background:#ffffff;color:#000;font-weight:700;">Admin Login</button>
-      <button id="clearLicenseBtn" style="flex:1;background:#f44336;color:#fff;">Remove License</button>
-    </div>
   </section>
 
-  <!-- Generator panel (core features) -->
+  <!-- Generator panel -->
   <section class="card">
     <div class="grid">
       <div>
@@ -115,32 +109,31 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
     </div>
   </section>
 
-  <!-- Admin Panel (hidden unless admin logged) -->
+  <!-- Admin panel hidden -->
   <section class="card" id="adminPanel">
     <h3 style="margin-top:0;margin-bottom:8px;">🔧 Admin — License Generator</h3>
-
     <div style="margin-bottom:8px;">
       <label>Device ID to give license</label>
       <input type="text" id="adminDeviceId" placeholder="Enter device ID (e.g. 123456789)">
     </div>
-
     <div style="margin-bottom:8px;">
       <label>License Duration (days)</label>
       <input type="number" id="adminDuration" placeholder="e.g. 15" min="1">
     </div>
-
     <div style="display:flex;gap:8px;">
       <button id="generateLicenseBtn" style="flex:1;background:#4caf50;color:#fff;">Generate License</button>
       <button id="copyLastLicenseBtn" style="flex:1;background:#2196f3;color:#fff;">Copy Last</button>
     </div>
-
     <div class="code-box" id="generatedBox" style="margin-top:10px;">Generated license will appear here.</div>
     <div style="margin-top:8px;color:var(--muted);font-size:13px;">
-      Note: Give the generated key to the member. The key will work only on the Device ID you specified.
+      Note: Give the generated key to the member. It works only on the Device ID specified.
     </div>
   </section>
 
-  <footer>© DragonFly — Advance signals</footer>
+  <footer>
+    © DragonFly — Advance signals
+    <span class="footer-admin" id="adminLoginBtn" title="Admin Only">Admin Login</span>
+  </footer>
 </div>
 
 <!-- Signal Popup -->
@@ -171,8 +164,9 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
 
 <script>
 // ---------- Config ----------
-const ADMIN_PASSWORD = "@Traderparvej@"; // per your request
-const LICENSE_STORAGE_PREFIX = "dragon_license_"; // will be suffixed by deviceId
+const ADMIN_PASSWORD = "@Traderparvej@";
+const LICENSE_STORAGE_PREFIX = "dragon_license_";
+
 // ---------- Device ID ----------
 let deviceId = localStorage.getItem("dragon_device_id");
 if(!deviceId){
@@ -181,34 +175,28 @@ if(!deviceId){
 }
 document.getElementById('deviceIdDiv').textContent = "Device ID: " + deviceId;
 
-// ---------- UI elements ----------
+// ---------- UI ----------
 const licenseInput = document.getElementById('licenseInput');
 const activateBtn = document.getElementById('activateBtn');
-const adminLoginBtn = document.getElementById('adminLoginBtn');
-const clearLicenseBtn = document.getElementById('clearLicenseBtn');
 const licenseStatus = document.getElementById('licenseStatus');
-
 const adminPanel = document.getElementById('adminPanel');
 const adminDeviceIdInput = document.getElementById('adminDeviceId');
 const adminDurationInput = document.getElementById('adminDuration');
 const generateLicenseBtn = document.getElementById('generateLicenseBtn');
 const generatedBox = document.getElementById('generatedBox');
 const copyLastLicenseBtn = document.getElementById('copyLastLicenseBtn');
-
 const marketSel = document.getElementById('market');
 const assetSelect = document.getElementById('assetSelect');
 const bollinger = document.getElementById('bollinger');
 const timeframe = document.getElementById('timeframe');
 const generateBtn = document.getElementById('generate');
 const resetBtn = document.getElementById('reset');
-
 const signalModal = document.getElementById('signalModal');
 const candleBody = document.getElementById('candleBody');
 const signalText = document.getElementById('signalText');
-
-// Admin modal elements
 const adminLoginModal = document.getElementById('adminLoginModal');
 const adminPasswordInput = document.getElementById('adminPasswordInput');
+const adminLoginBtn = document.getElementById('adminLoginBtn');
 const adminLoginSubmit = document.getElementById('adminLoginSubmit');
 const adminLoginCancel = document.getElementById('adminLoginCancel');
 
@@ -221,174 +209,93 @@ function fillAssetSelect(){ assetSelect.innerHTML=''; const pairs = marketSel.va
 fillAssetSelect();
 marketSel.addEventListener('change', fillAssetSelect);
 
-// ---------- Utility ----------
+// ---------- License Functions ----------
 function pad2(n){ return String(n).padStart(2,'0'); }
-
-// Generate license key (base64 encode of deviceId|expiryMillis|random)
 function makeLicenseKeyForDevice(deviceIdParam, days){
   const now = Date.now();
-  const expiry = now + (days * 24 * 60 * 60 * 1000);
+  const expiry = now + (days*24*60*60*1000);
   const rand = Math.floor(Math.random()*900000+100000);
   const payload = `${deviceIdParam}|${expiry}|${rand}`;
-  const key = btoa(payload);
-  return { key, expiry };
+  return { key:btoa(payload), expiry };
 }
-
-// Validate a license key against this device
 function validateLicenseKeyForThisDevice(key, deviceIdToCheck){
   try{
     const decoded = atob(key);
     const parts = decoded.split("|");
-    if(parts.length < 2) return { ok:false, reason:'invalid_format' };
+    if(parts.length<2) return { ok:false };
     const [dId, expiryStr] = parts;
     const expiry = parseInt(expiryStr,10);
-    if(String(dId) !== String(deviceIdToCheck)) return { ok:false, reason:'device_mismatch' };
-    if(Date.now() > expiry) return { ok:false, reason:'expired', expiry };
+    if(String(dId)!==String(deviceIdToCheck)) return { ok:false, reason:'device_mismatch' };
+    if(Date.now()>expiry) return { ok:false, reason:'expired', expiry };
     return { ok:true, expiry };
-  }catch(e){
-    return { ok:false, reason:'invalid_base64' };
-  }
+  }catch(e){ return { ok:false, reason:'invalid' }; }
 }
-
-// save license to localStorage for this device
-function saveLicenseToLocal(key, expiry){
-  const obj = { key, expiry };
-  localStorage.setItem(LICENSE_STORAGE_PREFIX + deviceId, JSON.stringify(obj));
-}
-function clearLicenseLocal(){
-  localStorage.removeItem(LICENSE_STORAGE_PREFIX + deviceId);
-  licenseStatus.textContent = "License Inactive ❌";
-  licenseStatus.classList.remove('active');
-}
-
-// load license on start
+function saveLicenseToLocal(key, expiry){ localStorage.setItem(LICENSE_STORAGE_PREFIX+deviceId, JSON.stringify({key,expiry})); }
 function loadLicenseLocal(){
-  const raw = localStorage.getItem(LICENSE_STORAGE_PREFIX + deviceId);
+  const raw = localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
   if(!raw) return false;
   try{
     const obj = JSON.parse(raw);
-    if(!obj.key || !obj.expiry) return false;
-    if(Date.now() > obj.expiry){
-      localStorage.removeItem(LICENSE_STORAGE_PREFIX + deviceId);
-      return false;
-    }
-    licenseStatus.textContent = "License Active ✅";
+    if(!obj.key||!obj.expiry) return false;
+    if(Date.now()>obj.expiry){ localStorage.removeItem(LICENSE_STORAGE_PREFIX+deviceId); return false; }
+    licenseStatus.textContent="License Active ✅";
     licenseStatus.classList.add('active');
     return true;
   }catch(e){ return false; }
 }
 loadLicenseLocal();
 
-// ---------- Member license activation ----------
-activateBtn.addEventListener('click', ()=>{
+// Member activation
+activateBtn.addEventListener('click',()=>{
   const entered = licenseInput.value.trim();
-  if(!entered){ alert("Please paste a license key."); return; }
+  if(!entered){ alert("Paste a license key."); return; }
   const res = validateLicenseKeyForThisDevice(entered, deviceId);
-  if(res.ok){
-    saveLicenseToLocal(entered, res.expiry);
-    licenseStatus.textContent = "License Active ✅";
-    licenseStatus.classList.add('active');
-    alert("✅ License activated! Expires: " + new Date(res.expiry).toLocaleString());
-  } else {
-    let msg = "Invalid license.";
-    if(res.reason === 'device_mismatch') msg = "This license is not for this device.";
-    else if(res.reason === 'expired') msg = "License expired on " + new Date(res.expiry).toLocaleString();
-    else if(res.reason === 'invalid_base64' || res.reason === 'invalid_format') msg = "License key format invalid.";
-    alert("❌ " + msg);
-  }
+  if(res.ok){ saveLicenseToLocal(entered,res.expiry); licenseStatus.textContent="License Active ✅"; licenseStatus.classList.add('active'); alert("✅ License activated! Expires: "+new Date(res.expiry).toLocaleString()); }
+  else{ let msg="Invalid license."; if(res.reason==='device_mismatch') msg="This license is not for this device."; else if(res.reason==='expired') msg="License expired on "+new Date(res.expiry).toLocaleString(); alert("❌ "+msg); }
 });
 
-// remove license
-clearLicenseBtn.addEventListener('click', ()=>{
-  if(confirm("Remove license from this device?")){
-    clearLicenseLocal();
-    alert("License removed.");
-  }
+// ---------- Admin login ----------
+adminLoginBtn.addEventListener('click',()=>{ adminPasswordInput.value=''; adminLoginModal.style.display='flex'; adminPasswordInput.focus(); });
+adminLoginCancel.addEventListener('click',()=>{ adminLoginModal.style.display='none'; });
+adminLoginSubmit.addEventListener('click',()=>{
+  const pass = adminPasswordInput.value||'';
+  if(pass===ADMIN_PASSWORD){ adminLoginModal.style.display='none'; adminPanel.style.display='block'; alert("Admin access granted."); }
+  else{ alert("Wrong admin password."); adminPasswordInput.value=''; adminPasswordInput.focus(); }
 });
-
-// ---------- Admin modal login (safer than prompt) ----------
-adminLoginBtn.addEventListener('click', ()=> {
-  adminPasswordInput.value = '';
-  adminLoginModal.style.display = 'flex';
-  adminPasswordInput.focus();
-});
-
-adminLoginCancel.addEventListener('click', ()=> {
-  adminLoginModal.style.display = 'none';
-});
-
-adminLoginSubmit.addEventListener('click', ()=> {
-  const pass = adminPasswordInput.value || '';
-  if(pass === ADMIN_PASSWORD){
-    adminLoginModal.style.display = 'none';
-    adminPanel.style.display = 'block';
-    alert("Admin access granted.");
-  } else {
-    alert("Wrong admin password.");
-    adminPasswordInput.value = '';
-    adminPasswordInput.focus();
-  }
-});
-
-// allow Enter key to submit
-adminPasswordInput.addEventListener('keyup', (e)=>{ if(e.key === 'Enter') adminLoginSubmit.click(); });
+adminPasswordInput.addEventListener('keyup',(e)=>{ if(e.key==='Enter') adminLoginSubmit.click(); });
 
 // ---------- Admin generate license ----------
-generateLicenseBtn.addEventListener('click', ()=>{
-  const dev = String(adminDeviceIdInput.value || '').trim();
-  const days = parseInt(adminDurationInput.value || '0', 10);
+generateLicenseBtn.addEventListener('click',()=>{
+  const dev = String(adminDeviceIdInput.value||'').trim();
+  const days = parseInt(adminDurationInput.value||'0',10);
   if(!dev){ alert("Enter Device ID"); return; }
-  if(!days || days <= 0){ alert("Enter valid duration (days)"); return; }
-  const res = makeLicenseKeyForDevice(dev, days);
-  lastGenerated = { device:dev, key:res.key, expiry:res.expiry };
-  generatedBox.innerHTML = `<strong>Device:</strong> ${dev}<br><strong>Key:</strong> <span style="word-break:break-word;">${res.key}</span><br><strong>Expiry:</strong> ${new Date(res.expiry).toLocaleString()}`;
-  if(String(dev) === String(deviceId)){
-    if(confirm("You generated a license for THIS device. Do you want to activate it locally now?")){
-      saveLicenseToLocal(res.key, res.expiry);
-      licenseStatus.textContent = "License Active ✅";
-      licenseStatus.classList.add('active');
-      alert("Activated locally for this device.");
-    }
-  }
+  if(!days||days<=0){ alert("Enter valid duration"); return; }
+  const res = makeLicenseKeyForDevice(dev,days);
+  lastGenerated={device:dev,key:res.key,expiry:res.expiry};
+  generatedBox.innerHTML=`<strong>Device:</strong> ${dev}<br><strong>Key:</strong> <span style="word-break:break-word;">${res.key}</span><br><strong>Expiry:</strong> ${new Date(res.expiry).toLocaleString()}`;
+  if(String(dev)===String(deviceId)){ if(confirm("License generated for THIS device. Activate now?")){ saveLicenseToLocal(res.key,res.expiry); licenseStatus.textContent="License Active ✅"; licenseStatus.classList.add('active'); alert("Activated locally."); } }
 });
+copyLastLicenseBtn.addEventListener('click',()=>{ if(!lastGenerated){ alert("No license generated yet."); return; } navigator.clipboard.writeText(lastGenerated.key).then(()=>alert("Copied."),()=>alert("Copy failed.")); });
 
-// copy last generated license to clipboard
-copyLastLicenseBtn.addEventListener('click', ()=>{
-  if(!lastGenerated){ alert("No license generated yet."); return; }
-  navigator.clipboard.writeText(lastGenerated.key).then(()=>alert("Copied to clipboard."), ()=>alert("Copy failed."));
-});
-
-// ---------- Signals (same behavior) ----------
+// ---------- Signals ----------
 function generateSignalText(){
-  const raw = localStorage.getItem(LICENSE_STORAGE_PREFIX + deviceId);
-  if(!raw){ alert("License inactive. Activate license first."); return null; }
+  const raw = localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
+  if(!raw){ alert("License inactive."); return null; }
   const saved = JSON.parse(raw);
-  if(!saved || !saved.key || !saved.expiry || Date.now() > saved.expiry){
-    alert("License inactive/expired. Activate license first.");
-    clearLicenseLocal();
-    return null;
-  }
+  if(!saved.key||!saved.expiry||Date.now()>saved.expiry){ alert("License inactive/expired."); return null; }
 
   const pair = assetSelect.value;
   const bb = bollinger.value;
-  const direction = bb === 'upper' ? 'Buy' : 'Sell';
-  const analysis = bb === 'upper'
-    ? 'Price is touching the upper BB; short-term bullish momentum observed.'
-    : 'Price is touching the lower BB; short-term bearish momentum observed.';
-  const now = new Date();
-  const gap = 2; // fixed 2 minutes
-  const entry = new Date(now.getTime() + gap*60*1000);
+  const direction = bb==='upper'?'Buy':'Sell';
+  const analysis = bb==='upper'?'Price touching upper BB; bullish momentum.':'Price touching lower BB; bearish momentum.';
+  const now = new Date(); const gap=2; const entry=new Date(now.getTime()+gap*60*1000);
 
-  let tf = timeframe.value;
-  let duration = "1 Minute";
-  if(tf === "5m") duration = "5 Minutes";
-  else if(tf === "15m") duration = "15 Minutes";
-  else if(tf === "1h") duration = "1 Hour";
-
-  const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())} (${gap}m later)`;
+  let tf=timeframe.value; let duration="1 Minute";
+  if(tf==="5m") duration="5 Minutes"; else if(tf==="15m") duration="15 Minutes"; else if(tf==="1h") duration="1 Hour";
+  const timeStr=`${pad2(entry.getHours())}:${pad2(entry.getMinutes())} (${gap}m later)`;
 
   return {
-    text: `✦━━━━━━━━━━━━━━━━✦
+    text:`✦━━━━━━━━━━━━━━━━✦
 🐉 DRAGONFLY — AI MARKET ANALYSIS
 ✦━━━━━━━━━━━━━━━━✦
 
@@ -401,61 +308,13 @@ function generateSignalText(){
 🧾 Market Analysis
 ${analysis}
 
-⚡️ Note: Execute the trade exactly after ${gap} minutes.
+⚡️ Note: Execute trade exactly after ${gap} minutes.
 ✦━━━━━━━━━━━━━━━━✦`,
     type: direction
   };
 }
 
-function showSignalPopup(text, type){
-  signalText.textContent = text;
-  candleBody.style.height = "0";
-  if(type === "Buy"){
-    candleBody.style.background = "linear-gradient(180deg,#7CFC00,#00a000)";
-    candleBody.style.animation = "growUp 1.2s forwards";
-  } else {
-    candleBody.style.background = "linear-gradient(180deg,#ff6b6b,#c40000)";
-    candleBody.style.animation = "growDown 1.2s forwards";
-  }
-  signalModal.style.display = "flex";
-}
-function closeSignal(){ signalModal.style.display = "none"; }
+function showSignalPopup(text,type){ signalText.textContent=text; candleBody.style.height="0"; candleBody.style.background=type==='Buy'?"linear-gradient(180deg,#7CFC00,#00a000)":"linear-gradient(180deg,#ff6b6b,#c40000)"; candleBody.style.animation=type==='Buy'?"growUp 1.2s forwards":"growDown 1.2s forwards"; signalModal.style.display='flex'; }
+function closeSignal(){ signalModal.style.display='none'; }
 
-// Generate button
-generateBtn.addEventListener('click', ()=>{
-  const sig = generateSignalText();
-  if(sig) showSignalPopup(sig.text, sig.type);
-});
-resetBtn.addEventListener('click', ()=>{ closeSignal(); });
-
-// Auto-check expiry on load periodically and update status
-function checkLocalExpiry(){
-  const raw = localStorage.getItem(LICENSE_STORAGE_PREFIX + deviceId);
-  if(!raw){
-    licenseStatus.textContent = "License Inactive ❌";
-    licenseStatus.classList.remove('active');
-    return;
-  }
-  try{
-    const obj = JSON.parse(raw);
-    if(Date.now() > obj.expiry){
-      localStorage.removeItem(LICENSE_STORAGE_PREFIX + deviceId);
-      licenseStatus.textContent = "License Inactive ❌";
-      licenseStatus.classList.remove('active');
-      alert("⚠️ License expired on this device.");
-    } else {
-      licenseStatus.textContent = "License Active ✅";
-      licenseStatus.classList.add('active');
-    }
-  }catch(e){
-    localStorage.removeItem(LICENSE_STORAGE_PREFIX + deviceId);
-    licenseStatus.textContent = "License Inactive ❌";
-    licenseStatus.classList.remove('active');
-  }
-}
-setInterval(checkLocalExpiry, 30*1000); // check every 30s
-checkLocalExpiry();
-
-</script>
-</body>
-</html>
+generate
