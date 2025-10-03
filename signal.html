@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DragonFly — Signal Generator</title>
 <style>
 :root{
@@ -12,7 +12,6 @@
   --text:#ffffff;
   --accent:#6dd6ff;
 }
-*{box-sizing:border-box;}
 body{
   margin:0;
   font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
@@ -20,66 +19,29 @@ body{
   color:var(--text);
 }
 .wrap{max-width:1100px;margin:18px auto;padding:18px;}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
-header h1{margin:0;font-size:20px;display:flex;align-items:center;gap:12px;}
-.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px;margin-bottom:12px;}
+header h1{font-size:22px;margin:0;color:var(--accent);}
+.card{background:var(--panel);border-radius:12px;padding:16px;margin-top:12px;}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
-select,button{
-  width:100%;
-  padding:10px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.06);
-  background:rgba(255,255,255,0.9);
-  color:#000;
-  font-weight:600;
-}
+select,input,button{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:#fff;color:#000;font-weight:600;}
 .controls{display:flex;gap:10px;margin-top:12px;}
 .controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:600;}
-.output{
-  margin-top:12px;
-  padding:16px;
-  border-radius:12px;
-  background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.02));
-  border:1px solid rgba(255,255,255,0.03);
-  min-height:180px;
-  white-space:pre-wrap;
-  font-family:'Courier New', Courier, monospace;
-  color:#fff;
-  font-size:14px;
-  line-height:1.45;
-}
-.unicode{font-family: "Arial", "DejaVu Sans", "monospace";}
+.output{margin-top:12px;padding:16px;border-radius:12px;background:rgba(255,255,255,0.05);min-height:200px;white-space:pre-wrap;font-family:'Courier New', monospace;color:#fff;font-size:14px;}
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
 a.owner-link{color:var(--accent);text-decoration:none;font-weight:bold;}
 a.owner-link:hover{text-decoration:underline;}
 @media (max-width:880px){.grid{grid-template-columns:1fr;}}
-.small-note{font-size:12px;color:var(--muted);}
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999;}
-.modal{background:#0f1530;padding:20px;border-radius:12px;width:90%;max-width:400px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.5);}
-.modal h2{margin-top:0;margin-bottom:10px;}
-.modal input, .modal select{width:100%;padding:10px;border-radius:8px;border:1px solid #333;margin-bottom:12px;}
-.modal button{padding:10px 16px;border:none;border-radius:8px;background:var(--accent);font-weight:bold;cursor:pointer;}
-.modal .info{color:#6dd6ff;font-size:13px;margin-top:6px;}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
 <h1>🐉 DragonFly — Signal Generator</h1>
-<div class="small">Software: DragonFly &nbsp; Owner: <a class="owner-link" href="https://t.me/TraderParvej" target="_blank">@TraderParvej</a></div>
+<div style="margin-top:4px;font-size:13px;color:var(--muted)">Software: DragonFly &nbsp; Owner: <a class="owner-link" href="https://t.me/TraderParvej" target="_blank">@TraderParvej</a></div>
 </header>
 
 <section class="card">
 <div class="grid">
-  <div>
-    <label>UTC Offset (eg. +6:00)</label>
-    <select id="utcSelect">
-      <option value="+0:00">UTC +0:00</option>
-      <option value="+6:00" selected>UTC +6:00 (BD)</option>
-    </select>
-  </div>
-
   <div>
     <label>Market</label>
     <select id="market">
@@ -87,35 +49,22 @@ a.owner-link:hover{text-decoration:underline;}
       <option value="REAL">REAL</option>
     </select>
   </div>
-
-  <div>
-    <label>Timeframe</label>
-    <select id="timeframe">
-      <option value="1m" selected>1 minute</option>
-      <option value="5m">5 minutes</option>
-      <option value="15m">15 minutes</option>
-      <option value="1h">1 hour</option>
-    </select>
-  </div>
-
   <div>
     <label>Select Asset</label>
     <select id="assetSelect"></select>
-    <div class="small-note">You can select only one asset at a time.</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:4px;">Only one pair can be selected at a time</div>
   </div>
-
   <div>
     <label>Bollinger Band</label>
     <select id="bollinger">
-      <option value="upper" selected>Upper</option>
+      <option value="upper">Upper</option>
       <option value="lower">Lower</option>
     </select>
   </div>
-
   <div>
     <label>Signal Mode</label>
     <select id="modeSelect">
-      <option value="free" selected>Free Analysis</option>
+      <option value="free">Free Analysis</option>
       <option value="premium">Premium Analysis</option>
     </select>
   </div>
@@ -127,26 +76,32 @@ a.owner-link:hover{text-decoration:underline;}
   <button id="copyOut">Copy Output</button>
 </div>
 
-<div class="output unicode" id="output">▶️ DATE: — ◀️
-
-(Press Generate to produce signals)</div>
+<div class="output" id="output">▶️ Press Generate to produce signals</div>
 </section>
 
-<footer>© DragonFly — Advance signals. Use responsibly.</footer>
-</div>
-
-<!-- Premium Info Modal -->
-<div class="modal-backdrop" id="premiumModal" style="display:none;">
-  <div class="modal">
-    <h2>💰 Premium Access</h2>
-    <p>To activate premium signals, contact admin:</p>
-    <a href="https://t.me/TraderParvej" target="_blank" class="owner-link">Click here to message @TraderParvej</a>
-    <div class="info">After contacting admin, premium access will be granted professionally.</div>
-    <button id="closePremium">Close</button>
+<section class="card" id="premiumSection" style="display:none;margin-top:12px;">
+  <h3 style="margin-top:0;color:var(--accent)">Premium Packages</h3>
+  <div style="display:flex;gap:12px;">
+    <button class="pkgBtn" data-days="7" data-amount="5">$5 / 1 Week</button>
+    <button class="pkgBtn" data-days="30" data-amount="10">$10 / 1 Month</button>
+    <button class="pkgBtn" data-days="90" data-amount="20">$20 / 3 Months</button>
   </div>
+  <div style="margin-top:8px;">
+    <label>Order ID</label>
+    <input type="text" id="orderID" placeholder="Enter your Order ID">
+    <button id="verifyOrder">Verify Package</button>
+    <div id="verifyMsg" style="color:#ff8a8a;margin-top:4px;"></div>
+  </div>
+</section>
+
+<footer>© DragonFly — Advanced Signals. Use responsibly.</footer>
 </div>
 
 <script>
+// Pairs
+const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)"];
+const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
+
 const marketSel = document.getElementById('market');
 const assetSelect = document.getElementById('assetSelect');
 const bollinger = document.getElementById('bollinger');
@@ -155,84 +110,122 @@ const output = document.getElementById('output');
 const generateBtn = document.getElementById('generate');
 const resetBtn = document.getElementById('reset');
 const copyBtn = document.getElementById('copyOut');
-const utcSel = document.getElementById('utcSelect');
-const tf = document.getElementById('timeframe');
+const premiumSection = document.getElementById('premiumSection');
+const pkgBtns = document.querySelectorAll('.pkgBtn');
+const orderInput = document.getElementById('orderID');
+const verifyBtn = document.getElementById('verifyOrder');
+const verifyMsg = document.getElementById('verifyMsg');
 
-const premiumModal = document.getElementById('premiumModal');
-const closePremiumBtn = document.getElementById('closePremium');
-
-let freeCount = 0;
 let premiumActive = false;
+let premiumExpiry = null;
 
-// ====== Assets ======
-const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)",
-"AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
-const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
-
-// Fill assets
-function fillAssetSelect(){
-    assetSelect.innerHTML = '';
-    const pairs = marketSel.value==='REAL'?REALpairs:OTCpairs;
-    pairs.forEach(p=>{
-        const opt = document.createElement('option');
-        opt.value = p; opt.textContent = p;
-        assetSelect.appendChild(opt);
-    });
+// Fill asset list
+function fillAssets(){
+  assetSelect.innerHTML = '';
+  const list = marketSel.value === 'REAL' ? REALpairs : OTCpairs;
+  list.forEach(p=>{
+    const opt = document.createElement('option');
+    opt.value = p; opt.textContent = p;
+    assetSelect.appendChild(opt);
+  });
 }
-fillAssetSelect();
-marketSel.addEventListener('change', fillAssetSelect);
+fillAssets();
+marketSel.addEventListener('change', fillAssets);
 
-// Utilities
-function pad2(n){ return String(n).padStart(2,'0'); }
-
-function generateSignalText(){
-    const pair = assetSelect.value;
-    const bb = bollinger.value;
-    const direction = bb==='upper'?'Buy':'Sell';
-    const analysis = bb==='upper'?'Price is touching upper BB; short-term bullish momentum observed.':'Price is touching lower BB; short-term bearish momentum observed.';
-    const now = new Date();
-    // Random 1–3 min later
-    const randMin = Math.floor(Math.random()*3)+1;
-    const entry = new Date(now.getTime() + randMin*60*1000);
-    const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())}`;
-    return `✦━━━━━━━━━━━━━━━━✦ 
-🐉 DRAGONFLY — AI MARKET ANALYSIS
-✦━━━━━━━━━━━━━━━━✦
-
-📊 Pair          : ${pair}
-⏰ Entry Time    : ${timeStr} (1–3 Minutes Later)
-⌛ Signal Duration: 1 Minute
-📈 Strategy      : Bollinger Band – ${bb.charAt(0).toUpperCase()+bb.slice(1)} Zone
-🎯 Direction     : ${direction}
-
-🧾 Market Analysis
-${analysis}
-
-⚡ Note: Execute the trade exactly after 1 minute for optimal entry.
-✦━━━━━━━━━━━━━━━━✦`;
-}
-
-// Generate button
-generateBtn.addEventListener('click',()=>{
-    if(modeSelect.value==='free'){
-        if(freeCount>=5){alert('Free Analysis limit reached (5/day). Upgrade to Premium.'); return;}
-        freeCount++;
-        output.textContent = generateSignalText();
-    } else {
-        if(!premiumActive){
-            premiumModal.style.display='flex';
-            return;
-        }
-        output.textContent = generateSignalText();
-    }
+// Show premium section if premium selected
+modeSelect.addEventListener('change', ()=>{
+  if(modeSelect.value==='premium'){
+    premiumSection.style.display='block';
+  } else {
+    premiumSection.style.display='none';
+  }
 });
 
-// Reset & Copy
-resetBtn.addEventListener('click',()=>{output.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
-copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(output.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
+// Utilities
+function pad2(n){return String(n).padStart(2,'0');}
+function randomMinuteOffset(){ return 1 + Math.floor(Math.random()*3); } // 1-3 min
+function getRandomSignal(){ return Math.random()>0.5?'BUY':'SELL';}
+function analysisText(bb){ return bb==='upper'?'Price at upper BB, short-term bullish momentum observed.':'Price at lower BB, short-term bearish momentum observed.';}
 
-// Premium modal
-closePremiumBtn.addEventListener('click',()=>{premiumModal.style.display='none';});
+// Generate single signal
+function buildSignal(){
+  const asset = assetSelect.value;
+  const bb = bollinger.value;
+  const direction = getRandomSignal();
+  const offset = randomMinuteOffset();
+  const now = new Date();
+  const entry = new Date(now.getTime() + offset*60*1000);
+  const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())}`;
+  const analysis = analysisText(bb);
+  return {asset, timeStr, bb, direction, analysis};
+}
+
+// Generate signals
+function generateSignals(){
+  if(modeSelect.value==='free'){
+    output.textContent='⏳ Generating free signals...';
+    const signals=[];
+    for(let i=0;i<5;i++){
+      const sig=buildSignal();
+      signals.push(sig);
+    }
+    displaySignals(signals);
+  } else {
+    if(!premiumActive){
+      output.textContent='❌ Premium package not active. Please buy package and verify Order ID.';
+      return;
+    }
+    const sig=buildSignal();
+    displaySignals([sig]);
+  }
+}
+
+// Display signals
+function displaySignals(signals){
+  let lines=[];
+  signals.forEach(sig=>{
+    lines.push('✦━━━━━━━━━━━━━━━━✦');
+    lines.push('🐉 DRAGONFLY — AI MARKET ANALYSIS');
+    lines.push('✦━━━━━━━━━━━━━━━━✦\n');
+    lines.push(`📊 Pair          : ${sig.asset}`);
+    lines.push(`⏰ Entry Time    : ${sig.timeStr} (1 Minute Later)`);
+    lines.push(`⌛ Signal Duration: 1 Minute`);
+    lines.push(`📈 Strategy      : Bollinger Band – ${sig.bb.charAt(0).toUpperCase()+sig.bb.slice(1)} Zone`);
+    lines.push(`🎯 Direction     : ${sig.direction}`);
+    lines.push('\n🧾 Market Analysis');
+    lines.push(`${sig.analysis}`);
+    lines.push('\n⚡ Note: Execute the trade exactly after 1 minute for optimal entry.');
+    lines.push('✦━━━━━━━━━━━━━━━━✦\n');
+  });
+  output.textContent = lines.join('\n');
+}
+
+// Premium package selection
+pkgBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const days = btn.dataset.days;
+    const amount = btn.dataset.amount;
+    alert(`Send $${amount} payment to Binance ID: 499388438\nAfter payment, enter the Order ID below and click Verify.`);
+    premiumExpiry = new Date(new Date().getTime() + days*24*60*60*1000);
+  });
+});
+
+// Verify Order ID
+verifyBtn.addEventListener('click', ()=>{
+  const id = orderInput.value.trim();
+  if(!id){
+    verifyMsg.textContent = '❌ Enter a valid Order ID';
+    return;
+  }
+  verifyMsg.textContent = '✅ Order ID submitted. Wait 24 hours then contact admin: ';
+  verifyMsg.innerHTML += `<a href="https://t.me/TraderParvej" target="_blank">@TraderParvej</a>`;
+  premiumActive = true;
+});
+
+// Buttons
+generateBtn.addEventListener('click', generateSignals);
+resetBtn.addEventListener('click', ()=>{output.textContent='▶️ Press Generate to produce signals';});
+copyBtn.addEventListener('click', ()=>{navigator.clipboard.writeText(output.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
 </script>
 </body>
 </html>
