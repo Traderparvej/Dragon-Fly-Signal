@@ -1,219 +1,297 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dragonfly AI Signal</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DragonFly — Signal Generator</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #0a0f1a;
-    color: #fff;
-    text-align: center;
-    padding: 20px;
-  }
-  select, button {
-    padding: 8px 12px;
-    margin: 5px;
-    border: none;
-    border-radius: 5px;
-  }
-  button {
-    background: #00c853;
-    color: #fff;
-    cursor: pointer;
-  }
-  button:disabled { background: #444; cursor: not-allowed; }
-  pre { background:#111; padding:10px; border-radius:5px; }
-
-  /* Modal */
-  .modal-backdrop {
-    position:fixed;
-    top:0;left:0;right:0;bottom:0;
-    background:rgba(0,0,0,0.8);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:1000;
-  }
-  .modal {
-    background:#1c2230;
-    padding:20px;
-    border-radius:10px;
-    width:90%;
-    max-width:600px;
-  }
-
-  /* Candle */
-  .candle {
-    display:inline-flex;
-    flex-direction:column;
-    align-items:center;
-    height:100px;
-    justify-content:space-between;
-  }
-  .wick {
-    width:4px;
-    height:20px;
-    background:#ccc;
-  }
-  .body {
-    width:30px;
-    height:0;
-    background:green;
-  }
-  @keyframes growUp {
-    from { height:0; }
-    to { height:50px; }
-  }
-  @keyframes growDown {
-    from { height:0; }
-    to { height:50px; }
-  }
+:root{
+  --bg:#081024;
+  --panel:#0f1530;
+  --muted:#9fb0d6;
+  --text:#ffffff;
+  --accent:#6dd6ff;
+  --green:#4caf50;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  background:linear-gradient(180deg,#05102a,#081024);
+  color:var(--text);
+}
+.wrap{max-width:1100px;margin:18px auto;padding:18px;}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+header h1{margin:0;font-size:20px;display:flex;align-items:center;gap:12px;}
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px;margin-bottom:12px;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
+select,button{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.06);
+  background:rgba(255,255,255,0.9);
+  color:#000;
+  font-weight:600;
+}
+.controls{display:flex;gap:10px;margin-top:12px;}
+.controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:600;transition:0.3s;}
+.controls button:hover{opacity:0.9;}
+.output{display:none;}
+footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
+a.owner-link{color:var(--accent);text-decoration:none;font-weight:bold;}
+a.owner-link:hover{text-decoration:underline;}
+@media (max-width:880px){.grid{grid-template-columns:1fr;}}
+.small-note{font-size:12px;color:var(--muted);}
+.license-status{margin-top:6px;font-weight:600;font-size:14px;}
+.license-status.active{color:var(--green);}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:999;}
+.modal{background:#0f1530;padding:20px;border-radius:12px;width:90%;max-width:420px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.5);text-align:center;}
+.modal pre{white-space:pre-wrap;color:#fff;font-size:14px;line-height:1.6;text-align:left;}
+.modal button{padding:10px 16px;margin-top:15px;width:100%;border:none;border-radius:8px;background:var(--accent);font-weight:bold;cursor:pointer;transition:0.3s;}
+.modal button:hover{opacity:0.9;}
+/* Candle Animation */
+.candle{display:inline-flex;flex-direction:column;align-items:center;height:100px;justify-content:space-between;margin-bottom:12px;}
+.wick{width:4px;height:20px;background:#ccc;}
+.body{width:30px;height:0;}
+@keyframes growUp{from{height:0;}to{height:50px;}}
+@keyframes growDown{from{height:0;}to{height:50px;}}
+@keyframes blink {0%,50%,100% {opacity:1;} 25%,75% {opacity:0.2;}}
+.blinking {animation: blink 1s infinite;}
 </style>
 </head>
 <body>
+<div class="wrap">
+<header>
+<h1>🐉 DragonFly — Signal Generator</h1>
+<div class="small">Software: DragonFly &nbsp; Owner: <a class="owner-link" href="https://t.me/TraderParvej" target="_blank">@TraderParvej</a></div>
+<div class="license-status" id="licenseStatus">License Inactive ❌ | Contact: <a class="owner-link" href="https://t.me/TraderParvej" target="_blank">@TraderParvej</a></div>
+</header>
 
-<h1>🐉 Dragonfly AI Signal</h1>
+<section class="card">
+<div class="grid">
+  <div>
+    <label>UTC Offset (eg. +6:00)</label>
+    <select id="utcSelect">
+      <option value="+0:00">UTC +0:00</option>
+      <option value="+6:00" selected>UTC +6:00 (BD)</option>
+    </select>
+  </div>
 
-<div>
-  <label>Pair:</label>
-  <select id="assetSelect">
-    <option>EUR/USD</option>
-    <option>GBP/USD</option>
-    <option>USD/JPY</option>
-    <option>BTC/USDT</option>
-  </select>
+  <div>
+    <label>Market</label>
+    <select id="market">
+      <option value="OTC">OTC</option>
+      <option value="REAL">REAL</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Timeframe</label>
+    <select id="timeframe">
+      <option value="1m" selected>1 minute</option>
+      <option value="5m">5 minutes</option>
+      <option value="15m">15 minutes</option>
+      <option value="1h">1 hour</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Select Asset</label>
+    <select id="assetSelect"></select>
+    <div class="small-note">You can select only one asset at a time.</div>
+  </div>
+
+  <div>
+    <label>Bollinger Band</label>
+    <select id="bollinger">
+      <option value="upper" selected>Upper</option>
+      <option value="lower">Lower</option>
+    </select>
+  </div>
 </div>
 
-<div>
-  <label>Bollinger:</label>
-  <select id="bollinger">
-    <option value="upper">Upper Band</option>
-    <option value="lower">Lower Band</option>
-  </select>
+<div class="controls">
+  <button id="generate">Generate Signal</button>
+  <button id="reset">Reset</button>
+  <button id="copyOut">Copy Output</button>
 </div>
 
-<div>
-  <label>Timeframe:</label>
-  <select id="timeframe">
-    <option value="1m">M1</option>
-    <option value="5m">M5</option>
-    <option value="15m">M15</option>
-    <option value="1h">H1</option>
-  </select>
+<div class="output unicode" id="output">▶️ DATE: — ◀️
+
+(Press Generate to produce signals)</div>
+</section>
+
+<footer>© DragonFly — Advance signals. Use responsibly.</footer>
 </div>
 
-<div>
-  <button id="generateBtn">Generate Signal</button>
-  <button id="resetBtn">Reset</button>
+<!-- License Modal -->
+<div class="modal-backdrop" id="licenseModal" style="display:none;">
+  <div class="modal">
+    <h2>🔑 License Activation</h2>
+    <p>Enter License Key to activate for this device:</p>
+    <input type="text" id="licenseInput" placeholder="Enter License Key"/>
+    <button id="activateLicense">Activate License</button>
+    <div class="info">Contact admin <a class="owner-link" href="https://t.me/TraderParvej" target="_blank">@TraderParvej</a> if needed.</div>
+  </div>
 </div>
 
-<pre id="output"></pre>
-
-<!-- Modal -->
+<!-- Signal Modal -->
 <div class="modal-backdrop" id="signalModal">
   <div class="modal">
-    <div style="text-align:center;margin-bottom:15px;">
-      <div class="candle">
-        <div class="wick"></div>
-        <div id="candleBody" class="body"></div>
-        <div class="wick"></div>
-      </div>
+    <div class="candle">
+      <div class="wick"></div>
+      <div id="candleBody" class="body"></div>
+      <div class="wick"></div>
     </div>
-    <pre id="signalText" style="white-space:pre-wrap;color:#fff;font-size:14px;line-height:1.6;"></pre>
-    <button onclick="closeSignal()" style="margin-top:15px;width:100%;">Close</button>
+    <pre id="signalText"></pre>
+    <button onclick="closeSignal()">Close</button>
   </div>
 </div>
 
 <script>
-const output=document.getElementById('output');
-const generateBtn=document.getElementById('generateBtn');
-const resetBtn=document.getElementById('resetBtn');
+const marketSel=document.getElementById('market');
 const assetSelect=document.getElementById('assetSelect');
 const bollinger=document.getElementById('bollinger');
 const timeframe=document.getElementById('timeframe');
+const output=document.getElementById('output');
+const generateBtn=document.getElementById('generate');
+const resetBtn=document.getElementById('reset');
+const copyBtn=document.getElementById('copyOut');
+const licenseStatus=document.getElementById('licenseStatus');
+const licenseModal=document.getElementById('licenseModal');
+const licenseInput=document.getElementById('licenseInput');
+const activateLicenseBtn=document.getElementById('activateLicense');
+const signalModal=document.getElementById('signalModal');
+const signalText=document.getElementById('signalText');
+const candleBody=document.getElementById('candleBody');
 
-let licenseOk=true; // demo
+let licenseOk=false;
 
-function pad2(x){return x.toString().padStart(2,'0');}
+// ====== Assets ======
+const OTCpairs=["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
+const REALpairs=['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
+function fillAssetSelect(){
+  assetSelect.innerHTML='';
+  const pairs=marketSel.value==='REAL'?REALpairs:OTCpairs;
+  pairs.forEach(p=>{
+    const opt=document.createElement('option');
+    opt.value=p; opt.textContent=p;
+    assetSelect.appendChild(opt);
+  });
+}
+fillAssetSelect();
+marketSel.addEventListener('change',fillAssetSelect);
+
+function pad2(n){return String(n).padStart(2,'0');}
+function fmtDate(d){return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}`;}
+
+// ===== License =====
+const LICENSE_KEY="63JA-TSGP-XMHF";
+let deviceId=localStorage.getItem("dragon_device_id");
+if(!deviceId){
+  deviceId=Math.floor(Math.random()*900000000+100000000);
+  localStorage.setItem("dragon_device_id",deviceId);
+}
+const LICENSE_STORAGE_KEY="dragon_license_"+deviceId;
+let licenseExpiry=localStorage.getItem(LICENSE_STORAGE_KEY)?new Date(localStorage.getItem(LICENSE_STORAGE_KEY)):null;
+
+function updateLicenseStatus(){
+  const now=new Date();
+  if(licenseExpiry && licenseExpiry.getTime()>now.getTime()){
+    licenseOk=true;
+    const diff=licenseExpiry-now;
+    const days=Math.floor(diff/1000/60/60/24);
+    licenseStatus.classList.add("active");
+    licenseStatus.innerHTML=`License Active ✅ | Expires: ${fmtDate(licenseExpiry)} | Remaining: ${days}d`;
+  } else {
+    licenseOk=false;
+    licenseStatus.classList.remove("active");
+    licenseStatus.innerHTML="License Inactive ❌ | Contact: <a class='owner-link' href='https://t.me/TraderParvej' target='_blank'>@TraderParvej</a>";
+    licenseModal.style.display='flex';
+  }
+}
+updateLicenseStatus();
+
+activateLicenseBtn.addEventListener('click',()=>{
+  const enteredKey=licenseInput.value.trim();
+  if(enteredKey===LICENSE_KEY){
+    licenseExpiry=new Date(new Date().getTime()+30*24*60*60*1000);
+    localStorage.setItem(LICENSE_STORAGE_KEY,licenseExpiry);
+    licenseModal.style.display='none';
+    updateLicenseStatus();
+    alert("License activated for 30 days!");
+  } else { alert("Invalid key."); }
+});
+
+// ===== Signal Generator =====
 function generateSignalText(){
-  if(!licenseOk){ alert("License not active."); return ""; }
-
-  const pair = assetSelect.value;
-  const bb = bollinger.value;
-  const direction = bb==='upper'?'Buy':'Sell';
-  const analysis = bb==='upper'
-    ? 'Price is touching the upper BB; short-term bullish momentum observed.'
-    : 'Price is touching the lower BB; short-term bearish momentum observed.';
-
-  const now = new Date();
-  const gap = 2;
-  const entry = new Date(now.getTime()+gap*60*1000);
-
-  let tf = timeframe.value;
+  if(!licenseOk){alert("License not active.");return"";}
+  const pair=assetSelect.value;
+  const bb=bollinger.value;
+  const direction=bb==='upper'?'Buy':'Sell';
+  const analysis=bb==='upper'?'Price is touching the upper BB; short-term bullish momentum observed.':'Price is touching the lower BB; short-term bearish momentum observed.';
+  const now=new Date();
+  const gap=2;
+  const entry=new Date(now.getTime()+gap*60*1000);
+  let tf=timeframe.value;
   let duration="1 Minute";
   if(tf==="5m") duration="5 Minutes";
   else if(tf==="15m") duration="15 Minutes";
   else if(tf==="1h") duration="1 Hour";
-
-  const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())} (${gap} Minutes Later)`;
-
-  return {
-    text:`✦━━━━━━━━━━━━━━━━✦ 
+  const timeStr=`${pad2(entry.getHours())}:${pad2(entry.getMinutes())} (${gap} Minutes Later)`;
+  return {text:`✦━━━━━━━━━━━━━━━━✦ 
 🐉 DRAGONFLY — AI MARKET ANALYSIS
 ✦━━━━━━━━━━━━━━━━✦
 
 📊 Pair               : ${pair} 
 ⏰ Entry Time    : ${timeStr}
 ⌛️ Signal Duration: ${duration}
-📈 Strategy        : Bollinger Band – ${bb.charAt(0).toUpperCase()+bb.slice(1)} Zone 
+📈 Strategy        : Bollinger Band – ${bb} Zone 
 🎯 Direction       : ${direction}
 
 🧾 Market Analysis
 ${analysis}
 
-⚡️ Note: Execute the trade exactly after ${gap} minutes for optimal entry.
-✦━━━━━━━━━━━━━━━━✦`,
-    type:direction
-  };
+⚡️ Note: Execute the trade exactly after ${gap} minutes.
+✦━━━━━━━━━━━━━━━━✦`,type:direction};
 }
 
-function showSignalModal(text,type){
-  document.getElementById('signalModal').style.display='flex';
-  document.getElementById('signalText').textContent=text;
-
-  const candle=document.getElementById('candleBody');
-  candle.style.height="0"; // reset
-  if(type==='Buy'){
-    candle.style.background="limegreen";
-    candle.style.animation="growUp 1.5s forwards";
+function showSignalModal(sig){
+  signalText.textContent=sig.text;
+  if(sig.type==='Buy'){
+    candleBody.style.background="limegreen";
+    candleBody.style.animation="growUp 1.5s forwards";
   } else {
-    candle.style.background="crimson";
-    candle.style.animation="growDown 1.5s forwards";
+    candleBody.style.background="crimson";
+    candleBody.style.animation="growDown 1.5s forwards";
   }
+  signalModal.style.display='flex';
 }
-function closeSignal(){
-  document.getElementById('signalModal').style.display='none';
-}
+function closeSignal(){signalModal.style.display='none';}
 
 generateBtn.addEventListener('click',()=>{
-  if(!licenseOk){ alert("License not active."); return; }
-
+  if(!licenseOk){alert("License not active.");return;}
   output.textContent="Analyzing market... ⏳";
   generateBtn.disabled=true; resetBtn.disabled=true;
-
   setTimeout(()=>{
     let sig=generateSignalText();
     output.textContent=sig.text;
-    showSignalModal(sig.text,sig.type);
+    showSignalModal(sig);
     generateBtn.disabled=false; resetBtn.disabled=false;
   },2000);
 });
 
-resetBtn.addEventListener('click',()=>{ output.textContent=""; });
+resetBtn.addEventListener('click',()=>{
+  output.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';
+});
+copyBtn.addEventListener('click',()=>{
+  navigator.clipboard.writeText(output.textContent);
+  copyBtn.textContent='Copied ✔';
+  setTimeout(()=>copyBtn.textContent='Copy Output',1000);
+});
 </script>
-
 </body>
 </html>
