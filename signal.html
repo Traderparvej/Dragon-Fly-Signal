@@ -61,8 +61,7 @@ a.owner-link:hover{text-decoration:underline;}
 .modal input, .modal select{width:100%;padding:10px;border-radius:8px;border:1px solid #333;margin-bottom:12px;}
 .modal button{padding:10px 16px;border:none;border-radius:8px;background:var(--accent);font-weight:bold;cursor:pointer;}
 .modal .error{color:#ff8a8a;font-size:13px;display:none;margin-top:6px;}
-.modal .expired a{color:#6dd6ff;text-decoration:none;}
-.modal .expired a:hover{text-decoration:underline;}
+.modal .info{color:#6dd6ff;font-size:13px;margin-top:6px;}
 </style>
 </head>
 <body>
@@ -139,11 +138,11 @@ a.owner-link:hover{text-decoration:underline;}
 <footer>© DragonFly — Advance signals. Use responsibly.</footer>
 </div>
 
-<!-- 🔒 Modal for Premium Payment -->
+<!-- Premium Modal -->
 <div class="modal-backdrop" id="premiumModal" style="display:none;">
   <div class="modal">
     <h2>💰 Premium Access</h2>
-    <p>Select your package and complete payment via Binance ID: <b>499388438</b></p>
+    <p>Select package & pay via Binance ID: <b>499388438</b></p>
     <select id="premiumPackage">
       <option value="1week">1 Week - $5</option>
       <option value="1month">1 Month - $10</option>
@@ -152,7 +151,7 @@ a.owner-link:hover{text-decoration:underline;}
     <input type="text" id="tranId" placeholder="Enter Transaction ID">
     <button id="verifyPremium">Submit & Verify</button>
     <div class="error" id="premiumError">❌ Transaction not verified yet.</div>
-    <p style="margin-top:10px;font-size:13px;">After verification, wait 24 hours before using. Admin: @TraderParvej</p>
+    <div class="info">After verification, wait 24 hours before using. Admin: @TraderParvej</div>
   </div>
 </div>
 
@@ -175,40 +174,37 @@ const premiumError = document.getElementById('premiumError');
 
 let freeCount = 0;
 let premiumVerified = false;
+let premiumStartTime = localStorage.getItem('premiumStartTime') ? new Date(localStorage.getItem('premiumStartTime')) : null;
 
-// ====== Asset Lists ======
+// ====== Assets ======
 const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)",
 "AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
 const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
-// ====== Fill assetSelect ======
+// Fill assets
 function fillAssetSelect(){
     assetSelect.innerHTML = '';
-    const pairs = marketSel.value === 'REAL' ? REALpairs : OTCpairs;
+    const pairs = marketSel.value==='REAL'?REALpairs:OTCpairs;
     pairs.forEach(p=>{
         const opt = document.createElement('option');
-        opt.value = p;
-        opt.textContent = p;
+        opt.value = p; opt.textContent = p;
         assetSelect.appendChild(opt);
     });
 }
 fillAssetSelect();
 marketSel.addEventListener('change', fillAssetSelect);
 
-// ====== Utilities ======
+// Utilities
 function pad2(n){ return String(n).padStart(2,'0'); }
-function fmtDate(d){ return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}`; }
-
-// ====== Generate Single Signal ======
-function generateSignal(){
+function generateSignalText(){
     const pair = assetSelect.value;
     const bb = bollinger.value;
-    const direction = bb === 'upper' ? 'Buy' : 'Sell';
-    const analysis = bb==='upper' ? 'Price is touching the upper BB; short-term bullish momentum observed.' : 'Price is touching the lower BB; short-term bearish momentum observed.';
+    const direction = bb==='upper'?'Buy':'Sell';
+    const analysis = bb==='upper'?'Price is touching upper BB; short-term bullish momentum observed.':'Price is touching lower BB; short-term bearish momentum observed.';
     const now = new Date();
-    const entry = new Date(now.getTime() + 1*60*1000);
+    const entry = new Date(now.getTime()+60*1000);
     const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())}`;
-    const outputText = `✦━━━━━━━━━━━━━━━━✦ 
+    return `✦━━━━━━━━━━━━━━━━✦ 
 🐉 DRAGONFLY — AI MARKET ANALYSIS
 ✦━━━━━━━━━━━━━━━━✦
 
@@ -223,49 +219,41 @@ ${analysis}
 
 ⚡ Note: Execute the trade exactly after 1 minute for optimal entry.
 ✦━━━━━━━━━━━━━━━━✦`;
-    return outputText;
 }
 
-// ====== Generate Button ======
+// Generate button
 generateBtn.addEventListener('click',()=>{
-    const mode = modeSelect.value;
-    if(mode==='free'){
-        if(freeCount>=5){
-            alert('Free Analysis limit reached (5 signals/day). Upgrade to Premium for unlimited signals.');
-            return;
-        }
+    if(modeSelect.value==='free'){
+        if(freeCount>=5){alert('Free Analysis limit reached (5/day). Upgrade to Premium.'); return;}
         freeCount++;
-        output.textContent = generateSignal();
-    } else if(mode==='premium'){
+        output.textContent = generateSignalText();
+    } else {
         if(!premiumVerified){
             premiumModal.style.display='flex';
             return;
         }
-        output.textContent = generateSignal();
+        const now = new Date();
+        const diff = (now - premiumStartTime)/1000/60/60;
+        if(diff<24){ alert('Wait 24 hours after verification before using Premium signals.'); return;}
+        output.textContent = generateSignalText();
     }
 });
 
-// ====== Reset Button ======
+// Reset & Copy
 resetBtn.addEventListener('click',()=>{output.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
+copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(output.textContent);copyBtn.textContent='Copied ✔'; setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
 
-// ====== Copy Button ======
-copyBtn.addEventListener('click',()=>{
-    navigator.clipboard.writeText(output.textContent);
-    copyBtn.textContent='Copied ✔';
-    setTimeout(()=>copyBtn.textContent='Copy Output',1000);
-});
-
-// ====== Premium Verification ======
+// Premium verification
 verifyBtn.addEventListener('click',()=>{
-    const tranId = tranIdInp.value.trim();
-    if(tranId!==''){
-        premiumVerified = true;
+    const tid = tranIdInp.value.trim();
+    if(tid!==''){
+        premiumVerified=true;
+        premiumStartTime=new Date();
+        localStorage.setItem('premiumStartTime', premiumStartTime);
         premiumModal.style.display='none';
         premiumError.style.display='none';
-        alert('Premium verified! Please wait 24 hours for activation.');
-    } else {
-        premiumError.style.display='block';
-    }
+        alert('Premium verified! Wait 24 hours before using signals.');
+    } else premiumError.style.display='block';
 });
 </script>
 </body>
