@@ -155,6 +155,8 @@ const output = document.getElementById('output');
 const generateBtn = document.getElementById('generate');
 const resetBtn = document.getElementById('reset');
 const copyBtn = document.getElementById('copyOut');
+const utcSel = document.getElementById('utcSelect');
+const tf = document.getElementById('timeframe');
 
 const premiumModal = document.getElementById('premiumModal');
 const closePremiumBtn = document.getElementById('closePremium');
@@ -162,7 +164,7 @@ const closePremiumBtn = document.getElementById('closePremium');
 let freeCount = 0;
 let premiumActive = false;
 
-// Assets
+// ====== Assets ======
 const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
 const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
@@ -190,13 +192,13 @@ function generateSignalText(){
     const now = new Date();
     const randMin = Math.floor(Math.random()*3)+1; // 1–3 min random
     const entry = new Date(now.getTime() + randMin*60*1000);
-    const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())}`;
+    const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())}`; // Only HH:MM
     return `✦━━━━━━━━━━━━━━━━✦ 
 🐉 DRAGONFLY — AI MARKET ANALYSIS
 ✦━━━━━━━━━━━━━━━━✦
 
 📊 Pair          : ${pair}
-⏰ Entry Time    : ${timeStr} (1–3 Minutes Later)
+⏰ Entry Time    : ${timeStr}
 ⌛ Signal Duration: 1 Minute
 📈 Strategy      : Bollinger Band – ${bb.charAt(0).toUpperCase()+bb.slice(1)} Zone
 🎯 Direction     : ${direction}
