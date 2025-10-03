@@ -11,8 +11,7 @@
   --muted:#9fb0d6;
   --text:#ffffff;
   --accent:#6dd6ff;
-  --success:#4ade80;
-  --warn:#ff6b6b;
+  --green:#4caf50;
 }
 *{box-sizing:border-box;}
 body{
@@ -27,7 +26,15 @@ header h1{margin:0;font-size:20px;display:flex;align-items:center;gap:12px;}
 .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px;margin-bottom:12px;}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
-select,button{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.9);color:#000;font-weight:600;}
+select,button{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.06);
+  background:rgba(255,255,255,0.9);
+  color:#000;
+  font-weight:600;
+}
 .controls{display:flex;gap:10px;margin-top:12px;}
 .controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:600;}
 .output{
@@ -36,36 +43,29 @@ select,button{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(2
   border-radius:12px;
   background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.02));
   border:1px solid rgba(255,255,255,0.03);
-  min-height:200px;
+  min-height:180px;
   white-space:pre-wrap;
   font-family:'Courier New', Courier, monospace;
   color:#fff;
   font-size:14px;
   line-height:1.45;
 }
-.unicode{font-family:"Arial","DejaVu Sans",monospace;}
+.unicode{font-family: "Arial", "DejaVu Sans", "monospace";}
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
 a.owner-link{color:var(--accent);text-decoration:none;font-weight:bold;}
 a.owner-link:hover{text-decoration:underline;}
 @media (max-width:880px){.grid{grid-template-columns:1fr;}}
 .small-note{font-size:12px;color:var(--muted);}
-.license-status-small{font-size:14px;font-weight:600;color:var(--success);}
-.license-details{display:flex;gap:12px;margin-top:4px;font-size:12px;}
-.license-details div{background:rgba(255,255,255,0.05);padding:4px 8px;border-radius:6px;}
-.get-new-license{margin-top:6px;display:inline-block;background:var(--accent);padding:6px 12px;border-radius:8px;color:#000;text-decoration:none;font-weight:bold;}
+.license-status{margin-top:6px;font-weight:600;font-size:14px;}
+.license-status.active{color:var(--green);}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-<h1>🐉 DragonFly — Signal Generator <span id="licenseStatus" class="license-status-small"></span></h1>
+<h1>🐉 DragonFly — Signal Generator</h1>
 <div class="small">Software: DragonFly &nbsp; Owner: <a class="owner-link" href="https://t.me/TraderParvej" target="_blank">@TraderParvej</a></div>
-<div class="license-details" id="licenseDetails">
-  <div id="licenseActive">Active: —</div>
-  <div id="licenseExpiry">Expiry: —</div>
-  <div id="deviceId">ID: —</div>
-</div>
-<a href="#" class="get-new-license" id="getNewLicenseBtn" target="_blank" style="display:none;">Get New License</a>
+<div class="license-status" id="licenseStatus">License Inactive ❌</div>
 </header>
 
 <section class="card">
@@ -126,9 +126,6 @@ a.owner-link:hover{text-decoration:underline;}
 </div>
 
 <script>
-const LICENSE_KEY = "dragon12580"; // hidden
-const LICENSE_STORAGE_KEY_PREFIX = "dragonfly_license_";
-
 const marketSel = document.getElementById('market');
 const assetSelect = document.getElementById('assetSelect');
 const bollinger = document.getElementById('bollinger');
@@ -136,80 +133,86 @@ const output = document.getElementById('output');
 const generateBtn = document.getElementById('generate');
 const resetBtn = document.getElementById('reset');
 const copyBtn = document.getElementById('copyOut');
+const utcSel = document.getElementById('utcSelect');
+const tf = document.getElementById('timeframe');
+const licenseStatus = document.getElementById('licenseStatus');
 
-const licenseStatusSmall = document.getElementById('licenseStatus');
-const licenseDetails = document.getElementById('licenseDetails');
-const licenseActivePill = document.getElementById('licenseActive');
-const licenseExpiryPill = document.getElementById('licenseExpiry');
-const deviceIdPill = document.getElementById('deviceId');
-const getNewLicenseBtn = document.getElementById('getNewLicenseBtn');
-
-const deviceId = Math.floor(Math.random()*900000000+100000000);
-let licenseExpiry = localStorage.getItem(LICENSE_STORAGE_KEY_PREFIX + deviceId) ? new Date(localStorage.getItem(LICENSE_STORAGE_KEY_PREFIX + deviceId)) : null;
 let licenseOk = false;
-let signalActive = false;
 
 // ====== Assets ======
 const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)",
 "AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
 const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
+// Fill assets
 function fillAssetSelect(){
-  assetSelect.innerHTML='';
-  const pairs = marketSel.value==='REAL'?REALpairs:OTCpairs;
-  pairs.forEach(p=>{
-    const opt = document.createElement('option');
-    opt.value=p; opt.textContent=p;
-    assetSelect.appendChild(opt);
-  });
+    assetSelect.innerHTML = '';
+    const pairs = marketSel.value==='REAL'?REALpairs:OTCpairs;
+    pairs.forEach(p=>{
+        const opt = document.createElement('option');
+        opt.value = p; opt.textContent = p;
+        assetSelect.appendChild(opt);
+    });
 }
 fillAssetSelect();
-marketSel.addEventListener('change',fillAssetSelect);
+marketSel.addEventListener('change', fillAssetSelect);
 
-// ====== Utils ======
-function pad2(n){return String(n).padStart(2,'0');}
-function fmtDate(d){return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}`;}
+// Utilities
+function pad2(n){ return String(n).padStart(2,'0'); }
+function fmtDate(d){ return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}`; }
 
-// ====== License ======
-function updateLicenseUI(){
+// ====== License System ======
+const LICENSE_KEY = "dragon12580";
+let deviceId = localStorage.getItem("dragon_device_id");
+if(!deviceId){
+  deviceId = Math.floor(Math.random()*900000000+100000000);
+  localStorage.setItem("dragon_device_id", deviceId);
+}
+const LICENSE_STORAGE_KEY = "dragon_license_"+deviceId;
+let licenseExpiry = localStorage.getItem(LICENSE_STORAGE_KEY) ? new Date(localStorage.getItem(LICENSE_STORAGE_KEY)) : null;
+
+function updateLicenseStatus(){
   const now = new Date();
   if(licenseExpiry && licenseExpiry.getTime() > now.getTime()){
     licenseOk = true;
-    const diff = licenseExpiry-now;
+    const diff = licenseExpiry - now;
     const days = Math.floor(diff/1000/60/60/24);
     const hrs = Math.floor(diff/1000/60/60)%24;
     const mins = Math.floor(diff/1000/60)%60;
-    licenseStatusSmall.style.color='#4ade80';
-    licenseStatusSmall.textContent=`License Active ✅ | Expires: ${fmtDate(licenseExpiry)} | Remaining: ${days}d ${hrs}h ${mins}m`;
-    licenseActivePill.textContent=`Active: ${fmtDate(new Date(licenseExpiry.getTime()-30*24*60*60*1000))}`;
-    licenseExpiryPill.textContent=`Expiry: ${fmtDate(licenseExpiry)}`;
-    deviceIdPill.textContent=`ID: ${deviceId}`;
-    getNewLicenseBtn.style.display='none';
+    licenseStatus.classList.add("active");
+    licenseStatus.textContent = `License Active ✅ | Expires: ${fmtDate(licenseExpiry)} | Remaining: ${days}d ${hrs}h ${mins}m`;
   } else {
     licenseOk = false;
-    licenseStatusSmall.style.color='#ff6b6b';
-    licenseStatusSmall.textContent='License Expired ❌';
-    licenseActivePill.textContent='Active: —';
-    licenseExpiryPill.textContent='Expiry: —';
-    deviceIdPill.textContent=`ID: ${deviceId}`;
-    getNewLicenseBtn.style.display='inline-block';
-    getNewLicenseBtn.href=`https://t.me/TraderParvej?start=${encodeURIComponent("Hello, I want a new DragonFly license. Device ID: "+deviceId)}`;
+    licenseStatus.classList.remove("active");
+    licenseStatus.textContent = "License Inactive ❌ | Contact: @TraderParvej";
   }
 }
-updateLicenseUI();
-setInterval(updateLicenseUI,60000);
+updateLicenseStatus();
 
-// ====== Signal ======
+if(!licenseOk){
+  const enteredKey = prompt("Enter License Key for this device:");
+  if(enteredKey===LICENSE_KEY){
+    licenseExpiry = new Date(new Date().getTime()+30*24*60*60*1000); // 30 days
+    localStorage.setItem(LICENSE_STORAGE_KEY, licenseExpiry);
+    updateLicenseStatus();
+    alert("License activated for 30 days!");
+  } else {
+    alert("Invalid key. Signals disabled.");
+  }
+}
+
+// ====== Signal Generator ======
 function generateSignalText(){
-  const pair = assetSelect.value;
-  const bb = bollinger.value;
-  const direction = bb==='upper'?'Buy':'Sell';
-  const analysis = bb==='upper'?'Price is touching upper BB; short-term bullish momentum observed.':'Price is touching lower BB; short-term bearish momentum observed.';
-  const now = new Date();
-  const randMin = Math.floor(Math.random()*3)+1;
-  const entry = new Date(now.getTime()+randMin*60*1000);
-  const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())}`;
-  return `✦━━━━━━━━━━━━━━━━✦ 
+    if(!licenseOk){ alert("License not active. Cannot generate signals."); return ""; }
+    const pair = assetSelect.value;
+    const bb = bollinger.value;
+    const direction = bb==='upper'?'Buy':'Sell';
+    const analysis = bb==='upper'?'Price is touching upper BB; short-term bullish momentum observed.':'Price is touching lower BB; short-term bearish momentum observed.';
+    const now = new Date();
+    const randMin = Math.floor(Math.random()*3)+1; // 1-3 min later
+    const entry = new Date(now.getTime() + randMin*60*1000);
+    const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())}`;
+    return `✦━━━━━━━━━━━━━━━━✦ 
 🐉 DRAGONFLY — AI MARKET ANALYSIS
 ✦━━━━━━━━━━━━━━━━✦
 
@@ -222,35 +225,21 @@ function generateSignalText(){
 🧾 Market Analysis
 ${analysis}
 
-⚡ Note: 1Step MTG and Trade Safety Margin.
+⚡ Note: 1Step MTG and Trade Safety Margin applied.
 ✦━━━━━━━━━━━━━━━━✦`;
 }
 
 generateBtn.addEventListener('click',()=>{
-  if(!licenseOk){alert('License required to generate signals. Please get a new license.'); return;}
-  if(signalActive){alert('Previous signal still active. Wait for it to finish.'); return;}
-  signalActive=true;
-  output.textContent=generateSignalText();
-  setTimeout(()=>{signalActive=false;},60*1000);
+    if(!licenseOk){ alert("License not active. Cannot generate signals."); return;}
+    if(output.textContent.includes("Entry Time") && !output.textContent.includes("EXECUTED")){
+        alert("Previous signal not yet completed. Wait for it to finish.");
+        return;
+    }
+    output.textContent = generateSignalText();
 });
 
 resetBtn.addEventListener('click',()=>{output.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
 copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(output.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
-
-// ====== First-time license prompt per device ======
-if(!licenseOk){
-  const enteredKey = prompt("Enter License Key for this device:");
-  if(enteredKey===LICENSE_KEY){
-    licenseExpiry=new Date(new Date().getTime()+30*24*60*60*1000);
-    localStorage.setItem(LICENSE_STORAGE_KEY_PREFIX + deviceId,licenseExpiry);
-    licenseOk=true;
-    updateLicenseUI();
-    alert("License activated for 30 days!");
-  } else {
-    alert('Invalid Key. Signals disabled.');
-    updateLicenseUI();
-  }
-}
 </script>
 </body>
 </html>
