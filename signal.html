@@ -19,13 +19,12 @@ body{
   background:linear-gradient(180deg,#05102a,#081024);
   color:var(--text);
 }
-.wrap{max-width:1100px;margin:18px auto;padding:18px;}
+.wrap{max-width:700px;margin:18px auto;padding:18px;}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 header h1{margin:0;font-size:20px;display:flex;align-items:center;gap:12px;}
 .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px;margin-bottom:12px;}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
-select,input[type=date],input[type=number],button{
+select,button{
   width:100%;
   padding:10px;
   border-radius:10px;
@@ -38,338 +37,140 @@ select,input[type=date],input[type=number],button{
 .controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:600;}
 .output{
   margin-top:12px;
-  padding:16px;
+  padding:12px;
   border-radius:12px;
   background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.02));
   border:1px solid rgba(255,255,255,0.03);
-  min-height:180px;
+  min-height:200px;
   white-space:pre-wrap;
   font-family:'Courier New', Courier, monospace;
   color:#fff;
-  font-size:14px;
-  line-height:1.45;
 }
-.unicode{font-family: "Arial", "DejaVu Sans", "monospace";}
+.asset-select-box {display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;}
+.asset-option {
+  background:var(--panel);
+  border:1px solid rgba(255,255,255,0.2);
+  border-radius:8px;
+  padding:8px 12px;
+  cursor:pointer;
+  user-select:none;
+  transition:0.2s;
+}
+.asset-option.active {
+  background:#10b98133;
+  border-color:#10b981;
+  color:#10b981;
+  font-weight:600;
+}
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
 a.owner-link{color:var(--accent);text-decoration:none;font-weight:bold;}
 a.owner-link:hover{text-decoration:underline;}
-@media (max-width:880px){.grid{grid-template-columns:1fr;}}
-
-/* Asset Dropdown style tweak */
-.select-inline {display:flex;gap:8px;align-items:center;}
-.small-note{font-size:12px;color:var(--muted);}
-
-/* 🔒 Modal Style */
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999;}
-.modal{background:#0f1530;padding:20px;border-radius:12px;width:90%;max-width:400px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.5);}
-.modal h2{margin-top:0;margin-bottom:10px;}
-.modal input{width:100%;padding:10px;border-radius:8px;border:1px solid #333;margin-bottom:12px;}
-.modal button{padding:10px 16px;border:none;border-radius:8px;background:var(--accent);font-weight:bold;cursor:pointer;}
-.modal .error{color:#ff8a8a;font-size:13px;display:none;margin-top:6px;}
-.modal .expired a{color:#6dd6ff;text-decoration:none;}
-.modal .expired a:hover{text-decoration:underline;}
-
-/* Fancy separators for output */
-.sep {color:var(--accent);font-weight:700;}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-<h1>🐉 DragonFly — Signal Generator
-  <span id="licenseStatus" style="font-size:13px;color:#6dd6ff;font-weight:600;"></span>
-</h1>
-<div class="small">Software: DragonFly &nbsp; Owner: <a class="owner-link" href="https://t.me/TraderParvej" target="_blank">@TraderParvej</a></div>
+<h1>🐉 DRAGONFLY — AI MARKET ANALYSIS</h1>
 </header>
 
 <section class="card">
-<div class="grid">
-  <div>
-    <label>UTC Offset (eg. +6:00)</label>
-    <select id="utcSelect">
-      <option value="+0:00">UTC +0:00</option>
-      <option value="+6:00" selected>UTC +6:00 (BD)</option>
-    </select>
-  </div>
-
-  <div>
-    <label>Market</label>
-    <select id="market">
-      <option value="OTC">OTC</option>
-      <option value="REAL">REAL</option>
-    </select>
-  </div>
-
-  <div>
-    <label>Timeframe</label>
-    <select id="timeframe">
-      <option value="1m" selected>1 minute</option>
-      <option value="5m">5 minutes</option>
-      <option value="15m">15 minutes</option>
-      <option value="1h">1 hour</option>
-    </select>
-  </div>
-
-  <!-- Removed Start Date and Signal Count as requested -->
-
-  <div>
-    <label>Select Asset</label>
-    <div class="select-inline">
-      <select id="assetSelect"></select>
-    </div>
-    <div class="small-note">একবারে শুধু একটি পেয়ার সিলেক্ট করা যাবে</div>
-  </div>
-
-  <div>
-    <label>Bollinger Band</label>
-    <select id="bollinger">
-      <option value="upper" selected>Upper (Buy / CALL)</option>
-      <option value="lower">Lower (Sell / PUT)</option>
-    </select>
-  </div>
-
-  <div>
-    <label>Signal Mode</label>
-    <select id="modeSelect">
-      <option value="auto" selected>Auto Analysis</option>
-      <option value="manual">Manual</option>
-    </select>
-  </div>
+<div>
+<label>Select Asset</label>
+<div class="asset-select-box" id="assetBox"></div>
+</div>
+<div>
+<label>Bollinger Band</label>
+<select id="bbOption">
+<option value="upper">Upper</option>
+<option value="lower">Lower</option>
+</select>
 </div>
 
 <div class="controls">
-  <button id="generate">Generate Signal</button>
-  <button id="reset">Reset</button>
-  <button id="copyOut">Copy Output</button>
+<button id="generate">Generate Signal</button>
+<button id="copyOut">Copy Output</button>
 </div>
 
-<div class="output unicode" id="output">▶️ DATE: — ◀️
-
-(Press Generate to produce signals)</div>
+<div class="output" id="output">▶️ Press Generate to get your DragonFly Signal</div>
 </section>
 
-<footer>© DragonFly — Advance signals. Use responsibly.</footer>
-</div>
-
-<!-- 🔒 License Modal -->
-<div class="modal-backdrop" id="licenseModal" style="display:none;">
-  <div class="modal">
-    <h2>🔑 License Required</h2>
-    <div id="licenseContent">
-      <p>Please enter your license key to unlock signals:</p>
-      <input type="password" id="licenseKey" placeholder="Enter license key">
-      <button id="submitLicense">Activate</button>
-      <div class="error" id="licenseError">❌ Invalid license, try again.</div>
-      <p style="margin-top:10px;font-size:13px;">লাইসেন্স নিতে টেলিগ্রাম গ্রুপে জয়েন করুন: <a href="https://t.me/+SsTMPgPVYoVlNTQ1" target="_blank">Click here</a></p>
-    </div>
-    <div class="expired" style="display:none;">
-      <p>License Expired. Please contact for a new license:</p>
-      <a href="https://t.me/+SsTMPgPVYoVlNTQ1" target="_blank">Contact via Telegram</a>
-    </div>
-  </div>
+<footer>Software: DragonFly &nbsp; Owner: <a class="owner-link" href="https://t.me/TraderParvej" target="_blank">@TraderParvej</a></footer>
 </div>
 
 <script>
-// ====== DOM Elements ======
-const utcSel = document.getElementById('utcSelect');
-const marketSel = document.getElementById('market');
-const tf = document.getElementById('timeframe');
-const assetSelect = document.getElementById('assetSelect');
-const outDiv = document.getElementById('output');
-const generateBtn = document.getElementById('generate');
-const resetBtn = document.getElementById('reset');
-const copyBtn = document.getElementById('copyOut');
-const bollinger = document.getElementById('bollinger');
-const modeSelect = document.getElementById('modeSelect');
-const licenseStatus = document.getElementById('licenseStatus');
-
-const licenseModal = document.getElementById('licenseModal');
-const submitLicense = document.getElementById('submitLicense');
-const licenseKey = document.getElementById('licenseKey');
-const licenseError = document.getElementById('licenseError');
-const licenseContent = document.getElementById('licenseContent');
-const expiredContent = document.querySelector('.modal .expired');
-
-let licenseOk = false;
-const LICENSE_KEY = '63JA-TSGP-XMHD';
-let licenseExpiry = localStorage.getItem('dragonfly_license_expiry') ? new Date(localStorage.getItem('dragonfly_license_expiry')) : null;
-
 // ====== Pairs ======
-const OTCpairs = [
-"AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)",
-"AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)",
-"USD/PHP (OTC)","USD/EGP (OTC)","EUR/CHF (OTC)","EUR/AUD (OTC)","USD/ZAR (OTC)",
-"AUD/CHF (OTC)","AUD/JPY (OTC)","CAD/CHF (OTC)","CHF/JPY (OTC)","EUR/CAD (OTC)",
-"EUR/JPY (OTC)","GBP/AUD (OTC)","NZD/CHF (OTC)","USD/CAD (OTC)","USD/CHF (OTC)",
-"USD/COP (OTC)","USD/INR (OTC)","USD/JPY (OTC)","USD/MXN (OTC)","USD/NGN (OTC)",
-"USD/PKR (OTC)","AUD/NZD (OTC)","EUR/SGD (OTC)","GBP/JPY (OTC)","USD/TRY (OTC)",
-"EUR/NZD (OTC)","GBP/NZD (OTC)","NZD/USD (OTC)","GBP/CHF (OTC)","GBP/CAD (OTC)","GBP/USD (OTC)"
-];
-const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
+const pairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
-// ====== Fill assetSelect based on market ======
-function fillAssetSelect(){
-  assetSelect.innerHTML = '';
-  const pairs = marketSel.value === 'REAL' ? REALpairs : OTCpairs;
-  pairs.forEach(pair=>{
-    const opt = document.createElement('option');
-    opt.value = pair;
-    opt.textContent = pair;
-    assetSelect.appendChild(opt);
+// ====== Asset Box ======
+const assetBox = document.getElementById('assetBox');
+let selectedAsset = null;
+pairs.forEach(pair=>{
+  const div = document.createElement('div');
+  div.className='asset-option';
+  div.textContent=pair;
+  div.addEventListener('click',()=>{
+    assetBox.querySelectorAll('.asset-option').forEach(d=>d.classList.remove('active'));
+    div.classList.add('active');
+    selectedAsset = pair;
   });
-}
-fillAssetSelect();
-marketSel.addEventListener('change', fillAssetSelect);
+  assetBox.appendChild(div);
+});
+
+// ====== Analysis Lines ======
+const analysisLinesUpper = [
+  "Price touched the Upper Bollinger Band. Short-term bullish momentum expected within 1 minute.",
+  "Strong push above Upper Band indicates short-term upward movement.",
+  "Price tested resistance zone and bounced, suggesting CALL entry."
+];
+const analysisLinesLower = [
+  "Price rejected from Lower Band, probability of bearish continuation is high.",
+  "Support at Lower Band holds, short-term downward momentum expected.",
+  "Price touched Lower Band with bearish candle confirmation, suggesting PUT."
+];
 
 // ====== Utilities ======
 function pad2(n){ return String(n).padStart(2,'0'); }
-function fmtDate(d){ return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}`; }
-function mono(str){
-    const map = {
-      "A":"𝙰","B":"𝙱","C":"𝙲","D":"𝙳","E":"𝙴","F":"𝙵","G":"𝙶","H":"𝙷","I":"𝙸","J":"𝙹",
-      "K":"𝙺","L":"𝙻","M":"𝙼","N":"𝙽","O":"𝙾","P":"𝙿","Q":"𝚀","R":"𝚁","S":"𝚂","T":"𝚃",
-      "U":"𝚄","V":"𝚅","W":"𝚆","X":"𝚇","Y":"𝚈","Z":"𝚉",
-      "0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿",
-      "-":"-","/":"/"," ":" "
-    };
-    return str.split("").map(ch=>map[ch.toUpperCase()]||ch).join("");
-}
 
-// ====== Build single signal ======
-function buildSingleSignal(){
-    const pair = assetSelect.value || 'EUR/USD';
-    // Bollinger selection decides direction
-    const band = bollinger.value; // 'upper' or 'lower'
-    const strategy = band === 'upper' ? 'Bollinger Band (Upper)' : 'Bollinger Band (Lower)';
-    const signal = band === 'upper' ? 'CALL (Buy)' : 'PUT (Sell)';
+// ====== Generate Signal ======
+const output = document.getElementById('output');
+document.getElementById('generate').addEventListener('click',()=>{
+  if(!selectedAsset){
+    alert('Please select an asset!');
+    return;
+  }
+  const bb = document.getElementById('bbOption').value;
+  const now = new Date();
+  now.setMinutes(now.getMinutes()+1);
+  const timeStr = `${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+  const direction = bb==='upper'?'CALL (Buy)':'PUT (Sell)';
+  const analysisArr = bb==='upper'?analysisLinesUpper:analysisLinesLower;
+  const analysis = analysisArr[Math.floor(Math.random()*analysisArr.length)];
 
-    // Entry time: exactly 1 minute from now (as requested)
-    const now = new Date();
-    const entry = new Date(now.getTime() + 1*60*1000);
-    const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())}`;
+  const text = 
+`✦━━━━━━━━━━━━━━━━✦
+🐉 DRAGONFLY — AI MARKET ANALYSIS
+✦━━━━━━━━━━━━━━━━✦
 
-    // Compose a professional analysis-like note (concise)
-    const confidence = Math.floor(85 + Math.random()*15); // 85-99% pseudo-confidence for pro feel
-    const reason = band === 'upper' 
-      ? 'Price touching upper BB — momentum suggests short-term bullish continuation.' 
-      : 'Price touching lower BB — momentum suggests short-term bearish continuation.';
+📊 Pair          : ${selectedAsset}
+⏰ Entry Time    : ${timeStr} (1 Minute Later)
+⌛ Signal Duration: 1 Minute
+📈 Strategy      : Bollinger Band – ${bb.charAt(0).toUpperCase()+bb.slice(1)} Zone
+🎯 Direction     : ${direction}
 
-    return {
-      pair,
-      timeStr,
-      strategy,
-      signal,
-      confidence,
-      reason,
-      generatedAt: now
-    };
-}
+🧾 Market Analysis
+${analysis}
 
-// ====== Generate Output ======
-function tfText(tfVal){
-    if(tfVal.endsWith("m")) return tfVal.replace("m"," minutes");
-    if(tfVal.endsWith("h")) return tfVal.replace("h"," hours");
-    return tfVal;
-}
+⚡ Note: Execute the trade exactly after 1 minute for optimal entry.
+✦━━━━━━━━━━━━━━━━✦`;
 
-function generateOutput(){
-    const now=new Date().getTime();
-    if(!licenseOk){
-        licenseModal.style.display='flex'; return;
-    }
-    if(licenseExpiry && now>licenseExpiry){
-        licenseOk = false;
-        licenseExpiry = null;
-        localStorage.removeItem('dragonfly_license_expiry');
-        licenseStatus.textContent = "License Expired ❌";
-        licenseModal.style.display='flex';
-        licenseContent.style.display='none';
-        expiredContent.style.display='block';
-        return;
-    }
-
-    outDiv.textContent="⏳ Generating professional signal...";
-    setTimeout(()=>{
-        const sig = buildSingleSignal();
-        const genDate = fmtDate(sig.generatedAt);
-        const timeframeText = tfText(tf.value);
-
-        // Professional DragonFly formatted output
-        const lines = [];
-        lines.push('✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦');
-        lines.push('🔮  DRAGONFLY — AI MARKET ANALYSIS  🔮');
-        lines.push('✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦\n');
-        lines.push(`📊 Pair        : ${sig.pair}`);
-        lines.push(`⏰ Entry Time  : ${sig.timeStr}  (Exact — 1 minute from now)`);
-        lines.push(`📈 Timeframe   : ${timeframeText}`);
-        lines.push(`⚙️ Strategy    : ${sig.strategy}`);
-        lines.push(`🎯 Signal      : ${sig.signal}`);
-        lines.push(`📈 Confidence : ${sig.confidence}%`);
-        lines.push(`\n💡 Reason      : ${sig.reason}`);
-        lines.push(`\n🕒 Generated   : ${genDate} | UTC ${utcSel.value}`);
-        lines.push('\n✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦');
-        lines.push('⚠️ Note: Signals are AI-assisted suggestions. Use risk management.');
-        lines.push('✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦\n');
-        lines.push('Software: DragonFly  •  Owner: @TraderParvej');
-
-        outDiv.textContent = lines.join('\n');
-    },300);
-}
-
-// ====== License ======
-function updateCountdown(){
-    if(licenseOk && licenseExpiry){
-        const now = new Date();
-        let diff = licenseExpiry - now;
-        if(diff <= 0){
-            licenseOk = false;
-            licenseExpiry = null;
-            localStorage.removeItem('dragonfly_license_expiry');
-            licenseStatus.textContent = "License Expired ❌";
-            return;
-        }
-        const days = Math.floor(diff/1000/60/60/24);
-        const hrs = Math.floor(diff/1000/60/60)%24;
-        const mins = Math.floor(diff/1000/60)%60;
-        const secs = Math.floor(diff/1000)%60;
-        licenseStatus.textContent = `License Active ✅ | Expires in ${days}d ${hrs}h ${mins}m ${secs}s`;
-    } else if(!licenseOk){
-        licenseStatus.textContent = "License Inactive ❌";
-    }
-}
-setInterval(updateCountdown,1000);
-
-// ====== Check localStorage on load ======
-if(localStorage.getItem('dragonfly_license_expiry')){
-    const exp = new Date(localStorage.getItem('dragonfly_license_expiry'));
-    if(exp.getTime() > new Date().getTime()){
-        licenseExpiry = exp;
-        licenseOk = true;
-        licenseModal.style.display='none';
-    } else {
-        localStorage.removeItem('dragonfly_license_expiry');
-    }
-}
-updateCountdown();
-
-submitLicense.addEventListener('click',()=>{
-    if(licenseKey.value.trim()===LICENSE_KEY){
-        licenseOk=true;
-        licenseExpiry=new Date().getTime()+30*24*60*60*1000;
-        licenseExpiry = new Date(licenseExpiry);
-        localStorage.setItem('dragonfly_license_expiry', licenseExpiry);
-        licenseModal.style.display='none';
-        licenseContent.style.display='block';
-        expiredContent.style.display='none';
-        updateCountdown();
-        generateOutput();
-    }else licenseError.style.display='block';
+  output.textContent = text;
 });
 
-// ====== Buttons ======
-generateBtn.addEventListener('click',generateOutput);
-resetBtn.addEventListener('click',()=>{outDiv.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
-copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(outDiv.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
+// ====== Copy Button ======
+document.getElementById('copyOut').addEventListener('click',()=>{
+  navigator.clipboard.writeText(output.textContent);
+  alert('Signal copied to clipboard ✅');
+});
 </script>
 </body>
 </html>
