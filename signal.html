@@ -25,15 +25,23 @@ header h1{margin:0;font-size:20px;display:flex;align-items:center;gap:12px;}
 .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px;margin-bottom:12px;}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
-select,button,input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.9);color:#000;font-weight:600;}
+select,button{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.9);color:#000;font-weight:600;}
 .controls{display:flex;gap:10px;margin-top:12px;}
 .controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:600;}
 .output{
-  margin-top:12px;padding:16px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.02));
-  border:1px solid rgba(255,255,255,0.03);min-height:180px;white-space:pre-wrap;
-  font-family:'Courier New', Courier, monospace;color:#fff;font-size:14px;line-height:1.45;
+  margin-top:12px;
+  padding:16px;
+  border-radius:12px;
+  background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.02));
+  border:1px solid rgba(255,255,255,0.03);
+  min-height:180px;
+  white-space:pre-wrap;
+  font-family:'Courier New', Courier, monospace;
+  color:#fff;
+  font-size:14px;
+  line-height:1.45;
 }
-.unicode{font-family:"Arial","DejaVu Sans","monospace";}
+.unicode{font-family: "Arial", "DejaVu Sans", "monospace";}
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
 a.owner-link{color:var(--accent);text-decoration:none;font-weight:bold;}
 a.owner-link:hover{text-decoration:underline;}
@@ -42,16 +50,17 @@ a.owner-link:hover{text-decoration:underline;}
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999;}
 .modal{background:#0f1530;padding:20px;border-radius:12px;width:90%;max-width:400px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.5);}
 .modal h2{margin-top:0;margin-bottom:10px;}
-.modal input{width:100%;padding:10px;border-radius:8px;border:1px solid #333;margin-bottom:12px;}
+.modal input, .modal select{width:100%;padding:10px;border-radius:8px;border:1px solid #333;margin-bottom:12px;}
 .modal button{padding:10px 16px;border:none;border-radius:8px;background:var(--accent);font-weight:bold;cursor:pointer;}
 .modal .info{color:#6dd6ff;font-size:13px;margin-top:6px;}
-.status-text{margin-top:6px;font-size:13px;color:#6dd6ff;font-weight:600;}
+.license-status{font-size:13px;color:#6dd6ff;font-weight:600;}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
 <h1>🐉 DragonFly — Signal Generator</h1>
+<div class="license-status" id="licenseStatus">License Inactive ❌</div>
 <div class="small">Software: DragonFly &nbsp; Owner: <a class="owner-link" href="https://t.me/TraderParvej" target="_blank">@TraderParvej</a></div>
 </header>
 
@@ -100,8 +109,6 @@ a.owner-link:hover{text-decoration:underline;}
   <button id="copyOut">Copy Output</button>
 </div>
 
-<div class="status-text" id="licenseStatus"></div>
-
 <div class="output unicode" id="output">▶️ DATE: — ◀️
 
 (Press Generate to produce signals)</div>
@@ -113,10 +120,11 @@ a.owner-link:hover{text-decoration:underline;}
 <!-- License Modal -->
 <div class="modal-backdrop" id="licenseModal" style="display:none;">
   <div class="modal">
-    <h2>🔑 Enter License Key</h2>
-    <input type="text" id="licenseInput" placeholder="Enter License Key">
-    <button id="submitLicense">Submit</button>
-    <div class="info">Provide the license key to activate 30 days access.</div>
+    <h2>🔑 License Required</h2>
+    <p>Please enter your license key to unlock signals:</p>
+    <input type="password" id="licenseKey" placeholder="Enter license key">
+    <button id="submitLicense">Activate</button>
+    <div class="info">Use key: <strong>dragon12580</strong></div>
   </div>
 </div>
 
@@ -128,42 +136,90 @@ const output = document.getElementById('output');
 const generateBtn = document.getElementById('generate');
 const resetBtn = document.getElementById('reset');
 const copyBtn = document.getElementById('copyOut');
+const utcSel = document.getElementById('utcSelect');
+const tf = document.getElementById('timeframe');
 const licenseModal = document.getElementById('licenseModal');
-const licenseInput = document.getElementById('licenseInput');
 const submitLicense = document.getElementById('submitLicense');
+const licenseKey = document.getElementById('licenseKey');
 const licenseStatus = document.getElementById('licenseStatus');
 
-let licenseActive = false;
-let licenseExpiry = null;
-
-// ===== Assets =====
 const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
 const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
+// Fill asset
 function fillAssetSelect(){
-    assetSelect.innerHTML = '';
-    const pairs = marketSel.value==='REAL'?REALpairs:OTCpairs;
-    pairs.forEach(p=>{
-        const opt=document.createElement('option');
-        opt.value=p; opt.textContent=p;
-        assetSelect.appendChild(opt);
-    });
+  assetSelect.innerHTML='';
+  const pairs = marketSel.value==='REAL'?REALpairs:OTCpairs;
+  pairs.forEach(p=>{
+    const opt=document.createElement('option');
+    opt.value=p; opt.textContent=p;
+    assetSelect.appendChild(opt);
+  });
 }
 fillAssetSelect();
-marketSel.addEventListener('change',fillAssetSelect);
+marketSel.addEventListener('change', fillAssetSelect);
 
-function pad2(n){ return String(n).padStart(2,'0'); }
+// Utilities
+function pad2(n){return String(n).padStart(2,'0');}
+function fmtDate(d){return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}`;}
 
+// License Logic
+const LICENSE_KEY = 'dragon12580';
+let licenseOk = false;
+let licenseExpiry = localStorage.getItem('dragonfly_license_expiry')?new Date(localStorage.getItem('dragonfly_license_expiry')):null;
+
+function updateLicenseStatus(){
+  const now = new Date();
+  if(licenseOk && licenseExpiry){
+    const diff = licenseExpiry - now;
+    if(diff<=0){
+      licenseOk=false; licenseExpiry=null;
+      localStorage.removeItem('dragonfly_license_expiry');
+      licenseStatus.textContent="License Expired ❌";
+      return;
+    }
+    const days=Math.floor(diff/1000/60/60/24);
+    const hrs=Math.floor(diff/1000/60/60)%24;
+    const mins=Math.floor(diff/1000/60)%60;
+    licenseStatus.textContent=`License Active ✅ | Expires: ${fmtDate(licenseExpiry)} | Remaining: ${days}d ${hrs}h ${mins}m`;
+  }else{
+    licenseStatus.textContent="License Inactive ❌";
+  }
+}
+setInterval(updateLicenseStatus,1000);
+
+// Check localStorage on load
+if(licenseExpiry && licenseExpiry.getTime()>new Date().getTime()){
+  licenseOk=true;
+  licenseModal.style.display='none';
+}else{
+  licenseModal.style.display='flex';
+}
+
+// Submit License
+submitLicense.addEventListener('click',()=>{
+  if(licenseKey.value.trim()===LICENSE_KEY){
+    licenseOk=true;
+    licenseExpiry=new Date(new Date().getTime()+30*24*60*60*1000);
+    localStorage.setItem('dragonfly_license_expiry', licenseExpiry);
+    licenseModal.style.display='none';
+    updateLicenseStatus();
+  }else{
+    alert('Invalid License Key!');
+  }
+});
+
+// Signal Generation
 function generateSignalText(){
-    const pair = assetSelect.value;
-    const bb = bollinger.value;
-    const direction = bb==='upper'?'Buy':'Sell';
-    const analysis = bb==='upper'?'Price is touching upper BB; short-term bullish momentum observed.':'Price is touching lower BB; short-term bearish momentum observed.';
-    const now = new Date();
-    const randMin = Math.floor(Math.random()*3)+1;
-    const entry = new Date(now.getTime() + randMin*60*1000);
-    const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())}`;
-    return `✦━━━━━━━━━━━━━━━━✦ 
+  const pair = assetSelect.value;
+  const bb = bollinger.value;
+  const direction = bb==='upper'?'Buy':'Sell';
+  const analysis = bb==='upper'?'Price is touching upper BB; short-term bullish momentum observed.':'Price is touching lower BB; short-term bearish momentum observed.';
+  const now = new Date();
+  const randMin = Math.floor(Math.random()*3)+1;
+  const entry = new Date(now.getTime() + randMin*60*1000);
+  const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())}`;
+  return `✦━━━━━━━━━━━━━━━━✦ 
 🐉 DRAGONFLY — AI MARKET ANALYSIS
 ✦━━━━━━━━━━━━━━━━✦
 
@@ -176,58 +232,17 @@ function generateSignalText(){
 🧾 Market Analysis
 ${analysis}
 
-⚡ Note: 1Step MTG & Trade Safety Margin
+⚡ Note: 1Step MTG & Trade Safety Margin Applied
 ✦━━━━━━━━━━━━━━━━✦`;
 }
 
-// License Days Remaining
-function updateLicenseStatus(){
-    if(licenseActive && licenseExpiry){
-        const now = new Date();
-        let diff = Math.ceil((licenseExpiry - now)/(1000*60*60*24));
-        if(diff<0){ diff=0; licenseActive=false; licenseStatus.textContent='License Expired'; licenseModal.style.display='flex'; return;}
-        const activeDate = new Date(licenseExpiry.getTime() - 30*24*60*60*1000);
-        const activeStr = `${pad2(activeDate.getDate())}-${pad2(activeDate.getMonth()+1)}-${activeDate.getFullYear()}`;
-        const expiryStr = `${pad2(licenseExpiry.getDate())}-${pad2(licenseExpiry.getMonth()+1)}-${licenseExpiry.getFullYear()}`;
-        licenseStatus.textContent = `License Key: dragon12580 | Active: ${activeStr} | Expiry: ${expiryStr} | Days Remaining: ${diff}`;
-    }
-}
-setInterval(updateLicenseStatus,1000*60);
-
-// Generate button
+// Buttons
 generateBtn.addEventListener('click',()=>{
-    const now = new Date();
-    if(licenseActive && licenseExpiry && now>licenseExpiry){
-        licenseActive=false;
-        licenseStatus.textContent='License Expired';
-        licenseModal.style.display='flex';
-        return;
-    }
-    if(!licenseActive){
-        licenseModal.style.display='flex';
-        return;
-    }
-    output.textContent = generateSignalText();
+  if(!licenseOk){licenseModal.style.display='flex'; return;}
+  output.textContent=generateSignalText();
 });
-
-// Reset & Copy
 resetBtn.addEventListener('click',()=>{output.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
 copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(output.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
-
-// License submit
-submitLicense.addEventListener('click',()=>{
-    if(licenseInput.value.trim() === "dragon12580"){
-        licenseActive = true;
-        const now = new Date();
-        licenseExpiry = new Date(now.getTime() + 30*24*60*60*1000);
-        licenseInput.value='';
-        licenseModal.style.display='none';
-        updateLicenseStatus();
-        alert("License Activated! You can now generate signals.");
-    } else {
-        alert("Invalid License Key.");
-    }
-});
 </script>
 </body>
 </html>
