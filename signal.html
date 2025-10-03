@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -54,23 +54,15 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
 a.owner-link{color:var(--accent);text-decoration:none;font-weight:bold;}
 a.owner-link:hover{text-decoration:underline;}
 @media (max-width:880px){.grid{grid-template-columns:1fr;}}
-
-/* Asset Dropdown style tweak */
-.select-inline {display:flex;gap:8px;align-items:center;}
 .small-note{font-size:12px;color:var(--muted);}
-
-/* 🔒 Modal Style */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999;}
 .modal{background:#0f1530;padding:20px;border-radius:12px;width:90%;max-width:400px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.5);}
 .modal h2{margin-top:0;margin-bottom:10px;}
-.modal input{width:100%;padding:10px;border-radius:8px;border:1px solid #333;margin-bottom:12px;}
+.modal input, .modal select{width:100%;padding:10px;border-radius:8px;border:1px solid #333;margin-bottom:12px;}
 .modal button{padding:10px 16px;border:none;border-radius:8px;background:var(--accent);font-weight:bold;cursor:pointer;}
 .modal .error{color:#ff8a8a;font-size:13px;display:none;margin-top:6px;}
 .modal .expired a{color:#6dd6ff;text-decoration:none;}
 .modal .expired a:hover{text-decoration:underline;}
-
-/* Fancy separators for output */
-.sep {color:var(--accent);font-weight:700;}
 </style>
 </head>
 <body>
@@ -110,29 +102,25 @@ a.owner-link:hover{text-decoration:underline;}
     </select>
   </div>
 
-  <!-- Removed Start Date and Signal Count as requested -->
-
   <div>
     <label>Select Asset</label>
-    <div class="select-inline">
-      <select id="assetSelect"></select>
-    </div>
-    <div class="small-note">একবারে শুধু একটি পেয়ার সিলেক্ট করা যাবে</div>
+    <select id="assetSelect"></select>
+    <div class="small-note">You can select only one asset at a time.</div>
   </div>
 
   <div>
     <label>Bollinger Band</label>
     <select id="bollinger">
-      <option value="upper" selected>Upper (Buy / CALL)</option>
-      <option value="lower">Lower (Sell / PUT)</option>
+      <option value="upper" selected>Upper</option>
+      <option value="lower">Lower</option>
     </select>
   </div>
 
   <div>
     <label>Signal Mode</label>
     <select id="modeSelect">
-      <option value="auto" selected>Auto Analysis</option>
-      <option value="manual">Manual</option>
+      <option value="free" selected>Free Analysis</option>
+      <option value="premium">Premium Analysis</option>
     </select>
   </div>
 </div>
@@ -151,72 +139,58 @@ a.owner-link:hover{text-decoration:underline;}
 <footer>© DragonFly — Advance signals. Use responsibly.</footer>
 </div>
 
-<!-- 🔒 License Modal -->
-<div class="modal-backdrop" id="licenseModal" style="display:none;">
+<!-- 🔒 Modal for Premium Payment -->
+<div class="modal-backdrop" id="premiumModal" style="display:none;">
   <div class="modal">
-    <h2>🔑 License Required</h2>
-    <div id="licenseContent">
-      <p>Please enter your license key to unlock signals:</p>
-      <input type="password" id="licenseKey" placeholder="Enter license key">
-      <button id="submitLicense">Activate</button>
-      <div class="error" id="licenseError">❌ Invalid license, try again.</div>
-      <p style="margin-top:10px;font-size:13px;">লাইসেন্স নিতে টেলিগ্রাম গ্রুপে জয়েন করুন: <a href="https://t.me/+SsTMPgPVYoVlNTQ1" target="_blank">Click here</a></p>
-    </div>
-    <div class="expired" style="display:none;">
-      <p>License Expired. Please contact for a new license:</p>
-      <a href="https://t.me/+SsTMPgPVYoVlNTQ1" target="_blank">Contact via Telegram</a>
-    </div>
+    <h2>💰 Premium Access</h2>
+    <p>Select your package and complete payment via Binance ID: <b>499388438</b></p>
+    <select id="premiumPackage">
+      <option value="1week">1 Week - $5</option>
+      <option value="1month">1 Month - $10</option>
+      <option value="3month">3 Months - $20</option>
+    </select>
+    <input type="text" id="tranId" placeholder="Enter Transaction ID">
+    <button id="verifyPremium">Submit & Verify</button>
+    <div class="error" id="premiumError">❌ Transaction not verified yet.</div>
+    <p style="margin-top:10px;font-size:13px;">After verification, wait 24 hours before using. Admin: @TraderParvej</p>
   </div>
 </div>
 
 <script>
-// ====== DOM Elements ======
-const utcSel = document.getElementById('utcSelect');
 const marketSel = document.getElementById('market');
-const tf = document.getElementById('timeframe');
 const assetSelect = document.getElementById('assetSelect');
-const outDiv = document.getElementById('output');
+const bollinger = document.getElementById('bollinger');
+const modeSelect = document.getElementById('modeSelect');
+const output = document.getElementById('output');
 const generateBtn = document.getElementById('generate');
 const resetBtn = document.getElementById('reset');
 const copyBtn = document.getElementById('copyOut');
-const bollinger = document.getElementById('bollinger');
-const modeSelect = document.getElementById('modeSelect');
-const licenseStatus = document.getElementById('licenseStatus');
+const utcSel = document.getElementById('utcSelect');
+const tf = document.getElementById('timeframe');
 
-const licenseModal = document.getElementById('licenseModal');
-const submitLicense = document.getElementById('submitLicense');
-const licenseKey = document.getElementById('licenseKey');
-const licenseError = document.getElementById('licenseError');
-const licenseContent = document.getElementById('licenseContent');
-const expiredContent = document.querySelector('.modal .expired');
+const premiumModal = document.getElementById('premiumModal');
+const verifyBtn = document.getElementById('verifyPremium');
+const tranIdInp = document.getElementById('tranId');
+const premiumError = document.getElementById('premiumError');
 
-let licenseOk = false;
-const LICENSE_KEY = '63JA-TSGP-XMHD';
-let licenseExpiry = localStorage.getItem('dragonfly_license_expiry') ? new Date(localStorage.getItem('dragonfly_license_expiry')) : null;
+let freeCount = 0;
+let premiumVerified = false;
 
-// ====== Pairs ======
-const OTCpairs = [
-"AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)",
-"AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)",
-"USD/PHP (OTC)","USD/EGP (OTC)","EUR/CHF (OTC)","EUR/AUD (OTC)","USD/ZAR (OTC)",
-"AUD/CHF (OTC)","AUD/JPY (OTC)","CAD/CHF (OTC)","CHF/JPY (OTC)","EUR/CAD (OTC)",
-"EUR/JPY (OTC)","GBP/AUD (OTC)","NZD/CHF (OTC)","USD/CAD (OTC)","USD/CHF (OTC)",
-"USD/COP (OTC)","USD/INR (OTC)","USD/JPY (OTC)","USD/MXN (OTC)","USD/NGN (OTC)",
-"USD/PKR (OTC)","AUD/NZD (OTC)","EUR/SGD (OTC)","GBP/JPY (OTC)","USD/TRY (OTC)",
-"EUR/NZD (OTC)","GBP/NZD (OTC)","NZD/USD (OTC)","GBP/CHF (OTC)","GBP/CAD (OTC)","GBP/USD (OTC)"
-];
+// ====== Asset Lists ======
+const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)",
+"AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
 const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
-// ====== Fill assetSelect based on market ======
+// ====== Fill assetSelect ======
 function fillAssetSelect(){
-  assetSelect.innerHTML = '';
-  const pairs = marketSel.value === 'REAL' ? REALpairs : OTCpairs;
-  pairs.forEach(pair=>{
-    const opt = document.createElement('option');
-    opt.value = pair;
-    opt.textContent = pair;
-    assetSelect.appendChild(opt);
-  });
+    assetSelect.innerHTML = '';
+    const pairs = marketSel.value === 'REAL' ? REALpairs : OTCpairs;
+    pairs.forEach(p=>{
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        assetSelect.appendChild(opt);
+    });
 }
 fillAssetSelect();
 marketSel.addEventListener('change', fillAssetSelect);
@@ -224,152 +198,75 @@ marketSel.addEventListener('change', fillAssetSelect);
 // ====== Utilities ======
 function pad2(n){ return String(n).padStart(2,'0'); }
 function fmtDate(d){ return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}`; }
-function mono(str){
-    const map = {
-      "A":"𝙰","B":"𝙱","C":"𝙲","D":"𝙳","E":"𝙴","F":"𝙵","G":"𝙶","H":"𝙷","I":"𝙸","J":"𝙹",
-      "K":"𝙺","L":"𝙻","M":"𝙼","N":"𝙽","O":"𝙾","P":"𝙿","Q":"𝚀","R":"𝚁","S":"𝚂","T":"𝚃",
-      "U":"𝚄","V":"𝚅","W":"𝚆","X":"𝚇","Y":"𝚈","Z":"𝚉",
-      "0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿",
-      "-":"-","/":"/"," ":" "
-    };
-    return str.split("").map(ch=>map[ch.toUpperCase()]||ch).join("");
-}
 
-// ====== Build single signal ======
-function buildSingleSignal(){
-    const pair = assetSelect.value || 'EUR/USD';
-    // Bollinger selection decides direction
-    const band = bollinger.value; // 'upper' or 'lower'
-    const strategy = band === 'upper' ? 'Bollinger Band (Upper)' : 'Bollinger Band (Lower)';
-    const signal = band === 'upper' ? 'CALL (Buy)' : 'PUT (Sell)';
-
-    // Entry time: exactly 1 minute from now (as requested)
+// ====== Generate Single Signal ======
+function generateSignal(){
+    const pair = assetSelect.value;
+    const bb = bollinger.value;
+    const direction = bb === 'upper' ? 'Buy' : 'Sell';
+    const analysis = bb==='upper' ? 'Price is touching the upper BB; short-term bullish momentum observed.' : 'Price is touching the lower BB; short-term bearish momentum observed.';
     const now = new Date();
     const entry = new Date(now.getTime() + 1*60*1000);
     const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())}`;
+    const outputText = `✦━━━━━━━━━━━━━━━━✦ 
+🐉 DRAGONFLY — AI MARKET ANALYSIS
+✦━━━━━━━━━━━━━━━━✦
 
-    // Compose a professional analysis-like note (concise)
-    const confidence = Math.floor(85 + Math.random()*15); // 85-99% pseudo-confidence for pro feel
-    const reason = band === 'upper' 
-      ? 'Price touching upper BB — momentum suggests short-term bullish continuation.' 
-      : 'Price touching lower BB — momentum suggests short-term bearish continuation.';
+📊 Pair          : ${pair}
+⏰ Entry Time    : ${timeStr} (1 Minute Later)
+⌛ Signal Duration: 1 Minute
+📈 Strategy      : Bollinger Band – ${bb.charAt(0).toUpperCase()+bb.slice(1)} Zone
+🎯 Direction     : ${direction}
 
-    return {
-      pair,
-      timeStr,
-      strategy,
-      signal,
-      confidence,
-      reason,
-      generatedAt: now
-    };
+🧾 Market Analysis
+${analysis}
+
+⚡ Note: Execute the trade exactly after 1 minute for optimal entry.
+✦━━━━━━━━━━━━━━━━✦`;
+    return outputText;
 }
 
-// ====== Generate Output ======
-function tfText(tfVal){
-    if(tfVal.endsWith("m")) return tfVal.replace("m"," minutes");
-    if(tfVal.endsWith("h")) return tfVal.replace("h"," hours");
-    return tfVal;
-}
-
-function generateOutput(){
-    const now=new Date().getTime();
-    if(!licenseOk){
-        licenseModal.style.display='flex'; return;
-    }
-    if(licenseExpiry && now>licenseExpiry){
-        licenseOk = false;
-        licenseExpiry = null;
-        localStorage.removeItem('dragonfly_license_expiry');
-        licenseStatus.textContent = "License Expired ❌";
-        licenseModal.style.display='flex';
-        licenseContent.style.display='none';
-        expiredContent.style.display='block';
-        return;
-    }
-
-    outDiv.textContent="⏳ Generating professional signal...";
-    setTimeout(()=>{
-        const sig = buildSingleSignal();
-        const genDate = fmtDate(sig.generatedAt);
-        const timeframeText = tfText(tf.value);
-
-        // Professional DragonFly formatted output
-        const lines = [];
-        lines.push('✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦');
-        lines.push('🔮  DRAGONFLY — AI MARKET ANALYSIS  🔮');
-        lines.push('✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦\n');
-        lines.push(`📊 Pair        : ${sig.pair}`);
-        lines.push(`⏰ Entry Time  : ${sig.timeStr}  (Exact — 1 minute from now)`);
-        lines.push(`📈 Timeframe   : ${timeframeText}`);
-        lines.push(`⚙️ Strategy    : ${sig.strategy}`);
-        lines.push(`🎯 Signal      : ${sig.signal}`);
-        lines.push(`📈 Confidence : ${sig.confidence}%`);
-        lines.push(`\n💡 Reason      : ${sig.reason}`);
-        lines.push(`\n🕒 Generated   : ${genDate} | UTC ${utcSel.value}`);
-        lines.push('\n✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦');
-        lines.push('⚠️ Note: Signals are AI-assisted suggestions. Use risk management.');
-        lines.push('✦━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✦\n');
-        lines.push('Software: DragonFly  •  Owner: @TraderParvej');
-
-        outDiv.textContent = lines.join('\n');
-    },300);
-}
-
-// ====== License ======
-function updateCountdown(){
-    if(licenseOk && licenseExpiry){
-        const now = new Date();
-        let diff = licenseExpiry - now;
-        if(diff <= 0){
-            licenseOk = false;
-            licenseExpiry = null;
-            localStorage.removeItem('dragonfly_license_expiry');
-            licenseStatus.textContent = "License Expired ❌";
+// ====== Generate Button ======
+generateBtn.addEventListener('click',()=>{
+    const mode = modeSelect.value;
+    if(mode==='free'){
+        if(freeCount>=5){
+            alert('Free Analysis limit reached (5 signals/day). Upgrade to Premium for unlimited signals.');
             return;
         }
-        const days = Math.floor(diff/1000/60/60/24);
-        const hrs = Math.floor(diff/1000/60/60)%24;
-        const mins = Math.floor(diff/1000/60)%60;
-        const secs = Math.floor(diff/1000)%60;
-        licenseStatus.textContent = `License Active ✅ | Expires in ${days}d ${hrs}h ${mins}m ${secs}s`;
-    } else if(!licenseOk){
-        licenseStatus.textContent = "License Inactive ❌";
+        freeCount++;
+        output.textContent = generateSignal();
+    } else if(mode==='premium'){
+        if(!premiumVerified){
+            premiumModal.style.display='flex';
+            return;
+        }
+        output.textContent = generateSignal();
     }
-}
-setInterval(updateCountdown,1000);
-
-// ====== Check localStorage on load ======
-if(localStorage.getItem('dragonfly_license_expiry')){
-    const exp = new Date(localStorage.getItem('dragonfly_license_expiry'));
-    if(exp.getTime() > new Date().getTime()){
-        licenseExpiry = exp;
-        licenseOk = true;
-        licenseModal.style.display='none';
-    } else {
-        localStorage.removeItem('dragonfly_license_expiry');
-    }
-}
-updateCountdown();
-
-submitLicense.addEventListener('click',()=>{
-    if(licenseKey.value.trim()===LICENSE_KEY){
-        licenseOk=true;
-        licenseExpiry=new Date().getTime()+30*24*60*60*1000;
-        licenseExpiry = new Date(licenseExpiry);
-        localStorage.setItem('dragonfly_license_expiry', licenseExpiry);
-        licenseModal.style.display='none';
-        licenseContent.style.display='block';
-        expiredContent.style.display='none';
-        updateCountdown();
-        generateOutput();
-    }else licenseError.style.display='block';
 });
 
-// ====== Buttons ======
-generateBtn.addEventListener('click',generateOutput);
-resetBtn.addEventListener('click',()=>{outDiv.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
-copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(outDiv.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
+// ====== Reset Button ======
+resetBtn.addEventListener('click',()=>{output.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
+
+// ====== Copy Button ======
+copyBtn.addEventListener('click',()=>{
+    navigator.clipboard.writeText(output.textContent);
+    copyBtn.textContent='Copied ✔';
+    setTimeout(()=>copyBtn.textContent='Copy Output',1000);
+});
+
+// ====== Premium Verification ======
+verifyBtn.addEventListener('click',()=>{
+    const tranId = tranIdInp.value.trim();
+    if(tranId!==''){
+        premiumVerified = true;
+        premiumModal.style.display='none';
+        premiumError.style.display='none';
+        alert('Premium verified! Please wait 24 hours for activation.');
+    } else {
+        premiumError.style.display='block';
+    }
+});
 </script>
 </body>
 </html>
