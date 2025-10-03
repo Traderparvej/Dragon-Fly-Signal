@@ -180,6 +180,20 @@ ${analysis}
 ✦━━━━━━━━━━━━━━━━✦`;
 }
 
+// License Days Remaining
+function updateLicenseStatus(){
+    if(licenseActive && licenseExpiry){
+        const now = new Date();
+        let diff = Math.ceil((licenseExpiry - now)/(1000*60*60*24));
+        if(diff<0){ diff=0; licenseActive=false; licenseStatus.textContent='License Expired'; licenseModal.style.display='flex'; return;}
+        const activeDate = new Date(licenseExpiry.getTime() - 30*24*60*60*1000);
+        const activeStr = `${pad2(activeDate.getDate())}-${pad2(activeDate.getMonth()+1)}-${activeDate.getFullYear()}`;
+        const expiryStr = `${pad2(licenseExpiry.getDate())}-${pad2(licenseExpiry.getMonth()+1)}-${licenseExpiry.getFullYear()}`;
+        licenseStatus.textContent = `License Key: dragon12580 | Active: ${activeStr} | Expiry: ${expiryStr} | Days Remaining: ${diff}`;
+    }
+}
+setInterval(updateLicenseStatus,1000*60);
+
 // Generate button
 generateBtn.addEventListener('click',()=>{
     const now = new Date();
@@ -206,11 +220,9 @@ submitLicense.addEventListener('click',()=>{
         licenseActive = true;
         const now = new Date();
         licenseExpiry = new Date(now.getTime() + 30*24*60*60*1000);
-        const activeDateStr = `${pad2(now.getDate())}-${pad2(now.getMonth()+1)}-${now.getFullYear()}`;
-        const expiryDateStr = `${pad2(licenseExpiry.getDate())}-${pad2(licenseExpiry.getMonth()+1)}-${licenseExpiry.getFullYear()}`;
-        licenseStatus.textContent = `License Key: dragon12580 | Active: ${activeDateStr} | Expiry: ${expiryDateStr}`;
-        licenseModal.style.display='none';
         licenseInput.value='';
+        licenseModal.style.display='none';
+        updateLicenseStatus();
         alert("License Activated! You can now generate signals.");
     } else {
         alert("Invalid License Key.");
