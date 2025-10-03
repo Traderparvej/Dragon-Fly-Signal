@@ -50,6 +50,7 @@ select,button{
   line-height:1.45;
 }
 .unicode{font-family: "Arial", "DejaVu Sans", "monospace";}
+
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
 a.owner-link{color:var(--accent);text-decoration:none;font-weight:bold;}
 a.owner-link:hover{text-decoration:underline;}
@@ -165,7 +166,8 @@ let freeCount = 0;
 let premiumActive = false;
 
 // ====== Assets ======
-const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
+const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)",
+"AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
 const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
 // Fill assets
@@ -190,9 +192,10 @@ function generateSignalText(){
     const direction = bb==='upper'?'Buy':'Sell';
     const analysis = bb==='upper'?'Price is touching upper BB; short-term bullish momentum observed.':'Price is touching lower BB; short-term bearish momentum observed.';
     const now = new Date();
-    const randMin = Math.floor(Math.random()*3)+1; // 1–3 min random
+    // Random 1–3 min later
+    const randMin = Math.floor(Math.random()*3)+1;
     const entry = new Date(now.getTime() + randMin*60*1000);
-    const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())}`; // Only HH:MM
+    const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())}`;
     return `✦━━━━━━━━━━━━━━━━✦ 
 🐉 DRAGONFLY — AI MARKET ANALYSIS
 ✦━━━━━━━━━━━━━━━━✦
@@ -206,7 +209,7 @@ function generateSignalText(){
 🧾 Market Analysis
 ${analysis}
 
-⚡ Note: Execute the trade exactly after 1 minute for optimal entry.
+⚡ Note: 1Step MTG & Trade Safety Margin
 ✦━━━━━━━━━━━━━━━━✦`;
 }
 
