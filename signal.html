@@ -12,9 +12,6 @@
   --text:#ffffff;
   --accent:#6dd6ff;
   --green:#4caf50;
-  --yellow:#ffca28;
-  --red:#f44336;
-  --blue:#29b6f6;
 }
 *{box-sizing:border-box;}
 body{
@@ -47,13 +44,12 @@ select,button{
   border-radius:12px;
   background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.02));
   border:1px solid rgba(255,255,255,0.03);
-  min-height:180px;
+  min-height:200px;
   white-space:pre-wrap;
   font-family:'Courier New', Courier, monospace;
   color:#fff;
   font-size:14px;
-  line-height:1.45;
-  opacity:1;
+  line-height:1.6;
   transition: all 0.6s ease-in-out;
 }
 .unicode{font-family: "Arial", "DejaVu Sans", "monospace";}
@@ -168,8 +164,7 @@ const activateLicenseBtn = document.getElementById('activateLicense');
 let licenseOk = false;
 
 // ====== Assets ======
-const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)",
-"AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
+const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
 const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
 function fillAssetSelect(){
@@ -229,7 +224,7 @@ activateLicenseBtn.addEventListener('click',()=>{
   }
 });
 
-// ====== Signal Generator with 1-2min random gap from generate click ======
+// ====== Signal Generator with true 1-2 min random gap ======
 function generateSignalText(){
     if(!licenseOk){ alert("License not active. Cannot generate signals."); return ""; }
 
@@ -239,7 +234,7 @@ function generateSignalText(){
     const analysis = bb==='upper'?'Price is touching the upper BB; short-term bullish momentum observed.':'Price is touching the lower BB; short-term bearish momentum observed.';
 
     const now = new Date();
-    const gap = Math.floor(Math.random()*2)+1; // 1-2 minutes
+    const gap = Math.floor(Math.random()*2)+1; // random 1 or 2 minutes
     const entry = new Date(now.getTime() + gap*60*1000);
 
     const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())} (${gap} Minute${gap>1?'s':''} Later)`;
@@ -248,11 +243,11 @@ function generateSignalText(){
 🐉 DRAGONFLY — AI MARKET ANALYSIS
 ✦━━━━━━━━━━━━━━━━✦
 
-📊 Pair          : ${pair}
+📊 Pair               : ${pair} 
 ⏰ Entry Time    : ${timeStr}
 ⌛️ Signal Duration: 1 Minute
-📈 Strategy      : Bollinger Band – ${bb.charAt(0).toUpperCase()+bb.slice(1)} Zone
-🎯 Direction     : ${direction}
+📈 Strategy        : Bollinger Band – ${bb.charAt(0).toUpperCase()+bb.slice(1)} Zone 
+🎯 Direction       : ${direction}
 
 🧾 Market Analysis
 ${analysis}
@@ -261,7 +256,6 @@ ${analysis}
 ✦━━━━━━━━━━━━━━━━✦`;
 }
 
-// ====== Generate Button Effect ======
 generateBtn.addEventListener('click',()=>{
     if(!licenseOk){ alert("License not active. Cannot generate signals."); return; }
 
@@ -283,7 +277,11 @@ generateBtn.addEventListener('click',()=>{
 resetBtn.addEventListener('click',()=>{
     output.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';
 });
-copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(output.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
+copyBtn.addEventListener('click',()=>{
+    navigator.clipboard.writeText(output.textContent);
+    copyBtn.textContent='Copied ✔';
+    setTimeout(()=>copyBtn.textContent='Copy Output',1000);
+});
 </script>
 </body>
 </html>
