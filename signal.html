@@ -127,7 +127,7 @@ a.owner-link:hover{text-decoration:underline;}
 
 <script>
 const LICENSE_KEY = "dragon12580"; // hidden
-const LICENSE_STORAGE_KEY = "dragonfly_license_expiry";
+const LICENSE_STORAGE_KEY_PREFIX = "dragonfly_license_";
 
 const marketSel = document.getElementById('market');
 const assetSelect = document.getElementById('assetSelect');
@@ -144,9 +144,9 @@ const licenseExpiryPill = document.getElementById('licenseExpiry');
 const deviceIdPill = document.getElementById('deviceId');
 const getNewLicenseBtn = document.getElementById('getNewLicenseBtn');
 
-let licenseOk = false;
-let licenseExpiry = localStorage.getItem(LICENSE_STORAGE_KEY) ? new Date(localStorage.getItem(LICENSE_STORAGE_KEY)) : null;
 const deviceId = Math.floor(Math.random()*900000000+100000000);
+let licenseExpiry = localStorage.getItem(LICENSE_STORAGE_KEY_PREFIX + deviceId) ? new Date(localStorage.getItem(LICENSE_STORAGE_KEY_PREFIX + deviceId)) : null;
+let licenseOk = false;
 let signalActive = false;
 
 // ====== Assets ======
@@ -170,16 +170,11 @@ marketSel.addEventListener('change',fillAssetSelect);
 function pad2(n){return String(n).padStart(2,'0');}
 function fmtDate(d){return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}`;}
 
-// ====== License UI ======
-function adminTelegramUrl(msg){return `https://t.me/TraderParvej?start=${encodeURIComponent(msg||"")}`;}
+// ====== License ======
 function updateLicenseUI(){
   const now = new Date();
-  if(licenseOk && licenseExpiry && licenseExpiry.getTime()<now.getTime()){
-    licenseOk=false; licenseExpiry=null;
-    localStorage.removeItem(LICENSE_STORAGE_KEY);
-  }
-
-  if(licenseOk && licenseExpiry){
+  if(licenseExpiry && licenseExpiry.getTime() > now.getTime()){
+    licenseOk = true;
     const diff = licenseExpiry-now;
     const days = Math.floor(diff/1000/60/60/24);
     const hrs = Math.floor(diff/1000/60/60)%24;
@@ -191,19 +186,20 @@ function updateLicenseUI(){
     deviceIdPill.textContent=`ID: ${deviceId}`;
     getNewLicenseBtn.style.display='none';
   } else {
-    licenseStatusSmall.className='license-expired';
+    licenseOk = false;
+    licenseStatusSmall.style.color='#ff6b6b';
     licenseStatusSmall.textContent='License Expired ❌';
     licenseActivePill.textContent='Active: —';
     licenseExpiryPill.textContent='Expiry: —';
     deviceIdPill.textContent=`ID: ${deviceId}`;
     getNewLicenseBtn.style.display='inline-block';
-    getNewLicenseBtn.href=adminTelegramUrl(`Hello @TraderParvej, I want a new DragonFly license. My Device ID: ${deviceId}`);
+    getNewLicenseBtn.href=`https://t.me/TraderParvej?start=${encodeURIComponent("Hello, I want a new DragonFly license. Device ID: "+deviceId)}`;
   }
 }
 updateLicenseUI();
 setInterval(updateLicenseUI,60000);
 
-// ====== Signals ======
+// ====== Signal ======
 function generateSignalText(){
   const pair = assetSelect.value;
   const bb = bollinger.value;
@@ -233,29 +229,27 @@ ${analysis}
 generateBtn.addEventListener('click',()=>{
   if(!licenseOk){alert('License required to generate signals. Please get a new license.'); return;}
   if(signalActive){alert('Previous signal still active. Wait for it to finish.'); return;}
-  signalActive = true;
+  signalActive=true;
   output.textContent=generateSignalText();
-  setTimeout(()=>{signalActive=false;}, 60*1000); 
+  setTimeout(()=>{signalActive=false;},60*1000);
 });
 
 resetBtn.addEventListener('click',()=>{output.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
 copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(output.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
 
-// ====== First-time license entry ======
-if(!licenseOk && !licenseExpiry){
-  const enteredKey = prompt("Enter License Key:");
+// ====== First-time license prompt per device ======
+if(!licenseOk){
+  const enteredKey = prompt("Enter License Key for this device:");
   if(enteredKey===LICENSE_KEY){
     licenseExpiry=new Date(new Date().getTime()+30*24*60*60*1000);
-    localStorage.setItem(LICENSE_STORAGE_KEY,licenseExpiry);
+    localStorage.setItem(LICENSE_STORAGE_KEY_PREFIX + deviceId,licenseExpiry);
     licenseOk=true;
     updateLicenseUI();
+    alert("License activated for 30 days!");
   } else {
     alert('Invalid Key. Signals disabled.');
     updateLicenseUI();
   }
-} else if(licenseExpiry && new Date(licenseExpiry).getTime()>new Date().getTime()){
-  licenseOk=true;
-  updateLicenseUI();
 }
 </script>
 </body>
