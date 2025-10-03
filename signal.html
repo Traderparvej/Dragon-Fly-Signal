@@ -25,32 +25,15 @@ header h1{margin:0;font-size:20px;display:flex;align-items:center;gap:12px;}
 .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px;margin-bottom:12px;}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
-select,input,button{
-  width:100%;
-  padding:10px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.06);
-  background:rgba(255,255,255,0.9);
-  color:#000;
-  font-weight:600;
-}
+select,button{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.9);color:#000;font-weight:600;}
 .controls{display:flex;gap:10px;margin-top:12px;}
 .controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:600;}
 .output{
-  margin-top:12px;
-  padding:16px;
-  border-radius:12px;
-  background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.02));
-  border:1px solid rgba(255,255,255,0.03);
-  min-height:180px;
-  white-space:pre-wrap;
-  font-family:'Courier New', Courier, monospace;
-  color:#fff;
-  font-size:14px;
-  line-height:1.45;
+  margin-top:12px;padding:16px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.02));
+  border:1px solid rgba(255,255,255,0.03);min-height:180px;white-space:pre-wrap;
+  font-family:'Courier New', Courier, monospace;color:#fff;font-size:14px;line-height:1.45;
 }
-.unicode{font-family: "Arial", "DejaVu Sans", "monospace";}
-
+.unicode{font-family:"Arial","DejaVu Sans","monospace";}
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
 a.owner-link{color:var(--accent);text-decoration:none;font-weight:bold;}
 a.owner-link:hover{text-decoration:underline;}
@@ -62,6 +45,7 @@ a.owner-link:hover{text-decoration:underline;}
 .modal input, .modal select{width:100%;padding:10px;border-radius:8px;border:1px solid #333;margin-bottom:12px;}
 .modal button{padding:10px 16px;border:none;border-radius:8px;background:var(--accent);font-weight:bold;cursor:pointer;}
 .modal .info{color:#6dd6ff;font-size:13px;margin-top:6px;}
+.status-text{margin-top:6px;font-size:13px;color:#6dd6ff;font-weight:600;}
 </style>
 </head>
 <body>
@@ -80,7 +64,6 @@ a.owner-link:hover{text-decoration:underline;}
       <option value="+6:00" selected>UTC +6:00 (BD)</option>
     </select>
   </div>
-
   <div>
     <label>Market</label>
     <select id="market">
@@ -88,7 +71,6 @@ a.owner-link:hover{text-decoration:underline;}
       <option value="REAL">REAL</option>
     </select>
   </div>
-
   <div>
     <label>Timeframe</label>
     <select id="timeframe">
@@ -98,13 +80,11 @@ a.owner-link:hover{text-decoration:underline;}
       <option value="1h">1 hour</option>
     </select>
   </div>
-
   <div>
     <label>Select Asset</label>
     <select id="assetSelect"></select>
     <div class="small-note">You can select only one asset at a time.</div>
   </div>
-
   <div>
     <label>Bollinger Band</label>
     <select id="bollinger">
@@ -112,7 +92,6 @@ a.owner-link:hover{text-decoration:underline;}
       <option value="lower">Lower</option>
     </select>
   </div>
-
   <div>
     <label>Signal Mode</label>
     <select id="modeSelect">
@@ -128,31 +107,32 @@ a.owner-link:hover{text-decoration:underline;}
   <button id="copyOut">Copy Output</button>
 </div>
 
+<div class="status-text" id="premiumStatus"></div>
+
 <div class="output unicode" id="output">▶️ DATE: — ◀️
 
 (Press Generate to produce signals)</div>
 </section>
 
-<!-- Premium Packages Modal -->
-<div class="modal-backdrop" id="premiumModal" style="display:none;">
-  <div class="modal">
-    <h2>💰 Premium Packages</h2>
-    <p>Select a package and provide payment details:</p>
-    <label>Choose Package</label>
-    <select id="pkgSelect">
-      <option value="1week">$5 — 1 Week</option>
-      <option value="1month">$10 — 1 Month</option>
-      <option value="3month">$20 — 3 Months</option>
-    </select>
-    <label>Payment via Binance ID: 499388438</label>
-    <input type="text" id="tranID" placeholder="Enter your Transaction/Order ID" />
-    <div class="info">After submitting, wait 24 hours and message admin <a href="https://t.me/TraderParvej" target="_blank" class="owner-link">@TraderParvej</a> for verification. Only after admin approval, Premium signals will be active.</div>
-    <button id="submitPkg">Submit Payment</button>
-    <button id="closePremium">Close</button>
-  </div>
+<footer>© DragonFly — Advance signals. Use responsibly.</footer>
 </div>
 
-<footer>© DragonFly — Advance signals. Use responsibly.</footer>
+<!-- Premium Modal -->
+<div class="modal-backdrop" id="premiumModal" style="display:none;">
+  <div class="modal">
+    <h2>💰 Premium Access</h2>
+    <label>Select Package:</label>
+    <select id="premiumPackage">
+      <option value="7days">7 Days - $5</option>
+      <option value="30days">30 Days - $10</option>
+      <option value="90days">90 Days - $20</option>
+    </select>
+    <label>Enter Payment Transaction/Order ID:</label>
+    <input type="text" id="transactionId" placeholder="Enter Order ID">
+    <button id="submitPremium">Submit for Approval</button>
+    <button id="closePremium">Close</button>
+    <div class="info">After submission, admin will approve to activate your premium signals.</div>
+  </div>
 </div>
 
 <script>
@@ -164,17 +144,22 @@ const output = document.getElementById('output');
 const generateBtn = document.getElementById('generate');
 const resetBtn = document.getElementById('reset');
 const copyBtn = document.getElementById('copyOut');
+const utcSel = document.getElementById('utcSelect');
+const tf = document.getElementById('timeframe');
 
 const premiumModal = document.getElementById('premiumModal');
 const closePremiumBtn = document.getElementById('closePremium');
-const submitPkgBtn = document.getElementById('submitPkg');
+const submitPremiumBtn = document.getElementById('submitPremium');
+const premiumPackage = document.getElementById('premiumPackage');
+const transactionId = document.getElementById('transactionId');
+const premiumStatus = document.getElementById('premiumStatus');
 
 let freeCount = 0;
-let premiumActive = false; // Only admin will set true after approval
+let premiumActive = false;
+let approvedPackage = null;
 
-// ====== Assets ======
-const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)",
-"AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
+// ===== Assets =====
+const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
 const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
 // Fill assets
@@ -182,15 +167,14 @@ function fillAssetSelect(){
     assetSelect.innerHTML = '';
     const pairs = marketSel.value==='REAL'?REALpairs:OTCpairs;
     pairs.forEach(p=>{
-        const opt = document.createElement('option');
-        opt.value = p; opt.textContent = p;
+        const opt=document.createElement('option');
+        opt.value=p; opt.textContent=p;
         assetSelect.appendChild(opt);
     });
 }
 fillAssetSelect();
-marketSel.addEventListener('change', fillAssetSelect);
+marketSel.addEventListener('change',fillAssetSelect);
 
-// Utilities
 function pad2(n){ return String(n).padStart(2,'0'); }
 
 function generateSignalText(){
@@ -224,13 +208,13 @@ generateBtn.addEventListener('click',()=>{
     if(modeSelect.value==='free'){
         if(freeCount>=5){alert('Free Analysis limit reached (5/day). Upgrade to Premium.'); return;}
         freeCount++;
-        output.textContent = generateSignalText();
+        output.textContent=generateSignalText();
     } else {
         if(!premiumActive){
             premiumModal.style.display='flex';
             return;
         }
-        output.textContent = generateSignalText();
+        output.textContent=generateSignalText();
     }
 });
 
@@ -238,14 +222,25 @@ generateBtn.addEventListener('click',()=>{
 resetBtn.addEventListener('click',()=>{output.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
 copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(output.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
 
-// Premium modal
+// Premium Modal
 closePremiumBtn.addEventListener('click',()=>{premiumModal.style.display='none';});
-submitPkgBtn.addEventListener('click',()=>{
-    const tranID = document.getElementById('tranID').value.trim();
-    if(tranID===''){alert('Please enter your Transaction/Order ID'); return;}
-    alert(`Thank you! Please wait 24 hours and message admin @TraderParvej with your Transaction ID for verification. Premium signals will be active only after admin approval.`);
+submitPremiumBtn.addEventListener('click',()=>{
+    if(transactionId.value.trim()===''){alert('Please enter Payment Order ID'); return;}
+    // simulate admin approval process
+    premiumActive = false;
+    approvedPackage = premiumPackage.value;
+    premiumStatus.textContent = `Premium Submitted for Approval (${approvedPackage}). Wait for admin approval.`;
     premiumModal.style.display='none';
+    transactionId.value='';
 });
+
+// Simulate admin approval (you will manually trigger this in real scenario)
+function approvePremium(){
+    if(!approvedPackage) return;
+    premiumActive = true;
+    let days=approvedPackage==='7days'?7:approvedPackage==='30days'?30:90;
+    premiumStatus.textContent = `Premium Active – ${days} Days (${approvedPackage})`;
+}
 </script>
 </body>
 </html>
