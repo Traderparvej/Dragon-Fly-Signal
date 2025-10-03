@@ -1,96 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DragonFly — Signal Generator</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>DragonFly — Signal Generator (Admin License)</title>
 <style>
 :root{
   --bg:#081024; --panel:#0f1530; --muted:#9fb0d6; --text:#ffffff;
   --accent:#6dd6ff; --green:#4caf50;
 }
 *{box-sizing:border-box;}
-body{margin:0;font-family:Inter,ui-sans-serif,system-ui; background:linear-gradient(180deg,#05102a,#081024); color:var(--text);}
+body{margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#05102a,#081024);color:var(--text);}
 .wrap{max-width:1100px;margin:18px auto;padding:18px;}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 header h1{margin:0;font-size:20px;display:flex;align-items:center;gap:12px;}
-.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px;margin-bottom:12px;}
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:14px;margin-bottom:12px;}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
-select,button,input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);font-weight:600;}
-select, input{background:rgba(255,255,255,0.9);color:#000;}
+select,button,input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);font-weight:600;}
+select,input,textarea{background:rgba(255,255,255,0.95);color:#000;font-weight:500;}
 .controls{display:flex;gap:10px;margin-top:12px;}
-.controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:600;transition:0.3s;}
-.controls button:hover{opacity:0.9;}
+.controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:700;transition:0.18s;}
+.controls button:hover{opacity:0.95;}
+.small-note{font-size:12px;color:var(--muted);}
 .license-status{margin-top:6px;font-weight:600;font-size:14px;}
 .license-status.active{color:var(--green);}
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
-.signal-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1000;}
-.signal-modal{background:#0f1530;padding:14px;border-radius:12px;width:90%;max-width:320px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.5);text-align:center;font-size:13px;}
+/* popup */
+.signal-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1200;}
+.signal-modal{background:#0f1530;padding:14px;border-radius:12px;width:92%;max-width:360px;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,0.6);text-align:center;font-size:13px;}
 .signal-candle{display:flex;flex-direction:column;align-items:center;margin-bottom:12px;}
-.signal-candle .wick{width:3px;height:14px;background:#ccc;}
-.signal-candle .body{width:22px;height:0;}
-@keyframes growUp{from{height:0;}to{height:40px;}}
-@keyframes growDown{from{height:0;}to{height:40px;}}
-.signal-text{text-align:left;white-space:pre-wrap;font-family:'Courier New', monospace;font-size:12px;line-height:1.4;color:#eee;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:8px;}
-.signal-modal button{margin-top:10px;width:100%;padding:8px;border:none;border-radius:8px;background:#6dd6ff;font-weight:bold;cursor:pointer;}
-.signal-modal button:hover{opacity:0.9;}
-.device-id{font-size:12px;color:#6dd6ff;margin-top:6px;text-align:center;}
+.signal-candle .wick{width:3px;height:14px;background:#ccc;border-radius:2px;}
+.signal-candle .body{width:26px;height:0;border-radius:3px;box-shadow:0 6px 18px rgba(0,0,0,0.25) inset;}
+@keyframes growUp{from{height:0;}to{height:44px;}}
+@keyframes growDown{from{height:0;}to{height:44px;}}
+.signal-text{text-align:left;white-space:pre-wrap;font-family:'Courier New',monospace;font-size:13px;line-height:1.45;color:#eee;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);border-radius:8px;padding:10px;margin-bottom:8px;}
+.signal-modal button{width:100%;padding:9px;border:none;border-radius:8px;background:var(--accent);font-weight:700;cursor:pointer;}
+.signal-modal button:hover{opacity:0.95;}
+/* admin section small */
+#adminPanel{display:none;margin-top:10px;}
+.admin-row{display:flex;gap:8px;}
+.admin-row input{flex:1;}
+.code-box{word-break:break-all;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;margin-top:8px;font-family:monospace;font-size:13px;}
+@media (max-width:880px){.grid{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header>
-<h1>🐉 DragonFly — Signal Generator</h1>
-<div class="license-status" id="licenseStatus">License Inactive ❌</div>
-</header>
+  <header>
+    <h1>🐉 DragonFly — Signal Generator</h1>
+    <div>
+      <span class="license-status" id="licenseStatus">License Inactive ❌</span>
+      <div class="small-note" id="deviceIdDiv"></div>
+    </div>
+  </header>
 
-<section class="card">
-  <label>Enter License Key</label>
-  <input type="text" id="licenseInput" placeholder="Enter your license key">
-  <button id="activateBtn" style="margin-top:8px;">Activate License</button>
-  <div class="device-id" id="deviceIdDiv"></div>
-</section>
+  <!-- License Activation (member) -->
+  <section class="card">
+    <label>Enter License Key (Member)</label>
+    <input type="text" id="licenseInput" placeholder="Paste license key here">
+    <button id="activateBtn" style="margin-top:10px;">Activate License</button>
+    <div class="small-note" style="margin-top:8px;color:#9fb0d6;">
+      If you are admin — click "Admin Login" to open admin tools.
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button id="adminLoginBtn" style="flex:1;background:#ffffff;color:#000;font-weight:700;">Admin Login</button>
+      <button id="clearLicenseBtn" style="flex:1;background:#f44336;color:#fff;">Remove License</button>
+    </div>
+  </section>
 
-<section class="card">
-<div class="grid">
-  <div>
-    <label>Market</label>
-    <select id="market">
-      <option value="OTC">OTC</option>
-      <option value="REAL">REAL</option>
-    </select>
-  </div>
-  <div>
-    <label>Timeframe</label>
-    <select id="timeframe">
-      <option value="1m" selected>1 minute</option>
-      <option value="5m">5 minutes</option>
-      <option value="15m">15 minutes</option>
-      <option value="1h">1 hour</option>
-    </select>
-  </div>
-  <div>
-    <label>Asset</label>
-    <select id="assetSelect"></select>
-  </div>
-  <div>
-    <label>Bollinger Band</label>
-    <select id="bollinger">
-      <option value="upper" selected>Upper</option>
-      <option value="lower">Lower</option>
-    </select>
-  </div>
+  <!-- Generator panel (core features) -->
+  <section class="card">
+    <div class="grid">
+      <div>
+        <label>Market</label>
+        <select id="market">
+          <option value="OTC">OTC</option>
+          <option value="REAL">REAL</option>
+        </select>
+      </div>
+      <div>
+        <label>Timeframe</label>
+        <select id="timeframe">
+          <option value="1m" selected>1 minute</option>
+          <option value="5m">5 minutes</option>
+          <option value="15m">15 minutes</option>
+          <option value="1h">1 hour</option>
+        </select>
+      </div>
+      <div>
+        <label>Asset</label>
+        <select id="assetSelect"></select>
+      </div>
+
+      <div>
+        <label>Bollinger Band</label>
+        <select id="bollinger">
+          <option value="upper" selected>Upper</option>
+          <option value="lower">Lower</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="controls" style="margin-top:12px;">
+      <button id="generate">Generate Signal</button>
+      <button id="reset">Reset</button>
+    </div>
+  </section>
+
+  <!-- Admin Panel (hidden unless admin logged) -->
+  <section class="card" id="adminPanel">
+    <h3 style="margin-top:0;margin-bottom:8px;">🔧 Admin — License Generator</h3>
+
+    <div style="margin-bottom:8px;">
+      <label>Device ID to give license</label>
+      <input type="text" id="adminDeviceId" placeholder="Enter device ID (e.g. 123456789)">
+    </div>
+
+    <div style="margin-bottom:8px;">
+      <label>License Duration (days)</label>
+      <input type="number" id="adminDuration" placeholder="e.g. 15" min="1">
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button id="generateLicenseBtn" style="flex:1;background:#4caf50;color:#fff;">Generate License</button>
+      <button id="copyLastLicenseBtn" style="flex:1;background:#2196f3;color:#fff;">Copy Last</button>
+    </div>
+
+    <div class="code-box" id="generatedBox" style="margin-top:10px;">Generated license will appear here.</div>
+    <div style="margin-top:8px;color:var(--muted);font-size:13px;">
+      Note: Give the generated key to the member. The key will work only on the Device ID you specified.
+    </div>
+  </section>
+
+  <footer>© DragonFly — Advance signals</footer>
 </div>
 
-<div class="controls">
-  <button id="generate">Generate Signal</button>
-  <button id="reset">Reset</button>
-</div>
-</section>
-<footer>© DragonFly — Advance signals</footer>
-</div>
-
+<!-- Signal Popup -->
 <div class="signal-modal-backdrop" id="signalModal">
   <div class="signal-modal">
     <div class="signal-candle">
@@ -104,115 +150,276 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
 </div>
 
 <script>
-const marketSel=document.getElementById('market');
-const assetSelect=document.getElementById('assetSelect');
-const bollinger=document.getElementById('bollinger');
-const timeframe=document.getElementById('timeframe');
-const licenseStatus=document.getElementById('licenseStatus');
-const licenseInput=document.getElementById('licenseInput');
-const activateBtn=document.getElementById('activateBtn');
-const deviceIdDiv=document.getElementById('deviceIdDiv');
-const signalModal=document.getElementById('signalModal');
-const candleBody=document.getElementById('candleBody');
-const signalText=document.getElementById('signalText');
-
-let licenseOk=false;
-
-// ===== Device ID =====
-let deviceId=localStorage.getItem("dragon_device_id");
+// ---------- Config ----------
+const ADMIN_PASSWORD = "@Traderparvej@"; // per your request
+const LICENSE_STORAGE_PREFIX = "dragon_license_"; // will be suffixed by deviceId
+// ---------- Device ID ----------
+let deviceId = localStorage.getItem("dragon_device_id");
 if(!deviceId){
-  deviceId=Math.floor(Math.random()*900000000+100000000);
-  localStorage.setItem("dragon_device_id",deviceId);
+  deviceId = String(Math.floor(Math.random()*900000000+100000000));
+  localStorage.setItem("dragon_device_id", deviceId);
 }
-deviceIdDiv.textContent="Device ID: "+deviceId;
+document.getElementById('deviceIdDiv').textContent = "Device ID: " + deviceId;
 
-// ===== License Database =====
-// Admin can update this object
-const LICENSE_DB = {
-  "926918825": {key:"LICENSE-926918825",expiry:null} // initially null expiry
-};
+// ---------- UI elements ----------
+const licenseInput = document.getElementById('licenseInput');
+const activateBtn = document.getElementById('activateBtn');
+const adminLoginBtn = document.getElementById('adminLoginBtn');
+const clearLicenseBtn = document.getElementById('clearLicenseBtn');
+const licenseStatus = document.getElementById('licenseStatus');
 
-// ===== License Activation =====
-activateBtn.addEventListener('click',()=>{
-  const enteredKey = licenseInput.value.trim();
-  if(LICENSE_DB[deviceId] && enteredKey===LICENSE_DB[deviceId].key){
-    const now = new Date();
-    const thirtyDays = 30*24*60*60*1000;
-    LICENSE_DB[deviceId].expiry = new Date(now.getTime() + thirtyDays); // 30 days expiry
-    localStorage.setItem("dragon_license_expiry", LICENSE_DB[deviceId].expiry);
-    licenseOk=true;
-    licenseStatus.textContent="License Active ✅";
-    licenseStatus.classList.add("active");
-    alert("✅ License Activated for 30 days!");
+const adminPanel = document.getElementById('adminPanel');
+const adminDeviceIdInput = document.getElementById('adminDeviceId');
+const adminDurationInput = document.getElementById('adminDuration');
+const generateLicenseBtn = document.getElementById('generateLicenseBtn');
+const generatedBox = document.getElementById('generatedBox');
+const copyLastLicenseBtn = document.getElementById('copyLastLicenseBtn');
+
+const marketSel = document.getElementById('market');
+const assetSelect = document.getElementById('assetSelect');
+const bollinger = document.getElementById('bollinger');
+const timeframe = document.getElementById('timeframe');
+const generateBtn = document.getElementById('generate');
+const resetBtn = document.getElementById('reset');
+
+const signalModal = document.getElementById('signalModal');
+const candleBody = document.getElementById('candleBody');
+const signalText = document.getElementById('signalText');
+
+// ---------- Assets ----------
+const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
+const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
+function fillAssetSelect(){ assetSelect.innerHTML=''; const pairs = marketSel.value==='REAL'?REALpairs:OTCpairs; pairs.forEach(p=>{ const opt=document.createElement('option'); opt.value=p; opt.textContent=p; assetSelect.appendChild(opt); }); }
+fillAssetSelect();
+marketSel.addEventListener('change', fillAssetSelect);
+
+// ---------- Utility ----------
+function pad2(n){ return String(n).padStart(2,'0'); }
+
+// Generate license key (base64 encode of deviceId|expiryMillis|random)
+function makeLicenseKeyForDevice(deviceId, days){
+  const now = Date.now();
+  const expiry = now + (days * 24 * 60 * 60 * 1000);
+  const rand = Math.floor(Math.random()*900000+100000);
+  const payload = `${deviceId}|${expiry}|${rand}`;
+  // base64 encode (safe for ASCII payload)
+  const key = btoa(payload);
+  return { key, expiry };
+}
+
+// Validate a license key against this device
+function validateLicenseKeyForThisDevice(key, deviceIdToCheck){
+  try{
+    const decoded = atob(key);
+    const parts = decoded.split("|");
+    if(parts.length < 2) return { ok:false, reason:'invalid_format' };
+    const [dId, expiryStr] = parts;
+    const expiry = parseInt(expiryStr,10);
+    if(dId !== String(deviceIdToCheck)) return { ok:false, reason:'device_mismatch' };
+    if(Date.now() > expiry) return { ok:false, reason:'expired', expiry };
+    return { ok:true, expiry };
+  }catch(e){
+    return { ok:false, reason:'invalid_base64' };
+  }
+}
+
+// save license to localStorage for this device
+function saveLicenseToLocal(key, expiry){
+  const obj = { key, expiry };
+  localStorage.setItem(LICENSE_STORAGE_PREFIX + deviceId, JSON.stringify(obj));
+}
+function clearLicenseLocal(){
+  localStorage.removeItem(LICENSE_STORAGE_PREFIX + deviceId);
+  licenseStatus.textContent = "License Inactive ❌";
+  licenseStatus.classList.remove('active');
+}
+
+// load license on start
+function loadLicenseLocal(){
+  const raw = localStorage.getItem(LICENSE_STORAGE_PREFIX + deviceId);
+  if(!raw) return false;
+  try{
+    const obj = JSON.parse(raw);
+    if(!obj.key || !obj.expiry) return false;
+    if(Date.now() > obj.expiry){
+      // expired
+      localStorage.removeItem(LICENSE_STORAGE_PREFIX + deviceId);
+      return false;
+    }
+    // ok
+    licenseStatus.textContent = "License Active ✅";
+    licenseStatus.classList.add('active');
+    return true;
+  }catch(e){ return false; }
+}
+loadLicenseLocal();
+
+// ---------- Member license activation ----------
+activateBtn.addEventListener('click', ()=>{
+  const entered = licenseInput.value.trim();
+  if(!entered){ alert("Please paste a license key."); return; }
+  const res = validateLicenseKeyForThisDevice(entered, deviceId);
+  if(res.ok){
+    saveLicenseToLocal(entered, res.expiry);
+    licenseStatus.textContent = "License Active ✅";
+    licenseStatus.classList.add('active');
+    alert("✅ License activated! Expires: " + new Date(res.expiry).toLocaleString());
   } else {
-    licenseOk=false;
-    licenseStatus.textContent="License Inactive ❌";
-    licenseStatus.classList.remove("active");
-    alert("❌ Invalid License Key for this Device!");
+    let msg = "Invalid license.";
+    if(res.reason === 'device_mismatch') msg = "This license is not for this device.";
+    else if(res.reason === 'expired') msg = "License expired on " + new Date(res.expiry).toLocaleString();
+    else if(res.reason === 'invalid_base64' || res.reason === 'invalid_format') msg = "License key format invalid.";
+    alert("❌ " + msg);
   }
 });
 
-// ===== Check Expiry on load =====
-window.onload = ()=>{
-  const expiry = new Date(localStorage.getItem("dragon_license_expiry"));
-  if(expiry && expiry>new Date()){
-    licenseOk=true;
-    licenseStatus.textContent="License Active ✅";
-    licenseStatus.classList.add("active");
-  } else {
-    licenseOk=false;
-    licenseStatus.textContent="License Inactive ❌";
-    licenseStatus.classList.remove("active");
+// remove license
+clearLicenseBtn.addEventListener('click', ()=>{
+  if(confirm("Remove license from this device?")){
+    clearLicenseLocal();
+    alert("License removed.");
   }
-};
+});
 
-// ===== Assets =====
-const OTCpairs=["AUD/USD (OTC)","EUR/USD (OTC)","USD/BDT (OTC)"];
-const REALpairs=["EUR/JPY","USD/JPY","EUR/USD","GBP/USD"];
-function fillAssetSelect(){
-  assetSelect.innerHTML='';
-  const pairs=marketSel.value==='REAL'?REALpairs:OTCpairs;
-  pairs.forEach(p=>{
-    const opt=document.createElement('option');
-    opt.value=p; opt.textContent=p;
-    assetSelect.appendChild(opt);
-  });
-}
-fillAssetSelect(); marketSel.addEventListener('change',fillAssetSelect);
+// ---------- Admin login (reveals admin panel) ----------
+adminLoginBtn.addEventListener('click', ()=>{
+  const pass = prompt("Enter admin password:");
+  if(pass === ADMIN_PASSWORD){
+    adminPanel.style.display = 'block';
+    alert("Admin access granted.");
+  } else {
+    alert("Wrong admin password.");
+  }
+});
 
-// ===== Signal Generator =====
-function pad2(n){return String(n).padStart(2,'0');}
+// ---------- Admin generate license ----------
+let lastGenerated = null;
+generateLicenseBtn.addEventListener('click', ()=>{
+  const dev = String(adminDeviceIdInput.value || '').trim();
+  const days = parseInt(adminDurationInput.value || '0', 10);
+  if(!dev){ alert("Enter Device ID"); return; }
+  if(!days || days <= 0){ alert("Enter valid duration (days)"); return; }
+  const res = makeLicenseKeyForDevice(dev, days);
+  lastGenerated = { device:dev, key:res.key, expiry:res.expiry };
+  // Show key for admin to copy
+  generatedBox.innerHTML = `<strong>Device:</strong> ${dev}<br><strong>Key:</strong> <span style="word-break:break-word;">${res.key}</span><br><strong>Expiry:</strong> ${new Date(res.expiry).toLocaleString()}`;
+  // If admin is generating for the same device they're on, optionally auto-insert into storage:
+  if(String(dev) === String(deviceId)){
+    if(confirm("You generated a license for THIS device. Do you want to activate it locally now?")){
+      saveLicenseToLocal(res.key, res.expiry);
+      licenseStatus.textContent = "License Active ✅";
+      licenseStatus.classList.add('active');
+      alert("Activated locally for this device.");
+    }
+  }
+});
+
+// copy last generated license to clipboard
+copyLastLicenseBtn.addEventListener('click', ()=>{
+  if(!lastGenerated){ alert("No license generated yet."); return; }
+  navigator.clipboard.writeText(lastGenerated.key).then(()=>alert("Copied to clipboard."), ()=>alert("Copy failed."));
+});
+
+// ---------- Signals (same behavior) ----------
 function generateSignalText(){
-  const pair=assetSelect.value;
-  const bb=bollinger.value;
-  const dir=bb==='upper'?'Buy':'Sell';
-  const now=new Date();
-  const gap=2; const entry=new Date(now.getTime()+gap*60000);
-  let tf=timeframe.value; let duration="1 Minute";
-  if(tf==="5m") duration="5 Minutes"; else if(tf==="15m") duration="15 Minutes"; else if(tf==="1h") duration="1 Hour";
-  const timeStr=`${pad2(entry.getHours())}:${pad2(entry.getMinutes())} (${gap}m later)`;
-  return {text:`📊 ${pair}\n⏰ ${timeStr}\n⌛ Duration: ${duration}\n🎯 Direction: ${dir}`,type:dir};
+  // require license active
+  const savedRaw = localStorage.getItem(LICENSE_STORAGE_PREFIX + deviceId);
+  if(!savedRaw){ alert("License inactive. Activate license first."); return null; }
+  const saved = JSON.parse(savedRaw);
+  if(!saved || !saved.key || !saved.expiry || Date.now() > saved.expiry){
+    alert("License inactive/expired. Activate license first.");
+    clearLicenseLocal();
+    return null;
+  }
+
+  const pair = assetSelect.value;
+  const bb = bollinger.value;
+  const direction = bb === 'upper' ? 'Buy' : 'Sell';
+  const analysis = bb === 'upper'
+    ? 'Price is touching the upper BB; short-term bullish momentum observed.'
+    : 'Price is touching the lower BB; short-term bearish momentum observed.';
+  const now = new Date();
+  const gap = 2; // fixed 2 minutes
+  const entry = new Date(now.getTime() + gap*60*1000);
+
+  let tf = timeframe.value;
+  let duration = "1 Minute";
+  if(tf === "5m") duration = "5 Minutes";
+  else if(tf === "15m") duration = "15 Minutes";
+  else if(tf === "1h") duration = "1 Hour";
+
+  const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())} (${gap}m later)`;
+
+  return {
+    text: `✦━━━━━━━━━━━━━━━━✦
+🐉 DRAGONFLY — AI MARKET ANALYSIS
+✦━━━━━━━━━━━━━━━━✦
+
+📊 Pair               : ${pair}
+⏰ Entry Time    : ${timeStr}
+⌛️ Signal Duration: ${duration}
+📈 Strategy        : Bollinger Band – ${bb.charAt(0).toUpperCase()+bb.slice(1)} Zone
+🎯 Direction       : ${direction}
+
+🧾 Market Analysis
+${analysis}
+
+⚡️ Note: Execute the trade exactly after ${gap} minutes.
+✦━━━━━━━━━━━━━━━━✦`,
+    type: direction
+  };
 }
 
-// ===== Popup =====
-function showSignalPopup(text,type){
-  signalModal.style.display='flex';
-  signalText.textContent=text;
-  candleBody.style.height="0";
-  if(type==="Buy"){candleBody.style.background="limegreen";candleBody.style.animation="growUp 1.2s forwards";}
-  else {candleBody.style.background="crimson";candleBody.style.animation="growDown 1.2s forwards";}
+function showSignalPopup(text, type){
+  signalText.textContent = text;
+  candleBody.style.height = "0";
+  if(type === "Buy"){
+    candleBody.style.background = "linear-gradient(180deg,#7CFC00,#00a000)";
+    candleBody.style.animation = "growUp 1.2s forwards";
+  } else {
+    candleBody.style.background = "linear-gradient(180deg,#ff6b6b,#c40000)";
+    candleBody.style.animation = "growDown 1.2s forwards";
+  }
+  signalModal.style.display = "flex";
 }
-function closeSignal(){signalModal.style.display='none';}
+function closeSignal(){ signalModal.style.display = "none"; }
 
-// ===== Generate =====
-document.getElementById('generate').addEventListener('click',()=>{
-  if(!licenseOk){alert("⚠️ Please activate license first!"); return;}
-  const sig=generateSignalText();
-  showSignalPopup(sig.text,sig.type);
+// Generate button
+generateBtn.addEventListener('click', ()=>{
+  const sig = generateSignalText();
+  if(sig) showSignalPopup(sig.text, sig.type);
 });
-document.getElementById('reset').addEventListener('click',()=>{
-  closeSignal();
-});
+resetBtn.addEventListener('click', ()=>{ closeSignal(); });
+
+// Auto-check expiry on load periodically and update status
+function checkLocalExpiry(){
+  const raw = localStorage.getItem(LICENSE_STORAGE_PREFIX + deviceId);
+  if(!raw){
+    licenseStatus.textContent = "License Inactive ❌";
+    licenseStatus.classList.remove('active');
+    return;
+  }
+  try{
+    const obj = JSON.parse(raw);
+    if(Date.now() > obj.expiry){
+      // expired
+      localStorage.removeItem(LICENSE_STORAGE_PREFIX + deviceId);
+      licenseStatus.textContent = "License Inactive ❌";
+      licenseStatus.classList.remove('active');
+      alert("⚠️ License expired on this device.");
+    } else {
+      licenseStatus.textContent = "License Active ✅";
+      licenseStatus.classList.add('active');
+    }
+  }catch(e){
+    localStorage.removeItem(LICENSE_STORAGE_PREFIX + deviceId);
+    licenseStatus.textContent = "License Inactive ❌";
+    licenseStatus.classList.remove('active');
+  }
+}
+setInterval(checkLocalExpiry, 30*1000); // check every 30s
+checkLocalExpiry();
+
 </script>
 </body>
 </html>
