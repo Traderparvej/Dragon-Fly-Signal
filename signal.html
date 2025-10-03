@@ -25,7 +25,7 @@ header h1{margin:0;font-size:20px;display:flex;align-items:center;gap:12px;}
 .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px;margin-bottom:12px;}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
-select,button{
+select,input,button{
   width:100%;
   padding:10px;
   border-radius:10px;
@@ -57,7 +57,7 @@ a.owner-link:hover{text-decoration:underline;}
 @media (max-width:880px){.grid{grid-template-columns:1fr;}}
 .small-note{font-size:12px;color:var(--muted);}
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999;}
-.modal{background:#0f1530;padding:20px;border-radius:12px;width:90%;max-width:400px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.5);}
+.modal{background:#0f1530;padding:20px;border-radius:12px;width:90%;max-width:450px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.5);}
 .modal h2{margin-top:0;margin-bottom:10px;}
 .modal input, .modal select{width:100%;padding:10px;border-radius:8px;border:1px solid #333;margin-bottom:12px;}
 .modal button{padding:10px 16px;border:none;border-radius:8px;background:var(--accent);font-weight:bold;cursor:pointer;}
@@ -133,18 +133,26 @@ a.owner-link:hover{text-decoration:underline;}
 (Press Generate to produce signals)</div>
 </section>
 
-<footer>© DragonFly — Advance signals. Use responsibly.</footer>
-</div>
-
-<!-- Premium Info Modal -->
+<!-- Premium Packages Modal -->
 <div class="modal-backdrop" id="premiumModal" style="display:none;">
   <div class="modal">
-    <h2>💰 Premium Access</h2>
-    <p>To activate premium signals, contact admin:</p>
-    <a href="https://t.me/TraderParvej" target="_blank" class="owner-link">Click here to message @TraderParvej</a>
-    <div class="info">After contacting admin, premium access will be granted professionally.</div>
+    <h2>💰 Premium Packages</h2>
+    <p>Select a package and provide payment details:</p>
+    <label>Choose Package</label>
+    <select id="pkgSelect">
+      <option value="1week">$5 — 1 Week</option>
+      <option value="1month">$10 — 1 Month</option>
+      <option value="3month">$20 — 3 Months</option>
+    </select>
+    <label>Payment via Binance ID: 499388438</label>
+    <input type="text" id="tranID" placeholder="Enter your Transaction/Order ID" />
+    <div class="info">After submitting, wait 24 hours and message admin <a href="https://t.me/TraderParvej" target="_blank" class="owner-link">@TraderParvej</a> for verification.</div>
+    <button id="submitPkg">Submit Payment</button>
     <button id="closePremium">Close</button>
   </div>
+</div>
+
+<footer>© DragonFly — Advance signals. Use responsibly.</footer>
 </div>
 
 <script>
@@ -156,11 +164,10 @@ const output = document.getElementById('output');
 const generateBtn = document.getElementById('generate');
 const resetBtn = document.getElementById('reset');
 const copyBtn = document.getElementById('copyOut');
-const utcSel = document.getElementById('utcSelect');
-const tf = document.getElementById('timeframe');
 
 const premiumModal = document.getElementById('premiumModal');
 const closePremiumBtn = document.getElementById('closePremium');
+const submitPkgBtn = document.getElementById('submitPkg');
 
 let freeCount = 0;
 let premiumActive = false;
@@ -192,7 +199,6 @@ function generateSignalText(){
     const direction = bb==='upper'?'Buy':'Sell';
     const analysis = bb==='upper'?'Price is touching upper BB; short-term bullish momentum observed.':'Price is touching lower BB; short-term bearish momentum observed.';
     const now = new Date();
-    // Random 1–3 min later
     const randMin = Math.floor(Math.random()*3)+1;
     const entry = new Date(now.getTime() + randMin*60*1000);
     const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())}`;
@@ -234,6 +240,13 @@ copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(output.textC
 
 // Premium modal
 closePremiumBtn.addEventListener('click',()=>{premiumModal.style.display='none';});
+submitPkgBtn.addEventListener('click',()=>{
+    const tranID = document.getElementById('tranID').value.trim();
+    if(tranID===''){alert('Please enter your Transaction/Order ID'); return;}
+    alert(`Thank you! Please wait 24 hours and message admin @TraderParvej with your Transaction ID for verification.`);
+    premiumActive = true;
+    premiumModal.style.display='none';
+});
 </script>
 </body>
 </html>
