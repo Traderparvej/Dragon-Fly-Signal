@@ -120,25 +120,45 @@ const signalModal=document.getElementById('signalModal');
 const candleBody=document.getElementById('candleBody');
 const signalText=document.getElementById('signalText');
 
-let licenseOk=false;
-
 // ===== Device ID =====
 let deviceId=localStorage.getItem("dragon_device_id");
 if(!deviceId){
-  deviceId=Math.floor(Math.random()*900000000+100000000);
+  deviceId=926918825; // fixed device ID
   localStorage.setItem("dragon_device_id",deviceId);
 }
 deviceIdDiv.textContent="Device ID: "+deviceId;
 
 // ===== License =====
-const VALID_LICENSE="DRAGONFLY-12345"; // আপনার আসল লাইসেন্স key
+const VALID_LICENSE="926918825"; // fixed license key
+const LICENSE_DURATION=30; // 30 days
 
-activateBtn.addEventListener('click',()=>{
-  if(licenseInput.value.trim()===VALID_LICENSE){
+let licenseOk=false;
+
+// check if license already activated
+let licenseData=JSON.parse(localStorage.getItem("dragon_license")) || {};
+if(licenseData.key===VALID_LICENSE && licenseData.device==deviceId){
+  const now=new Date().getTime();
+  if(now<licenseData.expiry){
     licenseOk=true;
     licenseStatus.textContent="License Active ✅";
     licenseStatus.classList.add("active");
-    alert("✅ License Activated Successfully!");
+  } else {
+    localStorage.removeItem("dragon_license");
+  }
+}
+
+// ===== Activate License Button =====
+activateBtn.addEventListener('click',()=>{
+  const entered=licenseInput.value.trim();
+  if(entered===VALID_LICENSE){
+    const now=new Date().getTime();
+    const expiry=now + LICENSE_DURATION*24*60*60*1000; // 30 days in ms
+    licenseData={key:VALID_LICENSE, device:deviceId, expiry:expiry};
+    localStorage.setItem("dragon_license", JSON.stringify(licenseData));
+    licenseOk=true;
+    licenseStatus.textContent="License Active ✅";
+    licenseStatus.classList.add("active");
+    alert("✅ License Activated Successfully! Valid for 30 days.");
   } else {
     licenseOk=false;
     licenseStatus.textContent="License Inactive ❌";
@@ -187,13 +207,20 @@ function closeSignal(){signalModal.style.display='none';}
 
 // ===== Generate =====
 document.getElementById('generate').addEventListener('click',()=>{
-  if(!licenseOk){alert("⚠️ Please activate license first!"); return;}
+  // check license validity
+  const now=new Date().getTime();
+  if(!licenseOk || now>licenseData.expiry){
+    licenseOk=false;
+    licenseStatus.textContent="License Inactive ❌";
+    licenseStatus.classList.remove("active");
+    localStorage.removeItem("dragon_license");
+    alert("⚠️ License expired or inactive. Please activate again.");
+    return;
+  }
   const sig=generateSignalText();
   showSignalPopup(sig.text,sig.type);
 });
-document.getElementById('reset').addEventListener('click',()=>{
-  closeSignal();
-});
+document.getElementById('reset').addEventListener('click',()=>{closeSignal();});
 </script>
 </body>
 </html>
