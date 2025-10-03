@@ -12,6 +12,9 @@
   --text:#ffffff;
   --accent:#6dd6ff;
   --green:#4caf50;
+  --yellow:#ffca28;
+  --red:#f44336;
+  --blue:#29b6f6;
 }
 *{box-sizing:border-box;}
 body{
@@ -36,7 +39,8 @@ select,button{
   font-weight:600;
 }
 .controls{display:flex;gap:10px;margin-top:12px;}
-.controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:600;}
+.controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:600;transition:0.3s;}
+.controls button:hover{opacity:0.9;}
 .output{
   margin-top:12px;
   padding:16px;
@@ -49,7 +53,8 @@ select,button{
   color:#fff;
   font-size:14px;
   line-height:1.45;
-  transition: all 0.4s ease-in-out;
+  opacity:1;
+  transition: all 0.6s ease-in-out;
 }
 .unicode{font-family: "Arial", "DejaVu Sans", "monospace";}
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
@@ -63,8 +68,13 @@ a.owner-link:hover{text-decoration:underline;}
 .modal{background:#0f1530;padding:20px;border-radius:12px;width:90%;max-width:400px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.5);}
 .modal h2{margin-top:0;margin-bottom:10px;}
 .modal input{width:100%;padding:10px;border-radius:8px;border:1px solid #333;margin-bottom:12px;}
-.modal button{padding:10px 16px;border:none;border-radius:8px;background:var(--accent);font-weight:bold;cursor:pointer;}
+.modal button{padding:10px 16px;border:none;border-radius:8px;background:var(--accent);font-weight:bold;cursor:pointer;transition:0.3s;}
+.modal button:hover{opacity:0.9;}
 .modal .info{color:#6dd6ff;font-size:13px;margin-top:6px;}
+@keyframes blink {0%,50%,100% {opacity:1;} 25%,75% {opacity:0.2;}}
+.blinking {animation: blink 1s infinite;}
+.fade-in {opacity:0; animation: fadeIn 1s forwards;}
+@keyframes fadeIn {to {opacity:1;}}
 </style>
 </head>
 <body>
@@ -124,7 +134,7 @@ a.owner-link:hover{text-decoration:underline;}
   <button id="copyOut">Copy Output</button>
 </div>
 
-<div class="output unicode" id="output">▶️ DATE: — ◀️
+<div class="output unicode fade-in" id="output">▶️ DATE: — ◀️
 
 (Press Generate to produce signals)</div>
 </section>
@@ -132,7 +142,6 @@ a.owner-link:hover{text-decoration:underline;}
 <footer>© DragonFly — Advance signals. Use responsibly.</footer>
 </div>
 
-<!-- License Modal -->
 <div class="modal-backdrop" id="licenseModal" style="display:none;">
   <div class="modal">
     <h2>🔑 License Activation</h2>
@@ -197,11 +206,11 @@ function updateLicenseStatus(){
     const hrs = Math.floor(diff/1000/60/60)%24;
     const mins = Math.floor(diff/1000/60)%60;
     licenseStatus.classList.add("active");
-    licenseStatus.textContent = `License Active ✅ | Expires: ${fmtDate(licenseExpiry)} | Remaining: ${days}d ${hrs}h ${mins}m`;
+    licenseStatus.innerHTML = `License Active ✅ | Expires: ${fmtDate(licenseExpiry)} | Remaining: <span style="color:#29b6f6">${days}d ${hrs}h ${mins}m</span>`;
   } else {
     licenseOk = false;
     licenseStatus.classList.remove("active");
-    licenseStatus.textContent = "License Inactive ❌ | Contact: @TraderParvej";
+    licenseStatus.innerHTML = "License Inactive ❌ | Contact: <a class='owner-link' href='https://t.me/TraderParvej' target='_blank'>@TraderParvej</a>";
     licenseModal.style.display = 'flex';
   }
 }
@@ -252,17 +261,19 @@ ${analysis}
 generateBtn.addEventListener('click',()=>{
     if(!licenseOk){ alert("License not active. Cannot generate signals."); return; }
 
-    output.style.opacity = 0.6;
+    output.classList.add('blinking');
     output.textContent = "Analyzing market... ⏳";
     generateBtn.disabled = true;
     resetBtn.disabled = true;
 
     setTimeout(()=>{
+        output.classList.remove('blinking');
         output.textContent = generateSignalText();
-        output.style.opacity = 1;
+        output.classList.add('fade-in');
+        setTimeout(()=>output.classList.remove('fade-in'), 1000);
         generateBtn.disabled = false;
         resetBtn.disabled = false;
-    }, 3500); // 3.5 seconds delay for processing effect
+    }, 3500);
 });
 
 resetBtn.addEventListener('click',()=>{output.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
