@@ -7,7 +7,7 @@
 <style>
 :root{
   --bg:#081024; --panel:#0f1530; --muted:#9fb0d6; --text:#ffffff;
-  --accent:#6dd6ff; --green:#4caf50; --red:#f44336;
+  --accent:#6dd6ff; --green:#4caf50;
 }
 *{box-sizing:border-box;}
 body{margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#05102a,#081024);color:var(--text);}
@@ -25,14 +25,7 @@ select,input,textarea{background:rgba(255,255,255,0.95);color:#000;font-weight:5
 .small-note{font-size:12px;color:var(--muted);}
 .license-status{margin-top:6px;font-weight:600;font-size:14px;}
 .license-status.active{color:var(--green);}
-.license-status.expired{color:var(--red);}
-.expiry-banner{background:var(--red);color:#fff;padding:8px;border-radius:6px;margin-bottom:12px;text-align:center;font-weight:700;display:none;}
 footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
-table{width:100%;border-collapse:collapse;margin-top:10px;}
-th,td{border:1px solid rgba(255,255,255,0.2);padding:6px;text-align:center;font-size:12px;}
-th{background:rgba(255,255,255,0.05);}
-td.expired{color:var(--red);}
-td.active{color:var(--green);}
 /* Signal popup */
 .signal-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1200;}
 .signal-modal{background:#0f1530;padding:14px;border-radius:12px;width:92%;max-width:360px;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,0.6);text-align:center;font-size:13px;}
@@ -68,8 +61,6 @@ td.active{color:var(--green);}
   <div class="small-note" id="deviceIdDiv"></div>
 </div>
 </header>
-
-<div class="expiry-banner" id="expiryBanner">⚠️ License expired! Please contact admin.</div>
 
 <section class="card">
   <label>Enter License Key (Member)</label>
@@ -113,10 +104,11 @@ td.active{color:var(--green);}
 </div>
 </section>
 
+<!-- Admin Panel hidden -->
 <section class="card" id="adminPanel">
 <h3>🔧 Admin — License Generator</h3>
 <div style="margin-bottom:8px;">
-  <label>Device ID</label>
+  <label>Device ID to give license</label>
   <input type="text" id="adminDeviceId" placeholder="Enter device ID">
 </div>
 <div style="margin-bottom:8px;">
@@ -128,13 +120,12 @@ td.active{color:var(--green);}
   <button id="copyLastLicenseBtn" style="flex:1;background:#2196f3;color:#fff;">Copy Last</button>
 </div>
 <div class="code-box" id="generatedBox" style="margin-top:10px;">Generated license will appear here.</div>
-
-<h4 style="margin-top:12px;">Device License Status</h4>
-<table id="deviceTable">
-<tr><th>Device ID</th><th>Expiry</th><th>Status</th></tr>
-</table>
+<div style="margin-top:8px;color:var(--muted);font-size:13px;">
+  Note: Give the generated key to the member. The key works only on the Device ID you specified.
+</div>
 </section>
 
+<!-- Signal popup -->
 <div class="signal-modal-backdrop" id="signalModal">
   <div class="signal-modal">
     <div class="signal-candle">
@@ -147,6 +138,7 @@ td.active{color:var(--green);}
   </div>
 </div>
 
+<!-- Admin login modal -->
 <div class="admin-login-backdrop" id="adminLoginModal">
   <div class="admin-login">
     <h3>Admin Login</h3>
@@ -176,14 +168,12 @@ document.getElementById('deviceIdDiv').textContent="Device ID: "+deviceId;
 const licenseInput=document.getElementById('licenseInput');
 const activateBtn=document.getElementById('activateBtn');
 const licenseStatus=document.getElementById('licenseStatus');
-const expiryBanner=document.getElementById('expiryBanner');
 const adminPanel=document.getElementById('adminPanel');
 const adminDeviceIdInput=document.getElementById('adminDeviceId');
 const adminDurationInput=document.getElementById('adminDuration');
 const generateLicenseBtn=document.getElementById('generateLicenseBtn');
 const generatedBox=document.getElementById('generatedBox');
 const copyLastLicenseBtn=document.getElementById('copyLastLicenseBtn');
-const deviceTable=document.getElementById('deviceTable');
 const marketSel=document.getElementById('market');
 const assetSelect=document.getElementById('assetSelect');
 const bollinger=document.getElementById('bollinger');
@@ -207,96 +197,68 @@ fillAssetSelect();
 marketSel.addEventListener('change', fillAssetSelect);
 
 function pad2(n){ return String(n).padStart(2,'0'); }
-function makeLicenseKeyForDevice(dev,days){
-  const now=Date.now();
-  const expiry=now+(days*24*60*60*1000);
+function makeLicenseKeyForDevice(deviceIdParam, days){
+  const now=Date.now(); const expiry=now+(days*24*60*60*1000);
   const rand=Math.floor(Math.random()*900000+100000);
-  const payload=`${dev}|${expiry}|${rand}`;
+  const payload=`${deviceIdParam}|${expiry}|${rand}`;
   const key=btoa(payload);
-  return {key,expiry};
+  return { key, expiry };
 }
-function validateLicenseKeyForThisDevice(key,dev){
+function validateLicenseKeyForThisDevice(key, deviceIdToCheck){
   try{
-    const decoded=atob(key);
-    const parts=decoded.split("|");
-    if(parts.length<2) return {ok:false};
-    const [dId,expiryStr]=parts;
-    const expiry=parseInt(expiryStr,10);
-    if(String(dId)!==String(dev)) return {ok:false,reason:'device_mismatch'};
-    if(Date.now()>expiry) return {ok:false,reason:'expired',expiry};
-    return {ok:true,expiry};
-  }catch(e){ return {ok:false}; }
+    const decoded=atob(key); const parts=decoded.split("|");
+    if(parts.length<2) return { ok:false };
+    const [dId, expiryStr]=parts; const expiry=parseInt(expiryStr,10);
+    if(String(dId)!==String(deviceIdToCheck)) return { ok:false, reason:'device_mismatch' };
+    if(Date.now()>expiry) return { ok:false, reason:'expired', expiry };
+    return { ok:true, expiry };
+  }catch(e){ return { ok:false }; }
 }
-function saveLicenseToLocal(key,expiry,dev=deviceId){ 
-  localStorage.setItem(LICENSE_STORAGE_PREFIX+dev,JSON.stringify({key,expiry}));
-}
-function loadLicenseLocal(dev=deviceId){
-  const raw=localStorage.getItem(LICENSE_STORAGE_PREFIX+dev);
+function saveLicenseToLocal(key, expiry, dev=deviceId){ localStorage.setItem(LICENSE_STORAGE_PREFIX+dev, JSON.stringify({ key, expiry })); }
+function loadLicenseLocal(){ 
+  const raw=localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
   if(!raw) return false;
-  try{
+  try{ 
     const obj=JSON.parse(raw);
-    if(Date.now()>obj.expiry){ 
-      if(dev===deviceId){ licenseStatus.textContent="License Expired ❌"; licenseStatus.classList.remove('active'); licenseStatus.classList.add('expired'); expiryBanner.style.display='block'; }
-      return false; 
-    }
-    if(dev===deviceId){ licenseStatus.textContent="License Active ✅"; licenseStatus.classList.add('active'); expiryBanner.style.display='none'; }
-    return true;
+    if(Date.now()>obj.expiry){ localStorage.removeItem(LICENSE_STORAGE_PREFIX+deviceId); return false; }
+    licenseStatus.textContent="License Active ✅"; licenseStatus.classList.add('active'); return true;
   }catch(e){ return false; }
 }
-
-function updateDeviceTable(){
-  deviceTable.innerHTML='<tr><th>Device ID</th><th>Expiry</th><th>Status</th></tr>';
-  for(let i=0;i<localStorage.length;i++){
-    const key=localStorage.key(i);
-    if(key.startsWith(LICENSE_STORAGE_PREFIX)){
-      const dev=key.replace(LICENSE_STORAGE_PREFIX,'');
-      const raw=localStorage.getItem(key);
-      if(raw){
-        const obj=JSON.parse(raw);
-        const expiryDate=new Date(obj.expiry);
-        const status=(Date.now()>obj.expiry)?'Expired':'Active';
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${dev}</td><td>${expiryDate.toLocaleString()}</td><td class="${status==='Active'?'active':'expired'}">${status}</td>`;
-        deviceTable.appendChild(tr);
-      }
-    }
-  }
-}
-
 loadLicenseLocal();
-updateDeviceTable();
 
 activateBtn.addEventListener('click', ()=>{
   const entered=licenseInput.value.trim();
   if(!entered){ alert("Paste license key."); return; }
-  const res=validateLicenseKeyForThisDevice(entered,deviceId);
-  if(res.ok){ saveLicenseToLocal(entered,res.expiry); alert("✅ License activated! Expires: "+new Date(res.expiry).toLocaleString()); loadLicenseLocal(); updateDeviceTable(); }
+  const res=validateLicenseKeyForThisDevice(entered, deviceId);
+  if(res.ok){ saveLicenseToLocal(entered,res.expiry); alert("✅ License activated! Expires: "+new Date(res.expiry).toLocaleString()); licenseStatus.textContent="License Active ✅"; licenseStatus.classList.add('active'); }
   else { alert("❌ Invalid license or expired."); }
 });
 
 showAdminLoginBtn.addEventListener('click', ()=>{ adminPasswordInput.value=''; adminLoginModal.style.display='flex'; adminPasswordInput.focus(); });
 adminLoginCancel.addEventListener('click', ()=>{ adminLoginModal.style.display='none'; });
-adminLoginSubmit.addEventListener('click', ()=>{
-  if(adminPasswordInput.value===ADMIN_PASSWORD){ adminLoginModal.style.display='none'; adminPanel.style.display='block'; alert("Admin access granted."); updateDeviceTable();}
-  else { alert("Wrong password."); adminPasswordInput.value=''; adminPasswordInput.focus(); }
-});
+adminLoginSubmit.addEventListener('click', ()=>{ if(adminPasswordInput.value===ADMIN_PASSWORD){ adminLoginModal.style.display='none'; adminPanel.style.display='block'; alert("Admin access granted."); } else { alert("Wrong password."); adminPasswordInput.value=''; adminPasswordInput.focus(); } });
 adminPasswordInput.addEventListener('keyup', e=>{ if(e.key==='Enter') adminLoginSubmit.click(); });
 
 generateLicenseBtn.addEventListener('click', ()=>{
   const dev=adminDeviceIdInput.value.trim();
   const days=parseInt(adminDurationInput.value,10);
   if(!dev || !days){ alert("Enter Device ID & duration"); return; }
+
   const localRaw=localStorage.getItem(LICENSE_STORAGE_PREFIX+dev);
   if(localRaw){
     const obj=JSON.parse(localRaw);
-    if(Date.now()<obj.expiry){ alert("Device still has active license. Cannot create new."); return; }
+    if(Date.now() < obj.expiry){
+      alert("⚠️ Device already has active license! Expiry: " + new Date(obj.expiry).toLocaleString());
+      return;
+    }
   }
-  const res=makeLicenseKeyForDevice(dev,days);
-  lastGenerated={device:dev,key:res.key,expiry:res.expiry};
-  saveLicenseToLocal(res.key,res.expiry,dev);
-  generatedBox.innerHTML=`<strong>Device:</strong> ${dev}<br><strong>Key:</strong> ${res.key}<br><strong>Expiry:</strong> ${new Date(res.expiry).toLocaleString()}`;
-  updateDeviceTable();
+
+  const res = makeLicenseKeyForDevice(dev, days);
+  lastGenerated = { device: dev, key: res.key, expiry: res.expiry };
+  saveLicenseToLocal(res.key, res.expiry, dev);
+  generatedBox.innerHTML = `<strong>Device:</strong> ${dev}<br><strong>Key:</strong> ${res.key}<br><strong>Expiry:</strong> ${new Date(res.expiry).toLocaleString()}`;
 });
+
 copyLastLicenseBtn.addEventListener('click', ()=>{ if(lastGenerated) navigator.clipboard.writeText(lastGenerated.key).then(()=>alert("Copied.")); });
 
 function generateSignalText(){
