@@ -7,7 +7,7 @@
 <style>
 :root{
   --bg:#081024; --panel:#0f1530; --muted:#9fb0d6; --text:#ffffff;
-  --accent:#6dd6ff; --green:#4caf50; --red:#ff6b6b; --yellow:#ffd700;
+  --accent:#6dd6ff; --green:#4caf50;
 }
 *{box-sizing:border-box;}
 body{margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#05102a,#081024);color:var(--text);}
@@ -26,40 +26,17 @@ select,input,textarea{background:rgba(255,255,255,0.95);color:#000;font-weight:5
 .license-status{margin-top:6px;font-weight:600;font-size:14px;}
 .license-status.active{color:var(--green);}
 footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
-
-/* Signal popup professional style */
-.signal-modal-backdrop{
-  position:fixed;inset:0;background:rgba(0,0,0,0.75);
-  display:none;align-items:center;justify-content:center;z-index:1200;
-}
-.signal-modal{
-  background:#0f1530;padding:16px;border-radius:14px;width:92%;max-width:380px;color:#fff;
-  box-shadow:0 12px 40px rgba(0,0,0,0.8);text-align:center;font-family:'Courier New',monospace;
-  border:2px solid var(--accent);position:relative;
-}
-.signal-candle{
-  display:flex;flex-direction:column;align-items:center;margin-bottom:14px;
-}
-.signal-candle .wick{width:3px;height:16px;background:#ccc;border-radius:2px;opacity:0.7;}
-.signal-candle .body{
-  width:28px;height:0;border-radius:4px;box-shadow:0 6px 22px rgba(0,0,0,0.35) inset;
-  transition: height 1.2s ease-in-out, background 0.5s;
-}
-@keyframes growUp{from{height:0;}to{height:50px;}}
-@keyframes growDown{from{height:0;}to{height:50px;}}
-.signal-text{
-  text-align:left;white-space:pre-wrap;font-size:13px;line-height:1.5;color:#eee;
-  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
-  border-radius:10px;padding:12px;margin-bottom:12px;
-}
-.signal-text span.bull{color:var(--green);font-weight:700;}
-.signal-text span.bear{color:var(--red);font-weight:700;}
-.signal-modal button{
-  width:100%;padding:10px;border:none;border-radius:10px;background:var(--accent);
-  font-weight:700;cursor:pointer;transition:0.2s;
-}
+/* Signal popup */
+.signal-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1200;}
+.signal-modal{background:#0f1530;padding:14px;border-radius:12px;width:92%;max-width:360px;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,0.6);text-align:center;font-size:13px;}
+.signal-candle{display:flex;flex-direction:column;align-items:center;margin-bottom:12px;}
+.signal-candle .wick{width:3px;height:14px;background:#ccc;border-radius:2px;}
+.signal-candle .body{width:26px;height:0;border-radius:3px;box-shadow:0 6px 18px rgba(0,0,0,0.25) inset;}
+@keyframes growUp{from{height:0;}to{height:44px;}}
+@keyframes growDown{from{height:0;}to{height:44px;}}
+.signal-text{text-align:left;white-space:pre-wrap;font-family:'Courier New',monospace;font-size:13px;line-height:1.45;color:#eee;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);border-radius:8px;padding:10px;margin-bottom:8px;}
+.signal-modal button{width:100%;padding:9px;border:none;border-radius:8px;background:var(--accent);font-weight:700;cursor:pointer;}
 .signal-modal button:hover{opacity:0.95;}
-
 /* admin modal login */
 .admin-login-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center;z-index:1300;}
 .admin-login{background:#0b1220;padding:16px;border-radius:10px;width:90%;max-width:380px;color:#fff;box-shadow:0 12px 40px rgba(0,0,0,0.6);}
@@ -127,6 +104,7 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 </div>
 </section>
 
+<!-- Admin Panel hidden -->
 <section class="card" id="adminPanel">
 <h3>🔧 Admin — License Generator</h3>
 <div style="margin-bottom:8px;">
@@ -143,11 +121,11 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 </div>
 <div class="code-box" id="generatedBox" style="margin-top:10px;">Generated license will appear here.</div>
 <div style="margin-top:8px;color:var(--muted);font-size:13px;">
-  Note: Give the generated key to the member. Works only on the specified Device ID.
+  Note: Give the generated key to the member. The key works only on the Device ID you specified.
 </div>
 </section>
 
-<!-- Signal Popup -->
+<!-- Signal popup -->
 <div class="signal-modal-backdrop" id="signalModal">
   <div class="signal-modal">
     <div class="signal-candle">
@@ -160,7 +138,7 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
   </div>
 </div>
 
-<!-- Admin Login Modal -->
+<!-- Admin login modal -->
 <div class="admin-login-backdrop" id="adminLoginModal">
   <div class="admin-login">
     <h3>Admin Login</h3>
@@ -169,11 +147,137 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
       <button id="adminLoginSubmit" style="background:#4caf50;color:#fff;">Login</button>
       <button id="adminLoginCancel" style="background:#f44336;color:#fff;">Cancel</button>
     </div>
-    <div class="admin-note">Hint: use password provided by owner.</div>
+    <div class="admin-note">Hint: use the password provided by owner.</div>
   </div>
 </div>
 
 <footer style="text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;">
 © DragonFly — Advance signals
 <div style="margin-top:4px;font-size:10px;">
-  <button id="showAdminLoginBtn" style="
+  <button id="showAdminLoginBtn" style="background:transparent;border:none;color:#9fb0d6;cursor:pointer;">Admin Login</button>
+</div>
+</footer>
+
+<script>
+const ADMIN_PASSWORD="@Traderparvej@";
+const LICENSE_STORAGE_PREFIX="dragon_license_";
+let deviceId=localStorage.getItem("dragon_device_id");
+if(!deviceId){ deviceId=String(Math.floor(Math.random()*900000000+100000000)); localStorage.setItem("dragon_device_id",deviceId);}
+document.getElementById('deviceIdDiv').textContent="Device ID: "+deviceId;
+
+const licenseInput=document.getElementById('licenseInput');
+const activateBtn=document.getElementById('activateBtn');
+const licenseStatus=document.getElementById('licenseStatus');
+const adminPanel=document.getElementById('adminPanel');
+const adminDeviceIdInput=document.getElementById('adminDeviceId');
+const adminDurationInput=document.getElementById('adminDuration');
+const generateLicenseBtn=document.getElementById('generateLicenseBtn');
+const generatedBox=document.getElementById('generatedBox');
+const copyLastLicenseBtn=document.getElementById('copyLastLicenseBtn');
+const marketSel=document.getElementById('market');
+const assetSelect=document.getElementById('assetSelect');
+const bollinger=document.getElementById('bollinger');
+const timeframe=document.getElementById('timeframe');
+const generateBtn=document.getElementById('generate');
+const resetBtn=document.getElementById('reset');
+const signalModal=document.getElementById('signalModal');
+const candleBody=document.getElementById('candleBody');
+const signalText=document.getElementById('signalText');
+const adminLoginModal=document.getElementById('adminLoginModal');
+const adminPasswordInput=document.getElementById('adminPasswordInput');
+const adminLoginSubmit=document.getElementById('adminLoginSubmit');
+const adminLoginCancel=document.getElementById('adminLoginCancel');
+const showAdminLoginBtn=document.getElementById('showAdminLoginBtn');
+let lastGenerated=null;
+
+const OTCpairs=["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
+const REALpairs=['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
+function fillAssetSelect(){ assetSelect.innerHTML=''; const pairs = marketSel.value==='REAL'?REALpairs:OTCpairs; pairs.forEach(p=>{ const opt=document.createElement('option'); opt.value=p; opt.textContent=p; assetSelect.appendChild(opt); }); }
+fillAssetSelect();
+marketSel.addEventListener('change', fillAssetSelect);
+
+function pad2(n){ return String(n).padStart(2,'0'); }
+function makeLicenseKeyForDevice(deviceIdParam, days){
+  const now=Date.now(); const expiry=now+(days*24*60*60*1000);
+  const rand=Math.floor(Math.random()*900000+100000);
+  const payload=`${deviceIdParam}|${expiry}|${rand}`;
+  const key=btoa(payload);
+  return { key, expiry };
+}
+function validateLicenseKeyForThisDevice(key, deviceIdToCheck){
+  try{
+    const decoded=atob(key); const parts=decoded.split("|");
+    if(parts.length<2) return { ok:false };
+    const [dId, expiryStr]=parts; const expiry=parseInt(expiryStr,10);
+    if(String(dId)!==String(deviceIdToCheck)) return { ok:false, reason:'device_mismatch' };
+    if(Date.now()>expiry) return { ok:false, reason:'expired', expiry };
+    return { ok:true, expiry };
+  }catch(e){ return { ok:false }; }
+}
+function saveLicenseToLocal(key, expiry, dev=deviceId){ localStorage.setItem(LICENSE_STORAGE_PREFIX+dev, JSON.stringify({ key, expiry })); }
+function loadLicenseLocal(){ 
+  const raw=localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
+  if(!raw) return false;
+  try{ 
+    const obj=JSON.parse(raw);
+    if(Date.now()>obj.expiry){ localStorage.removeItem(LICENSE_STORAGE_PREFIX+deviceId); return false; }
+    licenseStatus.textContent="License Active ✅"; licenseStatus.classList.add('active'); return true;
+  }catch(e){ return false; }
+}
+loadLicenseLocal();
+
+activateBtn.addEventListener('click', ()=>{
+  const entered=licenseInput.value.trim();
+  if(!entered){ alert("Paste license key."); return; }
+  const res=validateLicenseKeyForThisDevice(entered, deviceId);
+  if(res.ok){ saveLicenseToLocal(entered,res.expiry); alert("✅ License activated! Expires: "+new Date(res.expiry).toLocaleString()); licenseStatus.textContent="License Active ✅"; licenseStatus.classList.add('active'); }
+  else { alert("❌ Invalid license or expired."); }
+});
+
+showAdminLoginBtn.addEventListener('click', ()=>{ adminPasswordInput.value=''; adminLoginModal.style.display='flex'; adminPasswordInput.focus(); });
+adminLoginCancel.addEventListener('click', ()=>{ adminLoginModal.style.display='none'; });
+adminLoginSubmit.addEventListener('click', ()=>{ if(adminPasswordInput.value===ADMIN_PASSWORD){ adminLoginModal.style.display='none'; adminPanel.style.display='block'; alert("Admin access granted."); } else { alert("Wrong password."); adminPasswordInput.value=''; adminPasswordInput.focus(); } });
+adminPasswordInput.addEventListener('keyup', e=>{ if(e.key==='Enter') adminLoginSubmit.click(); });
+
+generateLicenseBtn.addEventListener('click', ()=>{
+  const dev=adminDeviceIdInput.value.trim();
+  const days=parseInt(adminDurationInput.value,10);
+  if(!dev || !days){ alert("Enter Device ID & duration"); return; }
+
+  const localRaw=localStorage.getItem(LICENSE_STORAGE_PREFIX+dev);
+  if(localRaw){
+    const obj=JSON.parse(localRaw);
+    if(Date.now() < obj.expiry){
+      alert("⚠️ Device already has active license! Expiry: " + new Date(obj.expiry).toLocaleString());
+      return;
+    }
+  }
+
+  const res = makeLicenseKeyForDevice(dev, days);
+  lastGenerated = { device: dev, key: res.key, expiry: res.expiry };
+  saveLicenseToLocal(res.key, res.expiry, dev);
+  generatedBox.innerHTML = `<strong>Device:</strong> ${dev}<br><strong>Key:</strong> ${res.key}<br><strong>Expiry:</strong> ${new Date(res.expiry).toLocaleString()}`;
+});
+
+copyLastLicenseBtn.addEventListener('click', ()=>{ if(lastGenerated) navigator.clipboard.writeText(lastGenerated.key).then(()=>alert("Copied.")); });
+
+function generateSignalText(){
+  const raw=localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
+  if(!raw){ alert("Activate license first."); return null; }
+  const saved=JSON.parse(raw);
+  if(Date.now()>saved.expiry){ alert("License expired."); return null; }
+  const pair=assetSelect.value; const bb=bollinger.value; const dir=bb==='upper'?'Buy':'Sell';
+  const analysis=bb==='upper'?'Price touching upper BB, bullish':'Price touching lower BB, bearish';
+  const now=new Date(); const gap=2; const entry=new Date(now.getTime()+gap*60000);
+  let tf=timeframe.value, duration="1 Minute";
+  if(tf==="5m") duration="5 Minutes"; else if(tf==="15m") duration="15 Minutes"; else if(tf==="1h") duration="1 Hour";
+  const timeStr=`${pad2(entry.getHours())}:${pad2(entry.getMinutes())} (${gap}m later)`;
+  return { text:`✦━━━━━━━━✦\n🐉 DRAGONFLY SIGNAL\n✦━━━━━━━━✦\n📊 Pair: ${pair}\n⏰ Entry: ${timeStr}\n⌛ Duration: ${duration}\n🎯 Direction: ${dir}\n🧾 Analysis: ${analysis}\n✦━━━━━━━━✦`, type:dir };
+}
+function showSignalPopup(text,type){ signalText.textContent=text; candleBody.style.height='0'; candleBody.style.background=type==='Buy'?'limegreen':'crimson'; candleBody.style.animation=type==='Buy'?'growUp 1.2s forwards':'growDown 1.2s forwards'; signalModal.style.display='flex'; }
+function closeSignal(){ signalModal.style.display='none'; }
+generateBtn.addEventListener('click',()=>{ const s=generateSignalText(); if(s) showSignalPopup(s.text,s.type); });
+resetBtn.addEventListener('click',closeSignal);
+</script>
+</body>
+</html>
