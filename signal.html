@@ -133,8 +133,6 @@ const output = document.getElementById('output');
 const generateBtn = document.getElementById('generate');
 const resetBtn = document.getElementById('reset');
 const copyBtn = document.getElementById('copyOut');
-const utcSel = document.getElementById('utcSelect');
-const tf = document.getElementById('timeframe');
 const licenseStatus = document.getElementById('licenseStatus');
 
 let licenseOk = false;
@@ -231,10 +229,6 @@ ${analysis}
 
 generateBtn.addEventListener('click',()=>{
     if(!licenseOk){ alert("License not active. Cannot generate signals."); return;}
-    if(output.textContent.includes("Entry Time") && !output.textContent.includes("EXECUTED")){
-        alert("Previous signal not yet completed. Wait for it to finish.");
-        return;
-    }
     output.textContent = generateSignalText();
 });
 
