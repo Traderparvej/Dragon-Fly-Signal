@@ -49,9 +49,9 @@ a.owner-link{color:var(--accent);text-decoration:none;font-weight:bold;}
 a.owner-link:hover{text-decoration:underline;}
 @media (max-width:880px){.grid{grid-template-columns:1fr;}}
 .small-note{font-size:12px;color:var(--muted);}
-.license-status-big{font-size:16px;font-weight:700;margin-left:12px;color:var(--success);}
+.license-status-small{font-size:14px;font-weight:600;color:var(--success);}
 .license-expired{color:var(--warn);}
-.license-details{display:flex;gap:12px;margin-top:4px;font-size:13px;}
+.license-details{display:flex;gap:12px;margin-top:4px;font-size:12px;}
 .license-details div{background:rgba(255,255,255,0.05);padding:4px 8px;border-radius:6px;}
 .get-new-license{margin-top:6px;display:inline-block;background:var(--accent);padding:6px 12px;border-radius:8px;color:#000;text-decoration:none;font-weight:bold;}
 </style>
@@ -59,7 +59,7 @@ a.owner-link:hover{text-decoration:underline;}
 <body>
 <div class="wrap">
 <header>
-<h1>🐉 DragonFly — Signal Generator <span id="licenseStatus" class="license-status-big"></span></h1>
+<h1>🐉 DragonFly — Signal Generator <span id="licenseStatus" class="license-status-small"></span></h1>
 <div class="small">Software: DragonFly &nbsp; Owner: <a class="owner-link" href="https://t.me/TraderParvej" target="_blank">@TraderParvej</a></div>
 <div class="license-details" id="licenseDetails">
   <div id="licenseActive">Active: —</div>
@@ -138,7 +138,7 @@ const generateBtn = document.getElementById('generate');
 const resetBtn = document.getElementById('reset');
 const copyBtn = document.getElementById('copyOut');
 
-const licenseStatusBig = document.getElementById('licenseStatus');
+const licenseStatusSmall = document.getElementById('licenseStatus');
 const licenseDetails = document.getElementById('licenseDetails');
 const licenseActivePill = document.getElementById('licenseActive');
 const licenseExpiryPill = document.getElementById('licenseExpiry');
@@ -148,6 +148,7 @@ const getNewLicenseBtn = document.getElementById('getNewLicenseBtn');
 let licenseOk = false;
 let licenseExpiry = localStorage.getItem(LICENSE_STORAGE_KEY) ? new Date(localStorage.getItem(LICENSE_STORAGE_KEY)) : null;
 const deviceId = Math.floor(Math.random()*900000000+100000000);
+let signalActive = false;
 
 // ====== Assets ======
 const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)",
@@ -184,15 +185,15 @@ function updateLicenseUI(){
     const days = Math.floor(diff/1000/60/60/24);
     const hrs = Math.floor(diff/1000/60/60)%24;
     const mins = Math.floor(diff/1000/60)%60;
-    licenseStatusBig.style.color='#4ade80';
-    licenseStatusBig.textContent=`License Active ✅ | Expires: ${fmtDate(licenseExpiry)} | Remaining: ${days}d ${hrs}h ${mins}m`;
+    licenseStatusSmall.style.color='#4ade80';
+    licenseStatusSmall.textContent=`License Active ✅ | Expires: ${fmtDate(licenseExpiry)} | Remaining: ${days}d ${hrs}h ${mins}m`;
     licenseActivePill.textContent=`Active: ${fmtDate(new Date(licenseExpiry.getTime()-30*24*60*60*1000))}`;
     licenseExpiryPill.textContent=`Expiry: ${fmtDate(licenseExpiry)}`;
     deviceIdPill.textContent=`ID: ${deviceId}`;
     getNewLicenseBtn.style.display='none';
   } else {
-    licenseStatusBig.className='license-expired';
-    licenseStatusBig.textContent='License Expired ❌';
+    licenseStatusSmall.className='license-expired';
+    licenseStatusSmall.textContent='License Expired ❌';
     licenseActivePill.textContent='Active: —';
     licenseExpiryPill.textContent='Expiry: —';
     deviceIdPill.textContent=`ID: ${deviceId}`;
@@ -201,7 +202,7 @@ function updateLicenseUI(){
   }
 }
 updateLicenseUI();
-setInterval(updateLicenseUI,60000); // auto-update remaining every minute
+setInterval(updateLicenseUI,60000); // update remaining every minute
 
 // ====== Signals ======
 function generateSignalText(){
@@ -232,7 +233,11 @@ ${analysis}
 
 generateBtn.addEventListener('click',()=>{
   if(!licenseOk){alert('License required to generate signals. Please get a new license.'); return;}
+  if(signalActive){alert('Previous signal still active. Wait for it to finish.'); return;}
+  signalActive = true;
   output.textContent=generateSignalText();
+  // disable generate until 1 minute passed
+  setTimeout(()=>{signalActive=false;}, 60*1000); 
 });
 
 resetBtn.addEventListener('click',()=>{output.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
