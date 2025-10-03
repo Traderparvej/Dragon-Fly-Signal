@@ -15,7 +15,6 @@
   --yellow:#ffca28;
   --red:#f44336;
   --blue:#29b6f6;
-  --fade:#ffffff10;
 }
 *{box-sizing:border-box;}
 body{
@@ -26,70 +25,56 @@ body{
 }
 .wrap{max-width:1100px;margin:18px auto;padding:18px;}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
-header h1{margin:0;font-size:22px;display:flex;align-items:center;gap:12px;color:var(--accent);}
-.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.04));border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 8px 24px rgba(0,0,0,0.5);}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-label{font-size:14px;color:var(--muted);display:block;margin-bottom:6px;font-weight:600;}
+header h1{margin:0;font-size:20px;display:flex;align-items:center;gap:12px;}
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px;margin-bottom:12px;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
 select,button{
   width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,0.08);
-  background:rgba(255,255,255,0.95);
+  padding:10px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.06);
+  background:rgba(255,255,255,0.9);
   color:#000;
   font-weight:600;
-  font-size:14px;
 }
-.controls{display:flex;gap:12px;margin-top:16px;}
-.controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:12px;cursor:pointer;font-weight:600;transition:0.3s;box-shadow:0 4px 12px rgba(0,0,0,0.3);}
-.controls button:hover{opacity:0.95; transform: translateY(-2px);}
+.controls{display:flex;gap:10px;margin-top:12px;}
+.controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:600;transition:0.3s;}
+.controls button:hover{opacity:0.9;}
 .output{
-  margin-top:16px;
-  padding:20px;
-  border-radius:16px;
-  background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));
-  border:1px solid rgba(255,255,255,0.05);
-  min-height:220px;
+  margin-top:12px;
+  padding:16px;
+  border-radius:12px;
+  background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(0,0,0,0.02));
+  border:1px solid rgba(255,255,255,0.03);
+  min-height:180px;
   white-space:pre-wrap;
   font-family:'Courier New', Courier, monospace;
   color:#fff;
-  font-size:15px;
-  line-height:1.6;
+  font-size:14px;
+  line-height:1.45;
   opacity:1;
   transition: all 0.6s ease-in-out;
 }
 .unicode{font-family: "Arial", "DejaVu Sans", "monospace";}
-footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px;}
+footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
 a.owner-link{color:var(--accent);text-decoration:none;font-weight:bold;}
 a.owner-link:hover{text-decoration:underline;}
 @media (max-width:880px){.grid{grid-template-columns:1fr;}}
 .small-note{font-size:12px;color:var(--muted);}
-.license-status{margin-top:8px;font-weight:600;font-size:14px;}
+.license-status{margin-top:6px;font-weight:600;font-size:14px;}
 .license-status.active{color:var(--green);}
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:999;}
-.modal{background:#0f1530;padding:24px;border-radius:16px;width:90%;max-width:420px;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.6);}
-.modal h2{margin-top:0;margin-bottom:12px;color:var(--accent);}
-.modal input{width:100%;padding:12px;border-radius:10px;border:1px solid #333;margin-bottom:14px;font-size:14px;}
-.modal button{padding:12px 18px;border:none;border-radius:10px;background:var(--accent);font-weight:bold;cursor:pointer;transition:0.3s;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.3);}
-.modal button:hover{opacity:0.95; transform: translateY(-2px);}
-.modal .info{color:#6dd6ff;font-size:13px;margin-top:8px;}
-@keyframes blink {0%,50%,100% {opacity:1;} 25%,75% {opacity:0.3;}}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:999;}
+.modal{background:#0f1530;padding:20px;border-radius:12px;width:90%;max-width:400px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.5);}
+.modal h2{margin-top:0;margin-bottom:10px;}
+.modal input{width:100%;padding:10px;border-radius:8px;border:1px solid #333;margin-bottom:12px;}
+.modal button{padding:10px 16px;border:none;border-radius:8px;background:var(--accent);font-weight:bold;cursor:pointer;transition:0.3s;}
+.modal button:hover{opacity:0.9;}
+.modal .info{color:#6dd6ff;font-size:13px;margin-top:6px;}
+@keyframes blink {0%,50%,100% {opacity:1;} 25%,75% {opacity:0.2;}}
 .blinking {animation: blink 1s infinite;}
 .fade-in {opacity:0; animation: fadeIn 1s forwards;}
 @keyframes fadeIn {to {opacity:1;}}
-.signal-block{
-  padding:14px;
-  border-radius:14px;
-  margin-top:12px;
-  border-left:5px solid var(--accent);
-  background:linear-gradient(90deg,rgba(255,255,255,0.02),rgba(0,0,0,0.05));
-  transition:0.5s;
-}
-.signal-buy{border-left-color:var(--green);}
-.signal-sell{border-left-color:var(--red);}
-.signal-header{font-weight:bold;color:var(--accent);margin-bottom:6px;font-size:15px;}
-.signal-entry{color:var(--blue);}
-.signal-direction{font-weight:bold;}
 </style>
 </head>
 <body>
@@ -168,7 +153,6 @@ a.owner-link:hover{text-decoration:underline;}
 </div>
 
 <script>
-// ===== Variables =====
 const marketSel = document.getElementById('market');
 const assetSelect = document.getElementById('assetSelect');
 const bollinger = document.getElementById('bollinger');
@@ -183,7 +167,7 @@ const activateLicenseBtn = document.getElementById('activateLicense');
 
 let licenseOk = false;
 
-// ===== Assets =====
+// ====== Assets ======
 const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)",
 "AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
 const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
@@ -203,7 +187,7 @@ marketSel.addEventListener('change', fillAssetSelect);
 function pad2(n){ return String(n).padStart(2,'0'); }
 function fmtDate(d){ return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}`; }
 
-// ===== License System =====
+// ====== License System ======
 const LICENSE_KEY = "63JA-TSGP-XMHF";
 let deviceId = localStorage.getItem("dragon_device_id");
 if(!deviceId){
@@ -245,42 +229,46 @@ activateLicenseBtn.addEventListener('click',()=>{
   }
 });
 
-// ===== Signal Generator =====
+// ====== Signal Generator ======
 function generateSignalText(){
     if(!licenseOk){ alert("License not active. Cannot generate signals."); return ""; }
     const pair = assetSelect.value;
     const bb = bollinger.value;
     const direction = bb==='upper'?'Buy':'Sell';
-    const analysis = bb==='upper'?'Price is touching upper BB; short-term bullish momentum observed.':'Price is touching lower BB; short-term bearish momentum observed.';
+    const analysis = bb==='upper'?'Price is touching the upper BB; short-term bullish momentum observed.':'Price is touching the lower BB; short-term bearish momentum observed.';
     const now = new Date();
-    const randMin = Math.floor(Math.random()*3)+1;
-    const entry = new Date(now.getTime() + randMin*60*1000);
-    const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())}`;
-    const blockClass = bb==='upper'?'signal-buy':'signal-sell';
-    return `<div class="signal-block ${blockClass}">
-<div class="signal-header">🐉 DRAGONFLY — AI MARKET ANALYSIS</div>
-📊 Pair          : ${pair}<br>
-⏰ Entry Time    : <span class="signal-entry">${timeStr}</span><br>
-⌛ Signal Duration: 1 Minute<br>
-📈 Strategy      : Bollinger Band – ${bb.charAt(0).toUpperCase()+bb.slice(1)} Zone<br>
-🎯 Direction     : <span class="signal-direction">${direction}</span><br>
-🧾 Market Analysis<br>${analysis}<br>
-⚡ Note: 1Step MTG and Trade Safety Margin applied.
-</div>`;
+    const entry = new Date(now.getTime() + 1*60*1000); // 1 min later
+    const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())} (1 Minute Later)`;
+
+    return `✦━━━━━━━━━━━━━━━━✦ 
+🐉 DRAGONFLY — AI MARKET ANALYSIS
+✦━━━━━━━━━━━━━━━━✦
+
+📊 Pair          : ${pair}
+⏰ Entry Time    : ${timeStr}
+⌛️ Signal Duration: 1 Minute
+📈 Strategy      : Bollinger Band – ${bb.charAt(0).toUpperCase()+bb.slice(1)} Zone
+🎯 Direction     : ${direction}
+
+🧾 Market Analysis
+${analysis}
+
+⚡️ Note: Execute the trade exactly after 1 minute for optimal entry.
+✦━━━━━━━━━━━━━━━━✦`;
 }
 
-// ===== Generate with Analysis Effect =====
+// ====== Generate with Analysis Effect ======
 generateBtn.addEventListener('click',()=>{
     if(!licenseOk){ alert("License not active. Cannot generate signals."); return; }
 
     output.classList.add('blinking');
-    output.innerHTML = "Analyzing market... ⏳";
+    output.textContent = "Analyzing market... ⏳";
     generateBtn.disabled = true;
     resetBtn.disabled = true;
 
     setTimeout(()=>{
         output.classList.remove('blinking');
-        output.innerHTML = generateSignalText();
+        output.textContent = generateSignalText();
         output.classList.add('fade-in');
         setTimeout(()=>output.classList.remove('fade-in'), 1000);
         generateBtn.disabled = false;
@@ -288,7 +276,7 @@ generateBtn.addEventListener('click',()=>{
     }, 3500);
 });
 
-resetBtn.addEventListener('click',()=>{output.innerHTML='▶️ DATE: — ◀️<br><br>(Press Generate to produce signals)';});
+resetBtn.addEventListener('click',()=>{output.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
 copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(output.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
 </script>
 </body>
