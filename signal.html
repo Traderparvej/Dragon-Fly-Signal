@@ -17,7 +17,8 @@ header h1{margin:0;font-size:20px;display:flex;align-items:center;gap:12px;}
 .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px;margin-bottom:12px;}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
-select,button{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.9);color:#000;font-weight:600;}
+select,button,input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);font-weight:600;}
+select, input{background:rgba(255,255,255,0.9);color:#000;}
 .controls{display:flex;gap:10px;margin-top:12px;}
 .controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:600;transition:0.3s;}
 .controls button:hover{opacity:0.9;}
@@ -26,8 +27,6 @@ select,button{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(2
 .license-status{margin-top:6px;font-weight:600;font-size:14px;}
 .license-status.active{color:var(--green);}
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:16px;}
-a.owner-link{color:var(--accent);text-decoration:none;font-weight:bold;}
-a.owner-link:hover{text-decoration:underline;}
 /* ==== Popup Compact ==== */
 .signal-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1000;}
 .signal-modal{background:#0f1530;padding:14px;border-radius:12px;width:90%;max-width:320px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.5);text-align:center;font-size:13px;}
@@ -47,6 +46,13 @@ a.owner-link:hover{text-decoration:underline;}
 <h1>🐉 DragonFly — Signal Generator</h1>
 <div class="license-status" id="licenseStatus">License Inactive ❌</div>
 </header>
+
+<!-- License Input -->
+<section class="card">
+  <label>Enter License Key</label>
+  <input type="text" id="licenseInput" placeholder="Enter your license key">
+  <button id="activateBtn" style="margin-top:8px;">Activate License</button>
+</section>
 
 <section class="card">
 <div class="grid">
@@ -112,8 +118,11 @@ const output=document.getElementById('output');
 const generateBtn=document.getElementById('generate');
 const resetBtn=document.getElementById('reset');
 const licenseStatus=document.getElementById('licenseStatus');
+const licenseInput=document.getElementById('licenseInput');
+const activateBtn=document.getElementById('activateBtn');
 
-let licenseOk=true; // demo always active
+let licenseOk=false; // default inactive
+const VALID_LICENSE="DRAGONFLY-12345"; // এখানে আপনার আসল লাইসেন্স key দিন
 
 // assets
 const OTCpairs=["AUD/USD (OTC)","EUR/USD (OTC)","USD/BDT (OTC)"];
@@ -153,8 +162,24 @@ function showSignalPopup(text,type){
 }
 function closeSignal(){document.getElementById('signalModal').style.display='none';}
 
+// license activation
+activateBtn.addEventListener('click',()=>{
+  if(licenseInput.value.trim()===VALID_LICENSE){
+    licenseOk=true;
+    licenseStatus.textContent="License Active ✅";
+    licenseStatus.classList.add("active");
+    alert("✅ License Activated Successfully!");
+  }else{
+    licenseOk=false;
+    licenseStatus.textContent="License Inactive ❌";
+    licenseStatus.classList.remove("active");
+    alert("❌ Invalid License Key!");
+  }
+});
+
+// generate signals
 generateBtn.addEventListener('click',()=>{
-  if(!licenseOk){alert("License inactive");return;}
+  if(!licenseOk){alert("⚠️ Please activate license first!");return;}
   output.textContent="Analyzing... ⏳";
   setTimeout(()=>{
     const sig=generateSignalText();
