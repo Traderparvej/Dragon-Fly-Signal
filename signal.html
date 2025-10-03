@@ -205,7 +205,17 @@ const showAdminLoginBtn=document.getElementById('showAdminLoginBtn');
 const loadingModal=document.getElementById('loadingModal');
 let lastGenerated=null;
 
-const OTCpairs=["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
+// Updated OTC pair list
+const OTCpairs=[
+  "AUD/CHF (OTC)","AUD/JPY (OTC)","USD/BRL (OTC)","CAD/JPY (OTC)","CHF/JPY (OTC)",
+  "EUR/NZD (OTC)","GBP/AUD (OTC)","NZD/CHF (OTC)","USD/TRY (OTC)","USD/ZAR (OTC)",
+  "USD/IDR (OTC)","USD/MXN (OTC)","USD/PHP (OTC)","AUD/CAD (OTC)","USD/COP (OTC)",
+  "GBP/NZD (OTC)","GBP/JPY (OTC)","USD/JPY (OTC)","USD/NGN (OTC)","EUR/USD (OTC)",
+  "NZD/JPY (OTC)","EUR/JPY (OTC)","USD/PKR (OTC)","AUD/NZD (OTC)","GBP/CAD (OTC)",
+  "EUR/SGD (OTC)","NZD/USD (OTC)","GBP/CHF (OTC)","AUD/USD (OTC)","CAD/CHF (OTC)",
+  "EUR/AUD (OTC)","EUR/GBP (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","USD/BDT (OTC)",
+  "USD/CHF (OTC)","USD/DZD (OTC)","USD/INR (OTC)","EUR/CHF (OTC)","USD/EGP (OTC)"
+];
 const REALpairs=['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
 function fillAssetSelect(){ 
