@@ -229,9 +229,7 @@ activateLicenseBtn.addEventListener('click',()=>{
   }
 });
 
-// ====== Signal Generator with Random 1-2min Gap ======
-let lastSignalTime = null;
-
+// ====== Signal Generator with 1-2min random gap from generate click ======
 function generateSignalText(){
     if(!licenseOk){ alert("License not active. Cannot generate signals."); return ""; }
 
@@ -240,14 +238,11 @@ function generateSignalText(){
     const direction = bb==='upper'?'Buy':'Sell';
     const analysis = bb==='upper'?'Price is touching the upper BB; short-term bullish momentum observed.':'Price is touching the lower BB; short-term bearish momentum observed.';
 
-    let now = new Date();
-    if(lastSignalTime && lastSignalTime > now) now = lastSignalTime;
-
-    const gap = Math.floor(Math.random()*2+1); // 1-2 minutes
+    const now = new Date();
+    const gap = Math.floor(Math.random()*2)+1; // 1-2 minutes
     const entry = new Date(now.getTime() + gap*60*1000);
-    lastSignalTime = entry;
 
-    const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())} (${gap} Minute Later)`;
+    const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())} (${gap} Minute${gap>1?'s':''} Later)`;
 
     return `✦━━━━━━━━━━━━━━━━✦ 
 🐉 DRAGONFLY — AI MARKET ANALYSIS
@@ -266,6 +261,7 @@ ${analysis}
 ✦━━━━━━━━━━━━━━━━✦`;
 }
 
+// ====== Generate Button Effect ======
 generateBtn.addEventListener('click',()=>{
     if(!licenseOk){ alert("License not active. Cannot generate signals."); return; }
 
@@ -281,12 +277,11 @@ generateBtn.addEventListener('click',()=>{
         setTimeout(()=>output.classList.remove('fade-in'), 1000);
         generateBtn.disabled = false;
         resetBtn.disabled = false;
-    }, 3500);
+    }, 3000);
 });
 
 resetBtn.addEventListener('click',()=>{
     output.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';
-    lastSignalTime = null;
 });
 copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(output.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
 </script>
