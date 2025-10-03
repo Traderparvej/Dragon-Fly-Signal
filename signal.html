@@ -147,6 +147,7 @@ const premiumStatus = document.getElementById('premiumStatus');
 let freeCount = 0;
 let premiumActive = false;
 let approvedPackage = null;
+let premiumExpiry = null;
 
 // ===== Assets =====
 const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
@@ -194,6 +195,13 @@ ${analysis}
 
 // Generate button
 generateBtn.addEventListener('click',()=>{
+    const now = new Date();
+    if(premiumActive && premiumExpiry && now>premiumExpiry){
+        premiumActive=false;
+        approvedPackage=null;
+        premiumStatus.textContent='Premium Expired';
+    }
+
     if(!premiumActive && freeCount>=5){
         premiumModal.style.display='flex';
         return;
@@ -210,20 +218,23 @@ copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(output.textC
 closePremiumBtn.addEventListener('click',()=>{premiumModal.style.display='none';});
 submitPremiumBtn.addEventListener('click',()=>{
     if(transactionId.value.trim()===''){alert('Please enter Payment Order ID'); return;}
-    premiumActive = false;
     approvedPackage = premiumPackage.value;
-    premiumStatus.textContent = `Premium Submitted for Approval (${approvedPackage}). Wait for admin approval.`;
     premiumModal.style.display='none';
     transactionId.value='';
+    premiumStatus.textContent=`Premium Submitted for Approval (${approvedPackage}). Wait for admin approval.`;
 });
 
-// Simulate admin approval
+// Admin Approval Simulation
 function approvePremium(){
     if(!approvedPackage) return;
-    premiumActive = true;
-    let days=approvedPackage==='7days'?7:approvedPackage==='30days'?30:90;
-    premiumStatus.textContent = `Premium Active – ${days} Days (${approvedPackage})`;
+    premiumActive=true;
+    const now = new Date();
+    const days = approvedPackage==='7days'?7:approvedPackage==='30days'?30:90;
+    premiumExpiry = new Date(now.getTime()+days*24*60*60*1000);
+    premiumStatus.textContent=`Premium Active – ${days} Days (${approvedPackage})`;
 }
+
+// For testing, call approvePremium() in console or admin panel after payment
 </script>
 </body>
 </html>
