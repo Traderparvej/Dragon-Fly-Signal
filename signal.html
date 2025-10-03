@@ -12,6 +12,7 @@
   --text:#ffffff;
   --accent:#6dd6ff;
   --warn:#ff6b6b;
+  --success:#4ade80; /* green for license active */
 }
 *{box-sizing:border-box;}
 body{
@@ -48,7 +49,7 @@ a.owner-link{color:var(--accent);text-decoration:none;font-weight:bold;}
 a.owner-link:hover{text-decoration:underline;}
 @media (max-width:880px){.grid{grid-template-columns:1fr;}}
 .small-note{font-size:12px;color:var(--muted);}
-.license-status-big{font-size:15px;font-weight:700;margin-left:12px;}
+.license-status-big{font-size:16px;font-weight:700;margin-left:12px;color:var(--success);}
 .license-expired{color:var(--warn);}
 .license-details{display:flex;gap:12px;margin-top:4px;font-size:13px;}
 .license-details div{background:rgba(255,255,255,0.05);padding:4px 8px;border-radius:6px;}
@@ -126,7 +127,7 @@ a.owner-link:hover{text-decoration:underline;}
 </div>
 
 <script>
-const LICENSE_KEY = "dragon12580"; // hidden from UI
+const LICENSE_KEY = "dragon12580"; // hidden
 const LICENSE_STORAGE_KEY = "dragonfly_license_expiry";
 
 const marketSel = document.getElementById('market');
@@ -136,8 +137,6 @@ const output = document.getElementById('output');
 const generateBtn = document.getElementById('generate');
 const resetBtn = document.getElementById('reset');
 const copyBtn = document.getElementById('copyOut');
-const utcSel = document.getElementById('utcSelect');
-const tf = document.getElementById('timeframe');
 
 const licenseStatusBig = document.getElementById('licenseStatus');
 const licenseDetails = document.getElementById('licenseDetails');
@@ -148,63 +147,61 @@ const getNewLicenseBtn = document.getElementById('getNewLicenseBtn');
 
 let licenseOk = false;
 let licenseExpiry = localStorage.getItem(LICENSE_STORAGE_KEY) ? new Date(localStorage.getItem(LICENSE_STORAGE_KEY)) : null;
-const deviceId = Math.floor(Math.random()*900000000+100000000); // fake unique device id
+const deviceId = Math.floor(Math.random()*900000000+100000000);
 
 // ====== Assets ======
 const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)",
 "AUD/CAD (OTC)","CAD/JPY (OTC)","USD/IDR (OTC)","EUR/GBP (OTC)","USD/BDT (OTC)"];
 const REALpairs = ['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
-// fill assets
 function fillAssetSelect(){
-  assetSelect.innerHTML = '';
+  assetSelect.innerHTML='';
   const pairs = marketSel.value==='REAL'?REALpairs:OTCpairs;
   pairs.forEach(p=>{
     const opt = document.createElement('option');
-    opt.value = p; opt.textContent = p;
+    opt.value=p; opt.textContent=p;
     assetSelect.appendChild(opt);
   });
 }
 fillAssetSelect();
-marketSel.addEventListener('change', fillAssetSelect);
+marketSel.addEventListener('change',fillAssetSelect);
 
 // ====== Utils ======
-function pad2(n){ return String(n).padStart(2,'0'); }
-function fmtDate(d){ return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}`; }
+function pad2(n){return String(n).padStart(2,'0');}
+function fmtDate(d){return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}`;}
 
 // ====== License UI ======
 function adminTelegramUrl(msg){return `https://t.me/TraderParvej?start=${encodeURIComponent(msg||"")}`;}
 function updateLicenseUI(){
   const now = new Date();
   if(licenseOk && licenseExpiry && licenseExpiry.getTime()<now.getTime()){
-    licenseOk=false;
-    licenseExpiry=null;
+    licenseOk=false; licenseExpiry=null;
     localStorage.removeItem(LICENSE_STORAGE_KEY);
   }
 
   if(licenseOk && licenseExpiry){
-    const diff = licenseExpiry - now;
+    const diff = licenseExpiry-now;
     const days = Math.floor(diff/1000/60/60/24);
     const hrs = Math.floor(diff/1000/60/60)%24;
     const mins = Math.floor(diff/1000/60)%60;
-
-    licenseStatusBig.textContent = `License Active ✅ | Expires: ${fmtDate(licenseExpiry)} | Remaining: ${days}d ${hrs}h ${mins}m`;
-    licenseActivePill.textContent = `Active: ${fmtDate(new Date(licenseExpiry.getTime()-30*24*60*60*1000))}`;
-    licenseExpiryPill.textContent = `Expiry: ${fmtDate(licenseExpiry)}`;
-    deviceIdPill.textContent = `ID: ${deviceId}`;
+    licenseStatusBig.style.color='#4ade80';
+    licenseStatusBig.textContent=`License Active ✅ | Expires: ${fmtDate(licenseExpiry)} | Remaining: ${days}d ${hrs}h ${mins}m`;
+    licenseActivePill.textContent=`Active: ${fmtDate(new Date(licenseExpiry.getTime()-30*24*60*60*1000))}`;
+    licenseExpiryPill.textContent=`Expiry: ${fmtDate(licenseExpiry)}`;
+    deviceIdPill.textContent=`ID: ${deviceId}`;
     getNewLicenseBtn.style.display='none';
   } else {
     licenseStatusBig.className='license-expired';
-    licenseStatusBig.textContent = 'License Expired ❌';
-    licenseActivePill.textContent = 'Active: —';
-    licenseExpiryPill.textContent = 'Expiry: —';
-    deviceIdPill.textContent = `ID: ${deviceId}`;
+    licenseStatusBig.textContent='License Expired ❌';
+    licenseActivePill.textContent='Active: —';
+    licenseExpiryPill.textContent='Expiry: —';
+    deviceIdPill.textContent=`ID: ${deviceId}`;
     getNewLicenseBtn.style.display='inline-block';
-    getNewLicenseBtn.href = adminTelegramUrl(`Hello @TraderParvej, I want a new DragonFly license. My Device ID: ${deviceId}`);
-    getNewLicenseBtn.target='_blank';
+    getNewLicenseBtn.href=adminTelegramUrl(`Hello @TraderParvej, I want a new DragonFly license. My Device ID: ${deviceId}`);
   }
 }
 updateLicenseUI();
+setInterval(updateLicenseUI,60000); // auto-update remaining every minute
 
 // ====== Signals ======
 function generateSignalText(){
@@ -214,7 +211,7 @@ function generateSignalText(){
   const analysis = bb==='upper'?'Price is touching upper BB; short-term bullish momentum observed.':'Price is touching lower BB; short-term bearish momentum observed.';
   const now = new Date();
   const randMin = Math.floor(Math.random()*3)+1;
-  const entry = new Date(now.getTime() + randMin*60*1000);
+  const entry = new Date(now.getTime()+randMin*60*1000);
   const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())}`;
   return `✦━━━━━━━━━━━━━━━━✦ 
 🐉 DRAGONFLY — AI MARKET ANALYSIS
@@ -234,23 +231,20 @@ ${analysis}
 }
 
 generateBtn.addEventListener('click',()=>{
-  if(!licenseOk){
-    alert('License required to generate signals. Please get a new license.');
-    return;
-  }
-  output.textContent = generateSignalText();
+  if(!licenseOk){alert('License required to generate signals. Please get a new license.'); return;}
+  output.textContent=generateSignalText();
 });
 
 resetBtn.addEventListener('click',()=>{output.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
 copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(output.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
 
-// ====== First time license entry ======
+// ====== First-time license entry ======
 if(!licenseOk && !licenseExpiry){
   const enteredKey = prompt("Enter License Key:");
   if(enteredKey===LICENSE_KEY){
-    licenseExpiry = new Date(new Date().getTime()+30*24*60*60*1000);
+    licenseExpiry=new Date(new Date().getTime()+30*24*60*60*1000);
     localStorage.setItem(LICENSE_STORAGE_KEY,licenseExpiry);
-    licenseOk = true;
+    licenseOk=true;
     updateLicenseUI();
   } else {
     alert('Invalid Key. Signals disabled.');
