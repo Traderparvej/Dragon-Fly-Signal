@@ -25,7 +25,7 @@ header h1{margin:0;font-size:20px;display:flex;align-items:center;gap:12px;}
 .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px;margin-bottom:12px;}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
-select,input[type=date],input[type=number],button{
+select,button{
   width:100%;
   padding:10px;
   border-radius:10px;
@@ -60,16 +60,13 @@ a.owner-link:hover{text-decoration:underline;}
 .modal h2{margin-top:0;margin-bottom:10px;}
 .modal input, .modal select{width:100%;padding:10px;border-radius:8px;border:1px solid #333;margin-bottom:12px;}
 .modal button{padding:10px 16px;border:none;border-radius:8px;background:var(--accent);font-weight:bold;cursor:pointer;}
-.modal .error{color:#ff8a8a;font-size:13px;display:none;margin-top:6px;}
 .modal .info{color:#6dd6ff;font-size:13px;margin-top:6px;}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-<h1>🐉 DragonFly — Signal Generator
-  <span id="licenseStatus" style="font-size:13px;color:#6dd6ff;font-weight:600;"></span>
-</h1>
+<h1>🐉 DragonFly — Signal Generator</h1>
 <div class="small">Software: DragonFly &nbsp; Owner: <a class="owner-link" href="https://t.me/TraderParvej" target="_blank">@TraderParvej</a></div>
 </header>
 
@@ -138,20 +135,14 @@ a.owner-link:hover{text-decoration:underline;}
 <footer>© DragonFly — Advance signals. Use responsibly.</footer>
 </div>
 
-<!-- Premium Modal -->
+<!-- Premium Info Modal -->
 <div class="modal-backdrop" id="premiumModal" style="display:none;">
   <div class="modal">
     <h2>💰 Premium Access</h2>
-    <p>Select package & pay via Binance ID: <b>499388438</b></p>
-    <select id="premiumPackage">
-      <option value="1week">1 Week - $5</option>
-      <option value="1month">1 Month - $10</option>
-      <option value="3month">3 Months - $20</option>
-    </select>
-    <input type="text" id="tranId" placeholder="Enter Transaction ID">
-    <button id="verifyPremium">Submit & Verify</button>
-    <div class="error" id="premiumError">❌ Transaction not verified yet.</div>
-    <div class="info">After verification, wait 24 hours before using. Admin: @TraderParvej</div>
+    <p>To activate premium signals, contact admin:</p>
+    <a href="https://t.me/TraderParvej" target="_blank" class="owner-link">Click here to message @TraderParvej</a>
+    <div class="info">After contacting admin, premium access will be granted professionally.</div>
+    <button id="closePremium">Close</button>
   </div>
 </div>
 
@@ -168,13 +159,10 @@ const utcSel = document.getElementById('utcSelect');
 const tf = document.getElementById('timeframe');
 
 const premiumModal = document.getElementById('premiumModal');
-const verifyBtn = document.getElementById('verifyPremium');
-const tranIdInp = document.getElementById('tranId');
-const premiumError = document.getElementById('premiumError');
+const closePremiumBtn = document.getElementById('closePremium');
 
 let freeCount = 0;
-let premiumVerified = false;
-let premiumStartTime = localStorage.getItem('premiumStartTime') ? new Date(localStorage.getItem('premiumStartTime')) : null;
+let premiumActive = false;
 
 // ====== Assets ======
 const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)",
@@ -196,20 +184,23 @@ marketSel.addEventListener('change', fillAssetSelect);
 
 // Utilities
 function pad2(n){ return String(n).padStart(2,'0'); }
+
 function generateSignalText(){
     const pair = assetSelect.value;
     const bb = bollinger.value;
     const direction = bb==='upper'?'Buy':'Sell';
     const analysis = bb==='upper'?'Price is touching upper BB; short-term bullish momentum observed.':'Price is touching lower BB; short-term bearish momentum observed.';
     const now = new Date();
-    const entry = new Date(now.getTime()+60*1000);
+    // Random 1–3 min later
+    const randMin = Math.floor(Math.random()*3)+1;
+    const entry = new Date(now.getTime() + randMin*60*1000);
     const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())}`;
     return `✦━━━━━━━━━━━━━━━━✦ 
 🐉 DRAGONFLY — AI MARKET ANALYSIS
 ✦━━━━━━━━━━━━━━━━✦
 
 📊 Pair          : ${pair}
-⏰ Entry Time    : ${timeStr} (1 Minute Later)
+⏰ Entry Time    : ${timeStr} (1–3 Minutes Later)
 ⌛ Signal Duration: 1 Minute
 📈 Strategy      : Bollinger Band – ${bb.charAt(0).toUpperCase()+bb.slice(1)} Zone
 🎯 Direction     : ${direction}
@@ -228,33 +219,20 @@ generateBtn.addEventListener('click',()=>{
         freeCount++;
         output.textContent = generateSignalText();
     } else {
-        if(!premiumVerified){
+        if(!premiumActive){
             premiumModal.style.display='flex';
             return;
         }
-        const now = new Date();
-        const diff = (now - premiumStartTime)/1000/60/60;
-        if(diff<24){ alert('Wait 24 hours after verification before using Premium signals.'); return;}
         output.textContent = generateSignalText();
     }
 });
 
 // Reset & Copy
 resetBtn.addEventListener('click',()=>{output.textContent='▶️ DATE: — ◀️\n\n(Press Generate to produce signals)';});
-copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(output.textContent);copyBtn.textContent='Copied ✔'; setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
+copyBtn.addEventListener('click',()=>{navigator.clipboard.writeText(output.textContent);copyBtn.textContent='Copied ✔';setTimeout(()=>copyBtn.textContent='Copy Output',1000);});
 
-// Premium verification
-verifyBtn.addEventListener('click',()=>{
-    const tid = tranIdInp.value.trim();
-    if(tid!==''){
-        premiumVerified=true;
-        premiumStartTime=new Date();
-        localStorage.setItem('premiumStartTime', premiumStartTime);
-        premiumModal.style.display='none';
-        premiumError.style.display='none';
-        alert('Premium verified! Wait 24 hours before using signals.');
-    } else premiumError.style.display='block';
-});
+// Premium modal
+closePremiumBtn.addEventListener('click',()=>{premiumModal.style.display='none';});
 </script>
 </body>
 </html>
