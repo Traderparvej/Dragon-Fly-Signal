@@ -152,6 +152,7 @@ a.owner-link:hover{text-decoration:underline;}
 const marketSel = document.getElementById('market');
 const assetSelect = document.getElementById('assetSelect');
 const bollinger = document.getElementById('bollinger');
+const timeframe = document.getElementById('timeframe');
 const output = document.getElementById('output');
 const generateBtn = document.getElementById('generate');
 const resetBtn = document.getElementById('reset');
@@ -224,7 +225,7 @@ activateLicenseBtn.addEventListener('click',()=>{
   }
 });
 
-// ====== Signal Generator with true 1-2 min random gap ======
+// ====== Signal Generator (2min entry gap + timeframe expiry) ======
 function generateSignalText(){
     if(!licenseOk){ alert("License not active. Cannot generate signals."); return ""; }
 
@@ -234,10 +235,17 @@ function generateSignalText(){
     const analysis = bb==='upper'?'Price is touching the upper BB; short-term bullish momentum observed.':'Price is touching the lower BB; short-term bearish momentum observed.';
 
     const now = new Date();
-    const gap = Math.floor(Math.random()*2)+1; // random 1 or 2 minutes
+    const gap = 2; // fixed 2 minutes
     const entry = new Date(now.getTime() + gap*60*1000);
 
-    const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())} (${gap} Minute${gap>1?'s':''} Later)`;
+    // expiry auto based on timeframe
+    let tf = timeframe.value;
+    let duration = "1 Minute";
+    if(tf==="5m") duration="5 Minutes";
+    else if(tf==="15m") duration="15 Minutes";
+    else if(tf==="1h") duration="1 Hour";
+
+    const timeStr = `${pad2(entry.getHours())}:${pad2(entry.getMinutes())} (${gap} Minutes Later)`;
 
     return `✦━━━━━━━━━━━━━━━━✦ 
 🐉 DRAGONFLY — AI MARKET ANALYSIS
@@ -245,14 +253,14 @@ function generateSignalText(){
 
 📊 Pair               : ${pair} 
 ⏰ Entry Time    : ${timeStr}
-⌛️ Signal Duration: 1 Minute
+⌛️ Signal Duration: ${duration}
 📈 Strategy        : Bollinger Band – ${bb.charAt(0).toUpperCase()+bb.slice(1)} Zone 
 🎯 Direction       : ${direction}
 
 🧾 Market Analysis
 ${analysis}
 
-⚡️ Note: Execute the trade exactly after ${gap} minute${gap>1?'s':''} for optimal entry.
+⚡️ Note: Execute the trade exactly after ${gap} minutes for optimal entry.
 ✦━━━━━━━━━━━━━━━━✦`;
 }
 
