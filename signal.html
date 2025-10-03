@@ -146,7 +146,7 @@ a.owner-link:hover{text-decoration:underline;}
     </select>
     <label>Payment via Binance ID: 499388438</label>
     <input type="text" id="tranID" placeholder="Enter your Transaction/Order ID" />
-    <div class="info">After submitting, wait 24 hours and message admin <a href="https://t.me/TraderParvej" target="_blank" class="owner-link">@TraderParvej</a> for verification.</div>
+    <div class="info">After submitting, wait 24 hours and message admin <a href="https://t.me/TraderParvej" target="_blank" class="owner-link">@TraderParvej</a> for verification. Only after admin approval, Premium signals will be active.</div>
     <button id="submitPkg">Submit Payment</button>
     <button id="closePremium">Close</button>
   </div>
@@ -170,7 +170,7 @@ const closePremiumBtn = document.getElementById('closePremium');
 const submitPkgBtn = document.getElementById('submitPkg');
 
 let freeCount = 0;
-let premiumActive = false;
+let premiumActive = false; // Only admin will set true after approval
 
 // ====== Assets ======
 const OTCpairs = ["AUD/USD (OTC)","USD/BRL (OTC)","EUR/USD (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)",
@@ -243,8 +243,7 @@ closePremiumBtn.addEventListener('click',()=>{premiumModal.style.display='none';
 submitPkgBtn.addEventListener('click',()=>{
     const tranID = document.getElementById('tranID').value.trim();
     if(tranID===''){alert('Please enter your Transaction/Order ID'); return;}
-    alert(`Thank you! Please wait 24 hours and message admin @TraderParvej with your Transaction ID for verification.`);
-    premiumActive = true;
+    alert(`Thank you! Please wait 24 hours and message admin @TraderParvej with your Transaction ID for verification. Premium signals will be active only after admin approval.`);
     premiumModal.style.display='none';
 });
 </script>
