@@ -267,54 +267,45 @@ activateBtn.addEventListener('click', ()=>{
 showAdminLoginBtn.addEventListener('click', ()=>{ adminPasswordInput.value=''; adminLoginModal.style.display='flex'; adminPasswordInput.focus(); });
 adminLoginCancel.addEventListener('click', ()=>{ adminLoginModal.style.display='none'; });
 adminLoginSubmit.addEventListener('click', ()=>{ if(adminPasswordInput.value===ADMIN_PASSWORD){ adminLoginModal.style.display='none'; adminPanel.style.display='block'; alert("Admin access granted."); } else { alert("Wrong password."); adminPasswordInput.value=''; adminPasswordInput.focus(); } });
+
 generateLicenseBtn.addEventListener('click', ()=>{
-  const targetDev=adminDeviceIdInput.value.trim();
-  const days=parseInt(adminDurationInput.value,10);
-  if(!targetDev||!days){ alert("Enter device ID and duration."); return; }
-  const { key, expiry }=makeLicenseKeyForDevice(targetDev,days);
-  lastGenerated=key; generatedBox.textContent=key;
+  const dId=adminDeviceIdInput.value.trim();
+  const days=parseInt(adminDurationInput.value.trim(),10);
+  if(!dId || isNaN(days)){ alert("Fill both fields."); return; }
+  const { key, expiry }=makeLicenseKeyForDevice(dId, days);
+  lastGenerated=key; generatedBox.textContent="License: "+key+"\nExpiry: "+new Date(expiry).toLocaleString();
 });
-copyLastLicenseBtn.addEventListener('click', ()=>{
-  if(lastGenerated){ navigator.clipboard.writeText(lastGenerated); alert("Copied license key."); }
-  else { alert("No license generated yet."); }
-});
+copyLastLicenseBtn.addEventListener('click', ()=>{ if(!lastGenerated){ alert("Nothing generated yet."); return; } navigator.clipboard.writeText(lastGenerated); alert("Copied license to clipboard."); });
 
-function showSignal(){
-  const pair=assetSelect.value; const tf=timeframe.value; const band=bollinger.value;
-  const direction = (band==='upper')?"BUY":"SELL";
-  // 2–3 min random gap
-  const now = new Date();
-  const gap = 2 + Math.floor(Math.random() * 2); // 2 অথবা 3
-  now.setMinutes(now.getMinutes() + gap);
-  const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
-  const candleDir = direction==="BUY"?"up":"down";
-  candleBody.style.background=(candleDir==='up'?'#4caf50':'#f44336');
-  candleBody.style.animation=(candleDir==='up'?'growUp 1s forwards':'growDown 1s forwards');
-  signalText.textContent = 
-`✦━━━━━━━━━━━━━━━━✦
-🐉 DRAGONFLY — AI MARKET ANALYSIS
-✦━━━━━━━━━━━━━━━━✦
-
-📊 Pair        : ${pair}
-⏰ Entry Time  : ${timeStr}
-⏳ Duration    : ${tf}
-🎯 Direction   : ${direction}
-🧾 Strategy    : Bollinger ${band.toUpperCase()} Zone
-
-✦━━━━━━━━━━━━━━━━✦
-✅ Trusted Dragonfly AI Generated Signal`;
-  signalModal.style.display='flex';
-}
 function closeSignal(){ signalModal.style.display='none'; }
+
+// ✅ Updated random gap 1–3 minutes instead of 2–3
 generateBtn.addEventListener('click', ()=>{
-  if(!loadLicenseLocal()){ alert("❌ License required."); return; }
+  const stored=localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
+  if(!stored){ alert("License inactive. Activate first."); return; }
   loadingModal.style.display='flex';
-  setTimeout(()=>{ loadingModal.style.display='none'; showSignal(); },2000);
+  setTimeout(()=>{
+    loadingModal.style.display='none';
+    const selectedAsset=assetSelect.value;
+    const bb=bollinger.value;
+    const tf=timeframe.value;
+    const market=marketSel.value;
+    const direction=(bb==='upper')?'↓ SELL':'↑ BUY';
+    const now=new Date();
+    const h=pad2(now.getHours()), m=pad2(now.getMinutes());
+    const curTime=`${h}:${m}`;
+    const gap=1+Math.floor(Math.random()*3); // 1–3 random minutes
+    const expTimeObj=new Date(now.getTime()+gap*60000);
+    const expTime=`${pad2(expTimeObj.getHours())}:${pad2(expTimeObj.getMinutes())}`;
+    const text=`📊 Market: ${market}\n⏱ Timeframe: ${tf}\n💎 Asset: ${selectedAsset}\n📈 Bollinger: ${bb}\n\n${direction} ${expTime}\n\n📍 Analysis Time: ${curTime}`;
+    signalText.textContent=text;
+    const isBuy=direction.includes('BUY');
+    candleBody.style.background=isBuy?'#4caf50':'#f44336';
+    candleBody.style.animation=isBuy?'growUp 0.8s forwards':'growDown 0.8s forwards';
+    signalModal.style.display='flex';
+  },2500+Math.random()*1000);
 });
-resetBtn.addEventListener('click', ()=>{
-  marketSel.value="OTC"; timeframe.value="1m"; bollinger.value="upper"; fillAssetSelect();
-});
+resetBtn.addEventListener('click', ()=>{ location.reload(); });
 </script>
-</div>
 </body>
 </html>
