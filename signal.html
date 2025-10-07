@@ -53,7 +53,6 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 .admin-row input{flex:1;}
 .code-box{word-break:break-all;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;margin-top:8px;font-family:monospace;font-size:13px;}
 @media (max-width:880px){.grid{grid-template-columns:1fr;}}
-@keyframes fadeIn{from{opacity:0;transform:scale(0.95);}to{opacity:1;transform:scale(1);}}
 </style>
 </head>
 <body>
@@ -96,29 +95,7 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 </div>
 <div class="code-box" id="generatedBox" style="margin-top:10px;">Generated license will appear here.</div>
 <div style="margin-top:8px;color:var(--muted);font-size:13px;">Note: Give the generated key to the member. The key works only on the Device ID you specified.</div>
-
-<!-- 🛠 Added Notice Popup System -->
-<hr style="margin:16px 0;border-color:rgba(255,255,255,0.05)">
-<h3>📢 Admin — Custom Notice Popup</h3>
-<textarea id="customNoticeInput" rows="3" placeholder="Write your notice here...">🚧 Server maintenance চলছে, অনুগ্রহ করে অপেক্ষা করুন।</textarea>
-<div class="controls">
-<button id="showCustomNoticeBtn" style="background:#ffb84d;color:#000;">Show Notice</button>
-<button id="hideCustomNoticeBtn" style="background:#f44336;color:#fff;">Hide Notice</button>
-</div>
 </section>
-
-<!-- 💬 Notice Modal -->
-<div id="customNoticeModal" style="
-  position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);
-  display:none;align-items:center;justify-content:center;z-index:5000;">
-  <div style="
-    background:linear-gradient(180deg,#0f1530,#1b2450);color:#fff;padding:24px 22px;border-radius:14px;
-    max-width:420px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.6);animation:fadeIn 0.3s ease;">
-    <h2 style="margin-top:0;margin-bottom:10px;">⚙️ Important Notice</h2>
-    <p id="customNoticeText" style="white-space:pre-line;font-size:15px;line-height:1.5;margin-bottom:18px;"></p>
-    <button id="closeNoticePopupBtn" style="background:#6dd6ff;color:#000;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;">Close</button>
-  </div>
-</div>
 
 <div class="signal-modal-backdrop" id="signalModal">
 <div class="signal-modal">
@@ -161,25 +138,143 @@ let deviceId=localStorage.getItem("dragon_device_id");
 if(!deviceId){deviceId=String(Math.floor(Math.random()*900000000+100000000));localStorage.setItem("dragon_device_id",deviceId);}
 document.getElementById('deviceIdDiv').textContent="Device ID: "+deviceId;
 
-// === Existing JS ===
-... [আপনার বাকি JS একই থাকবে, কিছু পরিবর্তন হয়নি] ...
+const licenseInput=document.getElementById('licenseInput');
+const activateBtn=document.getElementById('activateBtn');
+const licenseStatus=document.getElementById('licenseStatus');
+const adminPanel=document.getElementById('adminPanel');
+const adminDeviceIdInput=document.getElementById('adminDeviceId');
+const adminDurationInput=document.getElementById('adminDuration');
+const generateLicenseBtn=document.getElementById('generateLicenseBtn');
+const generatedBox=document.getElementById('generatedBox');
+const copyLastLicenseBtn=document.getElementById('copyLastLicenseBtn');
+const marketSel=document.getElementById('market');
+const assetSelect=document.getElementById('assetSelect');
+const bollinger=document.getElementById('bollinger');
+const timeframe=document.getElementById('timeframe');
+const generateBtn=document.getElementById('generate');
+const resetBtn=document.getElementById('reset');
+const signalModal=document.getElementById('signalModal');
+const candleBody=document.getElementById('candleBody');
+const signalText=document.getElementById('signalText');
+const adminLoginModal=document.getElementById('adminLoginModal');
+const adminPasswordInput=document.getElementById('adminPasswordInput');
+const adminLoginSubmit=document.getElementById('adminLoginSubmit');
+const adminLoginCancel=document.getElementById('adminLoginCancel');
+const showAdminLoginBtn=document.getElementById('showAdminLoginBtn');
+const loadingModal=document.getElementById('loadingModal');
+let lastGenerated=null;
 
-// === Notice Popup JS ===
-const customNoticeModal=document.getElementById('customNoticeModal');
-const customNoticeText=document.getElementById('customNoticeText');
-const showCustomNoticeBtn=document.getElementById('showCustomNoticeBtn');
-const hideCustomNoticeBtn=document.getElementById('hideCustomNoticeBtn');
-const closeNoticePopupBtn=document.getElementById('closeNoticePopupBtn');
-const customNoticeInput=document.getElementById('customNoticeInput');
+const OTCpairs=["AUD/CHF (OTC)","AUD/JPY (OTC)","USD/BRL (OTC)","CAD/JPY (OTC)","CHF/JPY (OTC)","EUR/NZD (OTC)","GBP/AUD (OTC)","NZD/CHF (OTC)","USD/TRY (OTC)","USD/ZAR (OTC)","USD/IDR (OTC)","USD/MXN (OTC)","USD/PHP (OTC)","AUD/CAD (OTC)","USD/COP (OTC)","GBP/NZD (OTC)","GBP/JPY (OTC)","USD/JPY (OTC)","USD/NGN (OTC)","EUR/USD (OTC)","NZD/JPY (OTC)","EUR/JPY (OTC)","USD/PKR (OTC)","AUD/NZD (OTC)","GBP/CAD (OTC)","EUR/SGD (OTC)","NZD/USD (OTC)","GBP/CHF (OTC)","AUD/USD (OTC)","CAD/CHF (OTC)","EUR/AUD (OTC)","EUR/GBP (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","USD/BDT (OTC)","USD/CHF (OTC)","USD/DZD (OTC)","USD/INR (OTC)","EUR/CHF (OTC)","USD/EGP (OTC)"];
+const REALpairs=['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
 
-showCustomNoticeBtn.addEventListener('click',()=>{
-  const msg=customNoticeInput.value.trim();
-  if(!msg){alert("⚠️ Please write a notice first.");return;}
-  customNoticeText.textContent=msg;
-  customNoticeModal.style.display='flex';
+function fillAssetSelect(){
+ assetSelect.innerHTML='';
+ const pairs=marketSel.value==='REAL'?REALpairs:OTCpairs;
+ pairs.forEach(p=>{
+   const opt=document.createElement('option');
+   opt.value=p;
+   opt.textContent=p;
+   assetSelect.appendChild(opt);
+ });
+}
+fillAssetSelect();
+marketSel.addEventListener('change',fillAssetSelect);
+
+function pad2(n){return String(n).padStart(2,'0');}
+
+function makeLicenseKeyForDevice(deviceIdParam,days){
+ const now=Date.now();
+ const expiry=now+(days*24*60*60*1000);
+ const rand=Math.floor(Math.random()*900000+100000);
+ const payload=`${deviceIdParam}|${expiry}|${rand}`;
+ const key=btoa(payload);
+ return {key,expiry};
+}
+
+function validateLicenseKeyForThisDevice(key,deviceIdToCheck){
+ try{
+   const decoded=atob(key);
+   const parts=decoded.split("|");
+   if(parts.length<2)return{ok:false};
+   const[dId,expiryStr]=parts;
+   const expiry=parseInt(expiryStr,10);
+   if(String(dId)!==String(deviceIdToCheck))return{ok:false,reason:'device_mismatch'};
+   if(Date.now()>expiry)return{ok:false,reason:'expired',expiry};
+   return{ok:true,expiry};
+ }catch(e){return{ok:false};}
+}
+
+function saveLicenseToLocal(key,expiry,dev=deviceId){
+ localStorage.setItem(LICENSE_STORAGE_PREFIX+dev,JSON.stringify({key,expiry}));
+}
+function loadLicenseLocal(){
+ const raw=localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
+ if(!raw)return false;
+ try{
+   const obj=JSON.parse(raw);
+   if(Date.now()>obj.expiry){localStorage.removeItem(LICENSE_STORAGE_PREFIX+deviceId);return false;}
+   licenseStatus.textContent="License Active ✅";
+   licenseStatus.classList.add('active');
+   return true;
+ }catch(e){return false;}
+}
+loadLicenseLocal();
+
+activateBtn.addEventListener('click',()=>{
+ const entered=licenseInput.value.trim();
+ if(!entered){alert("Paste license key.");return;}
+ const res=validateLicenseKeyForThisDevice(entered,deviceId);
+ if(res.ok){saveLicenseToLocal(entered,res.expiry);alert("✅ License activated! Expires: "+new Date(res.expiry).toLocaleString());licenseStatus.textContent="License Active ✅";licenseStatus.classList.add('active');}
+ else{alert("❌ Invalid license or expired.");}
 });
-hideCustomNoticeBtn.addEventListener('click',()=>{customNoticeModal.style.display='none';});
-closeNoticePopupBtn.addEventListener('click',()=>{customNoticeModal.style.display='none';});
+
+showAdminLoginBtn.addEventListener('click',()=>{adminPasswordInput.value='';adminLoginModal.style.display='flex';adminPasswordInput.focus();});
+adminLoginCancel.addEventListener('click',()=>{adminLoginModal.style.display='none';});
+adminLoginSubmit.addEventListener('click',()=>{if(adminPasswordInput.value===ADMIN_PASSWORD){adminLoginModal.style.display='none';adminPanel.style.display='block';alert("Admin access granted.");}else{alert("Wrong password.");adminPasswordInput.value='';adminPasswordInput.focus();}});
+
+generateLicenseBtn.addEventListener('click',()=>{
+ const targetDev=adminDeviceIdInput.value.trim();
+ const days=parseInt(adminDurationInput.value,10);
+ if(!targetDev||!days){alert("Enter device ID and duration.");return;}
+ const {key,expiry}=makeLicenseKeyForDevice(targetDev,days);
+ lastGenerated=key;
+ generatedBox.textContent=key;
+});
+copyLastLicenseBtn.addEventListener('click',()=>{if(lastGenerated){navigator.clipboard.writeText(lastGenerated);alert("Copied license key.");}else{alert("No license generated yet.");}});
+
+function showSignal(){
+ const pair=assetSelect.value;
+ const tf=timeframe.value;
+ const band=bollinger.value;
+ const direction=(band==='upper')?"BUY":"SELL";
+ // ✅ Updated to 1–3 min random gap
+ const now=new Date();
+ const gap=1+Math.floor(Math.random()*3); // 1, 2 or 3
+ now.setMinutes(now.getMinutes()+gap);
+ const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
+ const candleDir=direction==="BUY"?"up":"down";
+ candleBody.style.background=(candleDir==='up'?'#4caf50':'#f44336');
+ candleBody.style.animation=(candleDir==='up'?'growUp 1s forwards':'growDown 1s forwards');
+ signalText.textContent=`✦━━━━━━━━━━━━━━━━✦
+🐉 DRAGONFLY — AI MARKET ANALYSIS
+✦━━━━━━━━━━━━━━━━✦
+📊 Pair : ${pair}
+⏰ Entry Time : ${timeStr}
+⏳ Duration : ${tf}
+🎯 Direction : ${direction}
+🧾 Strategy : Bollinger ${band.toUpperCase()} Zone
+✦━━━━━━━━━━━━━━━━✦
+✅ Trusted Dragonfly AI Generated Signal`;
+ signalModal.style.display='flex';
+}
+function closeSignal(){signalModal.style.display='none';}
+
+generateBtn.addEventListener('click',()=>{
+ if(!loadLicenseLocal()){alert("❌ License required.");return;}
+ loadingModal.style.display='flex';
+ setTimeout(()=>{loadingModal.style.display='none';showSignal();},2000);
+});
+resetBtn.addEventListener('click',()=>{marketSel.value="OTC";timeframe.value="1m";bollinger.value="upper";fillAssetSelect();});
 </script>
 </div>
 </body>
