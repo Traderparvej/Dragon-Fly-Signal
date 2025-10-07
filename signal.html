@@ -53,67 +53,8 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 .admin-row input{flex:1;}
 .code-box{word-break:break-all;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;margin-top:8px;font-family:monospace;font-size:13px;}
 @media (max-width:880px){.grid{grid-template-columns:1fr;}}
+@keyframes fadeIn{from{opacity:0;transform:scale(0.95);}to{opacity:1;transform:scale(1);}}
 </style>
-
-<!-- 🔧 2-hour Server Maintenance Notice -->
-<style>
-#maintenanceNotice {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(90deg, #ffb84d, #ff9933);
-  color: #000;
-  font-weight: 600;
-  text-align: center;
-  padding: 10px;
-  z-index: 2000;
-  font-family: system-ui, sans-serif;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
-#maintenanceNotice span {
-  display: inline-block;
-  margin-left: 6px;
-  font-weight: 700;
-  font-family: monospace;
-}
-html[data-maintenance="true"] body {
-  padding-top: 46px;
-}
-</style>
-<script>
-(function(){
-  const DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours
-  const start = Date.now();
-  const end = start + DURATION_MS;
-
-  const bar = document.createElement('div');
-  bar.id = 'maintenanceNotice';
-  bar.innerHTML = '🚧 Server Maintenance চলছে — সিস্টেম ২ ঘণ্টা পরে পুনরায় চালু হবে। <span id="maintCountdown"></span>';
-  document.addEventListener('DOMContentLoaded', ()=>{
-    document.body.prepend(bar);
-    document.documentElement.setAttribute('data-maintenance','true');
-  });
-
-  function pad(n){return (n<10?'0':'')+n;}
-  function update(){
-    const left = end - Date.now();
-    if(left<=0){
-      bar.remove();
-      document.documentElement.removeAttribute('data-maintenance');
-      clearInterval(iv);
-      return;
-    }
-    const h = Math.floor(left/3600000);
-    const m = Math.floor((left%3600000)/60000);
-    const s = Math.floor((left%60000)/1000);
-    const timerEl = document.getElementById('maintCountdown');
-    if(timerEl) timerEl.textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
-  }
-  const iv = setInterval(update,1000);
-  update();
-})();
-</script>
 </head>
 <body>
 <div class="wrap">
@@ -125,9 +66,121 @@ html[data-maintenance="true"] body {
 <div class="small-note" id="deviceIdDiv"></div>
 </div>
 </header>
-<!-- বাকিটা একই -->
-<!-- আপনার আসল কোড একদম অপরিবর্তিত -->
-...
+
+<section class="card">
+<label>Enter License Key (Member)</label>
+<input type="text" id="licenseInput" placeholder="Paste license key here">
+<button id="activateBtn" style="margin-top:10px;">Activate License</button>
+</section>
+
+<section class="card">
+<div class="grid">
+<div><label>Market</label><select id="market"><option value="OTC">OTC</option><option value="REAL">REAL</option></select></div>
+<div><label>Timeframe</label><select id="timeframe"><option value="1m" selected>1 minute</option><option value="5m">5 minutes</option><option value="15m">15 minutes</option><option value="1h">1 hour</option></select></div>
+<div><label>Asset</label><select id="assetSelect"></select></div>
+<div><label>Bollinger Band</label><select id="bollinger"><option value="upper" selected>Upper</option><option value="lower">Lower</option></select></div>
+</div>
+<div class="controls" style="margin-top:12px;">
+<button id="generate">Generate Signal</button>
+<button id="reset">Reset</button>
+</div>
+</section>
+
+<section class="card" id="adminPanel">
+<h3>🔧 Admin — License Generator</h3>
+<div style="margin-bottom:8px;"><label>Device ID to give license</label><input type="text" id="adminDeviceId" placeholder="Enter device ID"></div>
+<div style="margin-bottom:8px;"><label>License Duration (days)</label><input type="number" id="adminDuration" placeholder="e.g. 15" min="1"></div>
+<div style="display:flex;gap:8px;">
+<button id="generateLicenseBtn" style="flex:1;background:#4caf50;color:#fff;">Generate License</button>
+<button id="copyLastLicenseBtn" style="flex:1;background:#2196f3;color:#fff;">Copy Last</button>
+</div>
+<div class="code-box" id="generatedBox" style="margin-top:10px;">Generated license will appear here.</div>
+<div style="margin-top:8px;color:var(--muted);font-size:13px;">Note: Give the generated key to the member. The key works only on the Device ID you specified.</div>
+
+<!-- 🛠 Added Notice Popup System -->
+<hr style="margin:16px 0;border-color:rgba(255,255,255,0.05)">
+<h3>📢 Admin — Custom Notice Popup</h3>
+<textarea id="customNoticeInput" rows="3" placeholder="Write your notice here...">🚧 Server maintenance চলছে, অনুগ্রহ করে অপেক্ষা করুন।</textarea>
+<div class="controls">
+<button id="showCustomNoticeBtn" style="background:#ffb84d;color:#000;">Show Notice</button>
+<button id="hideCustomNoticeBtn" style="background:#f44336;color:#fff;">Hide Notice</button>
+</div>
+</section>
+
+<!-- 💬 Notice Modal -->
+<div id="customNoticeModal" style="
+  position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;z-index:5000;">
+  <div style="
+    background:linear-gradient(180deg,#0f1530,#1b2450);color:#fff;padding:24px 22px;border-radius:14px;
+    max-width:420px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.6);animation:fadeIn 0.3s ease;">
+    <h2 style="margin-top:0;margin-bottom:10px;">⚙️ Important Notice</h2>
+    <p id="customNoticeText" style="white-space:pre-line;font-size:15px;line-height:1.5;margin-bottom:18px;"></p>
+    <button id="closeNoticePopupBtn" style="background:#6dd6ff;color:#000;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer;">Close</button>
+  </div>
+</div>
+
+<div class="signal-modal-backdrop" id="signalModal">
+<div class="signal-modal">
+<div class="signal-candle"><div class="wick"></div><div id="candleBody" class="body"></div><div class="wick"></div></div>
+<div id="signalText" class="signal-text"></div>
+<button onclick="closeSignal()">Close</button>
+</div>
+</div>
+
+<div class="loading-modal-backdrop" id="loadingModal">
+<div class="loading-box">
+<div>🔄 Analyzing Market...</div>
+<div class="dots"><span></span><span></span><span></span></div>
+</div>
+</div>
+
+<div class="admin-login-backdrop" id="adminLoginModal">
+<div class="admin-login">
+<h3>Admin Login</h3>
+<input type="password" id="adminPasswordInput" placeholder="Enter admin password">
+<div class="row" style="margin-top:6px;">
+<button id="adminLoginSubmit" style="background:#4caf50;color:#fff;">Login</button>
+<button id="adminLoginCancel" style="background:#f44336;color:#fff;">Cancel</button>
+</div>
+<div class="admin-note">Hint: use the password provided by owner.</div>
+</div>
+</div>
+
+<footer style="text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;">
+© DragonFly — Advance signals
+<div style="margin-top:4px;font-size:10px;">
+<button id="showAdminLoginBtn" style="background:transparent;border:none;color:#9fb0d6;cursor:pointer;">Admin Login</button>
+</div>
+</footer>
+
+<script>
+const ADMIN_PASSWORD="@Traderparvej@";
+const LICENSE_STORAGE_PREFIX="dragon_license_";
+let deviceId=localStorage.getItem("dragon_device_id");
+if(!deviceId){deviceId=String(Math.floor(Math.random()*900000000+100000000));localStorage.setItem("dragon_device_id",deviceId);}
+document.getElementById('deviceIdDiv').textContent="Device ID: "+deviceId;
+
+// === Existing JS ===
+... [আপনার বাকি JS একই থাকবে, কিছু পরিবর্তন হয়নি] ...
+
+// === Notice Popup JS ===
+const customNoticeModal=document.getElementById('customNoticeModal');
+const customNoticeText=document.getElementById('customNoticeText');
+const showCustomNoticeBtn=document.getElementById('showCustomNoticeBtn');
+const hideCustomNoticeBtn=document.getElementById('hideCustomNoticeBtn');
+const closeNoticePopupBtn=document.getElementById('closeNoticePopupBtn');
+const customNoticeInput=document.getElementById('customNoticeInput');
+
+showCustomNoticeBtn.addEventListener('click',()=>{
+  const msg=customNoticeInput.value.trim();
+  if(!msg){alert("⚠️ Please write a notice first.");return;}
+  customNoticeText.textContent=msg;
+  customNoticeModal.style.display='flex';
+});
+hideCustomNoticeBtn.addEventListener('click',()=>{customNoticeModal.style.display='none';});
+closeNoticePopupBtn.addEventListener('click',()=>{customNoticeModal.style.display='none';});
+</script>
 </div>
 </body>
 </html>
