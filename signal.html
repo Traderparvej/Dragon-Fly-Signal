@@ -30,7 +30,6 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 .signal-candle .wick{width:3px;height:14px;background:#ccc;border-radius:2px;}
 .signal-candle .body{width:26px;height:0;border-radius:3px;box-shadow:0 6px 18px rgba(0,0,0,0.25) inset;}
 @keyframes growUp{from{height:0;}to{height:44px;}}
-@keyframes growDown{from{height:0;}to{height:44px;}}
 .signal-text{text-align:left;white-space:pre-wrap;font-family:'Courier New',monospace;font-size:13px;line-height:1.45;color:#eee;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:10px;margin-bottom:8px;}
 .signal-modal button{width:100%;padding:9px;border:none;border-radius:8px;background:var(--accent);font-weight:700;cursor:pointer;}
 .signal-modal button:hover{opacity:0.95;}
@@ -49,8 +48,6 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 .admin-login .row button{flex:1;padding:10px;border-radius:8px;border:none;cursor:pointer;}
 .admin-note{font-size:13px;color:#9fb0d6;margin-top:6px;}
 #adminPanel{display:none;margin-top:10px;}
-.admin-row{display:flex;gap:8px;}
-.admin-row input{flex:1;}
 .code-box{word-break:break-all;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;margin-top:8px;font-family:monospace;font-size:13px;}
 @media (max-width:880px){.grid{grid-template-columns:1fr;}}
 </style>
@@ -94,7 +91,6 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 <button id="copyLastLicenseBtn" style="flex:1;background:#2196f3;color:#fff;">Copy Last</button>
 </div>
 <div class="code-box" id="generatedBox" style="margin-top:10px;">Generated license will appear here.</div>
-<div style="margin-top:8px;color:var(--muted);font-size:13px;">Note: Give the generated key to the member. The key works only on the Device ID you specified.</div>
 </section>
 
 <div class="signal-modal-backdrop" id="signalModal">
@@ -124,7 +120,7 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 </div>
 </div>
 
-<footer style="text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;">
+<footer>
 © DragonFly — Advance signals
 <div style="margin-top:4px;font-size:10px;">
 <button id="showAdminLoginBtn" style="background:transparent;border:none;color:#9fb0d6;cursor:pointer;">Admin Login</button>
@@ -164,8 +160,8 @@ const showAdminLoginBtn=document.getElementById('showAdminLoginBtn');
 const loadingModal=document.getElementById('loadingModal');
 let lastGenerated=null;
 
-const OTCpairs=["AUD/CHF (OTC)","AUD/JPY (OTC)","USD/BRL (OTC)","CAD/JPY (OTC)","CHF/JPY (OTC)","EUR/NZD (OTC)","GBP/AUD (OTC)","NZD/CHF (OTC)","USD/TRY (OTC)","USD/ZAR (OTC)","USD/IDR (OTC)","USD/MXN (OTC)","USD/PHP (OTC)","AUD/CAD (OTC)","USD/COP (OTC)","GBP/NZD (OTC)","GBP/JPY (OTC)","USD/JPY (OTC)","USD/NGN (OTC)","EUR/USD (OTC)","NZD/JPY (OTC)","EUR/JPY (OTC)","USD/PKR (OTC)","AUD/NZD (OTC)","GBP/CAD (OTC)","EUR/SGD (OTC)","NZD/USD (OTC)","GBP/CHF (OTC)","AUD/USD (OTC)","CAD/CHF (OTC)","EUR/AUD (OTC)","EUR/GBP (OTC)","NZD/CAD (OTC)","USD/ARS (OTC)","USD/BDT (OTC)","USD/CHF (OTC)","USD/DZD (OTC)","USD/INR (OTC)","EUR/CHF (OTC)","USD/EGP (OTC)"];
-const REALpairs=['EUR/JPY','USD/JPY','CAD/JPY','NZD/USD','EUR/USD','GBP/USD','AUD/JPY','GBP/CAD','USD/CAD','AUD/CAD','AUD/USD','GBP/AUD','GBP/JPY','USD/CHF','EUR/GBP'];
+const OTCpairs=["AUD/CHF (OTC)","AUD/JPY (OTC)","USD/MXN (OTC)","USD/PKR (OTC)","EUR/JPY (OTC)","GBP/JPY (OTC)","USD/JPY (OTC)","EUR/USD (OTC)"];
+const REALpairs=['EUR/JPY','USD/JPY','EUR/USD','GBP/USD','AUD/JPY','USD/CHF','GBP/JPY'];
 
 function fillAssetSelect(){
  assetSelect.innerHTML='';
@@ -198,8 +194,8 @@ function validateLicenseKeyForThisDevice(key,deviceIdToCheck){
    if(parts.length<2)return{ok:false};
    const[dId,expiryStr]=parts;
    const expiry=parseInt(expiryStr,10);
-   if(String(dId)!==String(deviceIdToCheck))return{ok:false,reason:'device_mismatch'};
-   if(Date.now()>expiry)return{ok:false,reason:'expired',expiry};
+   if(String(dId)!==String(deviceIdToCheck))return{ok:false};
+   if(Date.now()>expiry)return{ok:false};
    return{ok:true,expiry};
  }catch(e){return{ok:false};}
 }
@@ -242,29 +238,35 @@ generateLicenseBtn.addEventListener('click',()=>{
 });
 copyLastLicenseBtn.addEventListener('click',()=>{if(lastGenerated){navigator.clipboard.writeText(lastGenerated);alert("Copied license key.");}else{alert("No license generated yet.");}});
 
+// ✅ New Signal Output + Telegram Share
 function showSignal(){
  const pair=assetSelect.value;
- const tf=timeframe.value;
- const band=bollinger.value;
- const direction=(band==='upper')?"BUY":"SELL";
- // ✅ Updated to 1–3 min random gap
  const now=new Date();
- const gap=1+Math.floor(Math.random()*3); // 1, 2 or 3
+ const gap=1+Math.floor(Math.random()*3);
  now.setMinutes(now.getMinutes()+gap);
  const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
- const candleDir=direction==="BUY"?"up":"down";
- candleBody.style.background=(candleDir==='up'?'#4caf50':'#f44336');
- candleBody.style.animation=(candleDir==='up'?'growUp 1s forwards':'growDown 1s forwards');
- signalText.textContent=`✦━━━━━━━━━━━━━━━━✦
-🐉 DRAGONFLY — AI MARKET ANALYSIS
-✦━━━━━━━━━━━━━━━━✦
-📊 Pair : ${pair}
-⏰ Entry Time : ${timeStr}
-⏳ Duration : ${tf}
-🎯 Direction : ${direction}
-🧾 Strategy : Bollinger ${band.toUpperCase()} Zone
-✦━━━━━━━━━━━━━━━━✦
-✅ Trusted Dragonfly AI Generated Signal`;
+ const signalMessage=`⚡️ DragonFly AI ⚡️
+
+💹 ${pair}
+🕒 ${timeStr}
+🎯 Opposite Trade
+📋 Check previous candle & follow risk management`;
+
+ signalText.textContent=signalMessage;
+ candleBody.style.background='#4caf50';
+ candleBody.style.animation='growUp 1s forwards';
+
+ const existingShareBtn=document.getElementById("shareTelegramBtn");
+ if(!existingShareBtn){
+   const shareBtn=document.createElement("button");
+   shareBtn.id="shareTelegramBtn";
+   shareBtn.textContent="📤 Share to Telegram";
+   shareBtn.style.marginTop="8px";
+   shareBtn.style.background="#0088cc";
+   shareBtn.style.color="#fff";
+   shareBtn.onclick=()=>{const encoded=encodeURIComponent(signalMessage);window.open(`https://t.me/share/url?url=&text=${encoded}`,"_blank");};
+   signalText.insertAdjacentElement("afterend",shareBtn);
+ }
  signalModal.style.display='flex';
 }
 function closeSignal(){signalModal.style.display='none';}
