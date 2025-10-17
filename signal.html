@@ -11,7 +11,6 @@ body{margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180de
 .wrap{max-width:1100px;margin:18px auto;padding:18px;}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 header h1{margin:0;font-size:20px;display:flex;align-items:center;gap:12px;}
-header .telegram-link{font-size:13px;color:#6dd6ff;text-decoration:none;}
 .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:14px;margin-bottom:12px;}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
@@ -56,7 +55,6 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 <div class="wrap">
 <header>
 <h1>🐉 DragonFly — Signal Generator</h1>
-<a href="https://t.me/Bdsecrettrading" target="_blank" class="telegram-link">Telegram Support</a>
 <div>
 <span class="license-status" id="licenseStatus">License Inactive ❌</span>
 <div class="small-note" id="deviceIdDiv"></div>
@@ -97,7 +95,8 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 <div class="signal-modal">
 <div class="signal-candle"><div class="wick"></div><div id="candleBody" class="body"></div><div class="wick"></div></div>
 <div id="signalText" class="signal-text"></div>
-<button onclick="closeSignal()">Close</button>
+<button id="copySignalBtn">📋 Copy Signal</button>
+<button onclick="closeSignal()" style="margin-top:8px;">Close</button>
 </div>
 </div>
 
@@ -158,47 +157,16 @@ const adminLoginSubmit=document.getElementById('adminLoginSubmit');
 const adminLoginCancel=document.getElementById('adminLoginCancel');
 const showAdminLoginBtn=document.getElementById('showAdminLoginBtn');
 const loadingModal=document.getElementById('loadingModal');
+const copySignalBtn=document.getElementById('copySignalBtn');
 let lastGenerated=null;
 
-// ✅ Updated OTC pairs list
 const OTCpairs=[
-  "Boeing Company (OTC)",
-  "McDonald’s (OTC)",
-  "American Express (OTC)",
-  "Facebook Inc (OTC)",
-  "Johnson & Johnson (OTC)",
-  "Microsoft (OTC)",
-  "Pfizer Inc (OTC)",
-  "Solana (OTC)",
-  "Dogecoin (OTC)",
-  "Bitcoin (OTC)",
-  "Ethereum Classic (OTC)",
-  "Aptos (OTC)",
-  "Pepe (OTC)",
-  "Avalanche (OTC)",
-  "Melania Meme (OTC)",
-  "Notcoin (OTC)",
-  "Shiba Inu (OTC)",
-  "Celestia (OTC)",
-  "Toncoin (OTC)",
-  "Trump (OTC)",
-  "TRON (OTC)",
-  "USD/BDT (OTC)",
-  "USD/IDR (OTC)",
-  "USD/EGP (OTC)",
-  "USD/INR (OTC)",
-  "USD/ARS (OTC)",
-  "USD/PHP (OTC)",
-  "NZD/CHF (OTC)",
-  "USD/NGN (OTC)",
-  "USD/MXN (OTC)",
-  "NZD/CAD (OTC)",
-  "USD/BRL (OTC)",
-  "EUR/NZD (OTC)",
-  "USD/COP (OTC)",
-  "USD/TRY (OTC)"
+  "Boeing Company (OTC)","McDonald’s (OTC)","American Express (OTC)","Facebook Inc (OTC)","Johnson & Johnson (OTC)","Microsoft (OTC)",
+  "Pfizer Inc (OTC)","Solana (OTC)","Dogecoin (OTC)","Bitcoin (OTC)","Ethereum Classic (OTC)","Aptos (OTC)","Pepe (OTC)","Avalanche (OTC)",
+  "Melania Meme (OTC)","Notcoin (OTC)","Shiba Inu (OTC)","Celestia (OTC)","Toncoin (OTC)","Trump (OTC)","TRON (OTC)","USD/BDT (OTC)",
+  "USD/IDR (OTC)","USD/EGP (OTC)","USD/INR (OTC)","USD/ARS (OTC)","USD/PHP (OTC)","NZD/CHF (OTC)","USD/NGN (OTC)","USD/MXN (OTC)",
+  "NZD/CAD (OTC)","USD/BRL (OTC)","EUR/NZD (OTC)","USD/COP (OTC)","USD/TRY (OTC)"
 ];
-
 const REALpairs=['EUR/JPY','USD/JPY','EUR/USD','GBP/USD','AUD/JPY','USD/CHF','GBP/JPY'];
 
 function fillAssetSelect(){
@@ -279,7 +247,7 @@ copyLastLicenseBtn.addEventListener('click',()=>{if(lastGenerated){navigator.cli
 function showSignal(){
  const pair=assetSelect.value;
  const now=new Date();
- const gap=1+Math.floor(Math.random()*3);
+ const gap=2+Math.floor(Math.random()*4); // 2–5 min random gap
  now.setMinutes(now.getMinutes()+gap);
  const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
  const signalMessage=`⚡️ DragonFly AI ⚡️
@@ -292,29 +260,27 @@ function showSignal(){
  signalText.textContent=signalMessage;
  candleBody.style.background='#4caf50';
  candleBody.style.animation='growUp 1s forwards';
-
- const existingShareBtn=document.getElementById("shareTelegramBtn");
- if(!existingShareBtn){
-   const shareBtn=document.createElement("button");
-   shareBtn.id="shareTelegramBtn";
-   shareBtn.textContent="📤 Share to Telegram";
-   shareBtn.style.marginTop="8px";
-   shareBtn.style.background="#0088cc";
-   shareBtn.style.color="#fff";
-   shareBtn.onclick=()=>{const encoded=encodeURIComponent(signalMessage);window.open(`https://t.me/share/url?url=&text=${encoded}`,"_blank");};
-   signalText.insertAdjacentElement("afterend",shareBtn);
- }
  signalModal.style.display='flex';
 }
+
 function closeSignal(){signalModal.style.display='none';}
 
-generateBtn.addEventListener('click',()=>{
- if(!loadLicenseLocal()){alert("❌ License required.");return;}
- loadingModal.style.display='flex';
- setTimeout(()=>{loadingModal.style.display='none';showSignal();},2000);
+copySignalBtn.addEventListener('click',()=>{
+ const text=signalText.textContent;
+ navigator.clipboard.writeText(text).then(()=>alert("Signal copied! ✅"));
 });
-resetBtn.addEventListener('click',()=>{marketSel.value="OTC";timeframe.value="1m";bollinger.value="upper";fillAssetSelect();});
+
+generateBtn.addEventListener('click',()=>{
+ const hasLicense=loadLicenseLocal();
+ if(!hasLicense){alert("Activate license first.");return;}
+ loadingModal.style.display='flex';
+ setTimeout(()=>{
+   loadingModal.style.display='none';
+   showSignal();
+ },3000);
+});
+
+resetBtn.addEventListener('click',()=>{assetSelect.selectedIndex=0;timeframe.selectedIndex=0;bollinger.selectedIndex=0;});
 </script>
-</div>
 </body>
 </html>
