@@ -278,7 +278,7 @@ copyLastLicenseBtn.addEventListener('click',()=>{if(lastGenerated){navigator.cli
 function showSignal(){
  const pair=assetSelect.value;
  const now=new Date();
- const gap=2+Math.floor(Math.random()*4); // 2-5 min
+ const gap=1+Math.floor(Math.random()*4); // 1-4 min
  now.setMinutes(now.getMinutes()+gap);
  const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
  const signalMessage=`⚡️ DragonFly AI ⚡️
@@ -304,10 +304,13 @@ copySignalBtn.addEventListener('click',()=>{
 generateBtn.addEventListener('click',()=>{
  if(!loadLicenseLocal()){alert("❌ License required.");return;}
  loadingModal.style.display='flex';
- setTimeout(()=>{loadingModal.style.display='none';showSignal();},2000);
+ setTimeout(()=>{
+   loadingModal.style.display='none';
+   showSignal();
+ },1500);
 });
+resetBtn.addEventListener('click',()=>{licenseInput.value='';localStorage.removeItem(LICENSE_STORAGE_PREFIX+deviceId);licenseStatus.textContent="License Inactive ❌";licenseStatus.classList.remove('active');});
 
-resetBtn.addEventListener('click',()=>{marketSel.value="OTC";timeframe.value="1m";bollinger.value="upper";fillAssetSelect();});
 </script>
 </div>
 </body>
