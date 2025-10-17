@@ -98,7 +98,7 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 <div class="signal-candle"><div class="wick"></div><div id="candleBody" class="body"></div><div class="wick"></div></div>
 <div id="signalText" class="signal-text"></div>
 <button id="copySignalBtn">📋 Copy Signal</button>
-<button onclick="closeSignal()" style="margin-top:8px;background:#f44336;color:#fff;">Close</button>
+<button onclick="closeSignal()" style="margin-top:6px;background:#444;color:#fff;">Close</button>
 </div>
 </div>
 
@@ -153,17 +153,23 @@ const resetBtn=document.getElementById('reset');
 const signalModal=document.getElementById('signalModal');
 const candleBody=document.getElementById('candleBody');
 const signalText=document.getElementById('signalText');
-const copySignalBtn=document.getElementById('copySignalBtn');
 const adminLoginModal=document.getElementById('adminLoginModal');
 const adminPasswordInput=document.getElementById('adminPasswordInput');
 const adminLoginSubmit=document.getElementById('adminLoginSubmit');
 const adminLoginCancel=document.getElementById('adminLoginCancel');
 const showAdminLoginBtn=document.getElementById('showAdminLoginBtn');
 const loadingModal=document.getElementById('loadingModal');
+const copySignalBtn=document.getElementById('copySignalBtn');
 let lastGenerated=null;
 
-// ✅ Updated OTC & REAL pairs
-const OTCpairs=[ "Boeing Company (OTC)","McDonald’s (OTC)","American Express (OTC)","Facebook Inc (OTC)","Johnson & Johnson (OTC)","Microsoft (OTC)","Pfizer Inc (OTC)","Solana (OTC)","Dogecoin (OTC)","Bitcoin (OTC)","Ethereum Classic (OTC)","Aptos (OTC)","Pepe (OTC)","Avalanche (OTC)","Melania Meme (OTC)","Notcoin (OTC)","Shiba Inu (OTC)","Celestia (OTC)","Toncoin (OTC)","Trump (OTC)","TRON (OTC)","USD/BDT (OTC)","USD/IDR (OTC)","USD/EGP (OTC)","USD/INR (OTC)","USD/ARS (OTC)","USD/PHP (OTC)","NZD/CHF (OTC)","USD/NGN (OTC)","USD/MXN (OTC)","NZD/CAD (OTC)","USD/BRL (OTC)","EUR/NZD (OTC)","USD/COP (OTC)","USD/TRY (OTC)" ];
+const OTCpairs=[
+ "Boeing Company (OTC)","McDonald’s (OTC)","American Express (OTC)","Facebook Inc (OTC)","Johnson & Johnson (OTC)",
+ "Microsoft (OTC)","Pfizer Inc (OTC)","Solana (OTC)","Dogecoin (OTC)","Bitcoin (OTC)","Ethereum Classic (OTC)",
+ "Aptos (OTC)","Pepe (OTC)","Avalanche (OTC)","Melania Meme (OTC)","Notcoin (OTC)","Shiba Inu (OTC)","Celestia (OTC)",
+ "Toncoin (OTC)","Trump (OTC)","TRON (OTC)","USD/BDT (OTC)","USD/IDR (OTC)","USD/EGP (OTC)","USD/INR (OTC)",
+ "USD/ARS (OTC)","USD/PHP (OTC)","NZD/CHF (OTC)","USD/NGN (OTC)","USD/MXN (OTC)","NZD/CAD (OTC)",
+ "USD/BRL (OTC)","EUR/NZD (OTC)","USD/COP (OTC)","USD/TRY (OTC)"
+];
 const REALpairs=['EUR/JPY','USD/JPY','EUR/USD','GBP/USD','AUD/JPY','USD/CHF','GBP/JPY'];
 
 function fillAssetSelect(){
@@ -181,7 +187,6 @@ marketSel.addEventListener('change',fillAssetSelect);
 
 function pad2(n){return String(n).padStart(2,'0');}
 
-// license functions
 function makeLicenseKeyForDevice(deviceIdParam,days){
  const now=Date.now();
  const expiry=now+(days*24*60*60*1000);
@@ -240,39 +245,24 @@ generateLicenseBtn.addEventListener('click',()=>{
 });
 copyLastLicenseBtn.addEventListener('click',()=>{if(lastGenerated){navigator.clipboard.writeText(lastGenerated);alert("Copied license key.");}else{alert("No license generated yet.");}});
 
-// ✅ Updated Signal Logic (2–5 minute gap + Copy Button)
 function showSignal(){
  const pair=assetSelect.value;
  const now=new Date();
- const gap=2+Math.floor(Math.random()*4); // random 2–5 minute
+ const gap=2+Math.floor(Math.random()*4); // random gap 2–5 min
  now.setMinutes(now.getMinutes()+gap);
  const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
- const direction=(bollinger.value==='upper')?'⬇ SELL':'⬆ BUY';
- const tf=timeframe.value;
- const text=`📊 DragonFly Signal\nAsset: ${pair}\nTime: ${timeStr}\nType: ${direction}\nTimeframe: ${tf}\n🟢 Accuracy: ${(95+Math.random()*4).toFixed(1)}%`;
- signalText.textContent=text;
- candleBody.style.background=direction.includes('SELL')?'#ff5252':'#4caf50';
+ const signalMessage=`⚡️ DragonFly AI ⚡️
+
+💹 ${pair}
+🕒 ${timeStr}
+🎯 Opposite Trade
+📋 Check previous candle & follow risk management`;
+
+ signalText.textContent=signalMessage;
+ candleBody.style.background='#4caf50';
  candleBody.style.animation='growUp 1s forwards';
  signalModal.style.display='flex';
 }
-generateBtn.addEventListener('click',()=>{
- if(!loadLicenseLocal()){alert("Activate license first.");return;}
- loadingModal.style.display='flex';
- setTimeout(()=>{
-   loadingModal.style.display='none';
-   showSignal();
- },2500);
-});
-resetBtn.addEventListener('click',()=>{
- assetSelect.selectedIndex=0;
- bollinger.selectedIndex=0;
- timeframe.selectedIndex=0;
-});
+
 copySignalBtn.addEventListener('click',()=>{
- const txt=signalText.textContent;
- navigator.clipboard.writeText(txt).then(()=>alert("✅ Signal copied!"));
-});
-function closeSignal(){signalModal.style.display='none';}
-</script>
-</body>
-</html>
+ navigator.clipboard.writeText(signalText.textContent).then(()=>alert("✅ Signal copied!
