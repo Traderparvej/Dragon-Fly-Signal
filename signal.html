@@ -24,33 +24,9 @@ select,input,textarea{background:rgba(255,255,255,0.95);color:#000;font-weight:5
 .license-status.active{color:var(--green);}
 footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 .signal-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1200;}
-.signal-modal{background:linear-gradient(180deg,#0f1530,#111a3a);padding:16px;border-radius:14px;width:92%;max-width:380px;color:#fff;box-shadow:0 12px 30px rgba(0,0,0,0.6);text-align:center;font-size:13px;line-height:1.4;border:1px solid rgba(255,255,255,0.05);}
-.signal-candle{display:flex;flex-direction:column;align-items:center;margin-bottom:12px;}
-.signal-candle .wick{width:3px;height:14px;background:#ccc;border-radius:2px;}
-.signal-candle .body{width:26px;height:0;border-radius:3px;box-shadow:0 6px 18px rgba(0,0,0,0.25) inset;}
-@keyframes growUp{from{height:0;}to{height:44px;}}
-.signal-text{text-align:left;white-space:pre-wrap;font-family:'Courier New',monospace;font-size:13px;line-height:1.45;color:#eee;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:10px;margin-bottom:8px;}
-.signal-modal button{width:100%;padding:9px;border:none;border-radius:8px;background:var(--accent);font-weight:700;cursor:pointer;}
-.signal-modal button:hover{opacity:0.95;}
-.loading-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center;z-index:1250;}
-.loading-box{background:#0f1530;padding:20px 18px;border-radius:12px;text-align:center;max-width:300px;width:90%;color:#fff;font-size:14px;box-shadow:0 10px 28px rgba(0,0,0,0.6);}
-.dots{display:inline-block;margin-top:10px;}
-.dots span{display:inline-block;width:8px;height:8px;margin:0 2px;background:#6dd6ff;border-radius:50%;animation:bounce 1s infinite;}
-.dots span:nth-child(2){animation-delay:0.2s;}
-.dots span:nth-child(3){animation-delay:0.4s;}
-@keyframes bounce{0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
-.admin-login-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center;z-index:1300;}
-.admin-login{background:#0b1220;padding:16px;border-radius:10px;width:90%;max-width:380px;color:#fff;box-shadow:0 12px 40px rgba(0,0,0,0.6);}
-.admin-login h3{margin:0 0 10px 0;}
-.admin-login input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);margin-bottom:8px;}
-.admin-login .row{display:flex;gap:8px;}
-.admin-login .row button{flex:1;padding:10px;border-radius:8px;border:none;cursor:pointer;}
-.admin-note{font-size:13px;color:#9fb0d6;margin-top:6px;}
-#adminPanel{display:none;margin-top:10px;}
-.code-box{word-break:break-all;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;margin-top:8px;font-family:monospace;font-size:13px;}
-.asset-checkbox label{cursor:pointer;display:block;margin-bottom:4px;}
-.asset-checkbox input{margin-right:6px;}
-@media (max-width:880px){.grid{grid-template-columns:1fr;}}
+.signal-modal{background:linear-gradient(180deg,#0f1530,#111a3a);padding:16px;border-radius:14px;width:92%;max-width:380px;color:#fff;box-shadow:0 12px 30px rgba(0,0,0,0.6);text-align:left;font-family:'Courier New',monospace;font-size:13px;line-height:1.4;border:1px solid rgba(255,255,255,0.05);}
+.signal-text{white-space:pre-wrap;font-family:'Courier New',monospace;font-size:13px;line-height:1.45;color:#eee;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:10px;margin-bottom:8px;}
+.signal-modal button{width:100%;padding:9px;border:none;border-radius:8px;background:var(--accent);font-weight:700;cursor:pointer;margin-top:6px;}
 </style>
 </head>
 <body>
@@ -90,7 +66,6 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
   <div>
     <label>Assets (Tap to select multiple)</label>
     <div id="assetContainer" class="asset-checkbox" style="max-height:200px;overflow-y:auto;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;background:rgba(255,255,255,0.05);">
-      <!-- JS fills checkboxes -->
     </div>
     <small style="color:#9fb0d6;">Tap to select multiple assets</small>
   </div>
@@ -105,108 +80,52 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 </div>
 </section>
 
-<section class="card" id="adminPanel">
-<h3>🔧 Admin — License Generator</h3>
-<div style="margin-bottom:8px;"><label>Device ID to give license</label><input type="text" id="adminDeviceId" placeholder="Enter device ID"></div>
-<div style="margin-bottom:8px;"><label>License Duration (days)</label><input type="number" id="adminDuration" placeholder="e.g. 15" min="1"></div>
-<div style="display:flex;gap:8px;">
-<button id="generateLicenseBtn" style="flex:1;background:#4caf50;color:#fff;">Generate License</button>
-<button id="copyLastLicenseBtn" style="flex:1;background:#2196f3;color:#fff;">Copy Last</button>
-</div>
-<div class="code-box" id="generatedBox" style="margin-top:10px;">Generated license will appear here.</div>
-</section>
-
 <div class="signal-modal-backdrop" id="signalModal">
 <div class="signal-modal">
-<div class="signal-candle"><div class="wick"></div><div id="candleBody" class="body"></div><div class="wick"></div></div>
 <div id="signalText" class="signal-text"></div>
 <button id="copySignalBtn">📋 Copy Signal</button>
-<button onclick="closeSignal()" style="margin-top:8px;">Close</button>
-</div>
-</div>
-
-<div class="loading-modal-backdrop" id="loadingModal">
-<div class="loading-box">
-<div>🔄 Analyzing Market...</div>
-<div class="dots"><span></span><span></span><span></span></div>
-</div>
-</div>
-
-<div class="admin-login-backdrop" id="adminLoginModal">
-<div class="admin-login">
-<h3>Admin Login</h3>
-<input type="password" id="adminPasswordInput" placeholder="Enter admin password">
-<div class="row" style="margin-top:6px;">
-<button id="adminLoginSubmit" style="background:#4caf50;color:#fff;">Login</button>
-<button id="adminLoginCancel" style="background:#f44336;color:#fff;">Cancel</button>
-</div>
-<div class="admin-note">Hint: use the password provided by owner.</div>
+<button onclick="closeSignal()">Close</button>
 </div>
 </div>
 
 <footer>
 © DragonFly — Advance signals
-<div style="margin-top:4px;font-size:10px;">
-<button id="showAdminLoginBtn" style="background:transparent;border:none;color:#9fb0d6;cursor:pointer;">Admin Login</button>
-</div>
 </footer>
 
 <script>
-const ADMIN_PASSWORD="@Traderparvej@";
-const LICENSE_STORAGE_PREFIX="dragon_license_";
 let deviceId=localStorage.getItem("dragon_device_id");
 if(!deviceId){deviceId=String(Math.floor(Math.random()*900000000+100000000));localStorage.setItem("dragon_device_id",deviceId);}
 document.getElementById('deviceIdDiv').textContent="Device ID: "+deviceId;
 
-// DOM Elements
+// Elements
 const licenseInput=document.getElementById('licenseInput');
 const activateBtn=document.getElementById('activateBtn');
 const licenseStatus=document.getElementById('licenseStatus');
-const adminPanel=document.getElementById('adminPanel');
-const adminDeviceIdInput=document.getElementById('adminDeviceId');
-const adminDurationInput=document.getElementById('adminDuration');
-const generateLicenseBtn=document.getElementById('generateLicenseBtn');
-const generatedBox=document.getElementById('generatedBox');
-const copyLastLicenseBtn=document.getElementById('copyLastLicenseBtn');
 const marketSel=document.getElementById('market');
 const assetContainer=document.getElementById('assetContainer');
 const timeframe=document.getElementById('timeframe');
 const generateBtn=document.getElementById('generate');
 const resetBtn=document.getElementById('reset');
 const signalModal=document.getElementById('signalModal');
-const candleBody=document.getElementById('candleBody');
 const signalText=document.getElementById('signalText');
 const copySignalBtn=document.getElementById('copySignalBtn');
-const adminLoginModal=document.getElementById('adminLoginModal');
-const adminPasswordInput=document.getElementById('adminPasswordInput');
-const adminLoginSubmit=document.getElementById('adminLoginSubmit');
-const adminLoginCancel=document.getElementById('adminLoginCancel');
-const showAdminLoginBtn=document.getElementById('showAdminLoginBtn');
-const loadingModal=document.getElementById('loadingModal');
-let lastGenerated=null;
 
-// === Asset Lists ===
+// Assets
 const OTCpairs=[
-  "Boeing Company (OTC)","McDonald’s (OTC)","American Express (OTC)","Facebook Inc (OTC)","Johnson & Johnson (OTC)","Microsoft (OTC)",
-  "Pfizer Inc (OTC)","Solana (OTC)","Dogecoin (OTC)","Bitcoin (OTC)","Ethereum Classic (OTC)","Aptos (OTC)","Pepe (OTC)","Avalanche (OTC)",
-  "Melania Meme (OTC)","Notcoin (OTC)","Shiba Inu (OTC)","Celestia (OTC)","Toncoin (OTC)","Trump (OTC)","TRON (OTC)","USD/BDT (OTC)",
-  "USD/IDR (OTC)","USD/EGP (OTC)","USD/INR (OTC)","USD/ARS (OTC)","USD/PHP (OTC)","NZD/CHF (OTC)","USD/NGN (OTC)","USD/MXN (OTC)",
-  "NZD/CAD (OTC)","USD/BRL (OTC)","EUR/NZD (OTC)","USD/COP (OTC)","USD/TRY (OTC)"
+"USD/INR (OTC)","AUD/NZD (OTC)","USD/PHP (OTC)","USD/EGP (OTC)","Dogecoin (OTC)","Melania Meme (OTC)","Celestia (OTC)"
 ];
-const REALpairs=['EUR/JPY','USD/JPY','EUR/USD','GBP/USD','AUD/JPY','USD/CHF','GBP/JPY'];
+const REALpairs=['EUR/JPY','USD/JPY','EUR/USD'];
 
-// Fill assets dynamically
+// Fill assets
 function fillAssetContainer(){
   assetContainer.innerHTML='';
   const pairs=marketSel.value==='REAL'?REALpairs:OTCpairs;
   pairs.forEach(p=>{
     const div=document.createElement('div');
     const label=document.createElement('label');
-    label.style.cursor='pointer';
     const checkbox=document.createElement('input');
     checkbox.type='checkbox';
     checkbox.value=p;
-    checkbox.style.marginRight='6px';
     label.appendChild(checkbox);
     label.appendChild(document.createTextNode(p));
     div.appendChild(label);
@@ -216,85 +135,31 @@ function fillAssetContainer(){
 fillAssetContainer();
 marketSel.addEventListener('change',fillAssetContainer);
 
-// === License Functions ===
-function makeLicenseKeyForDevice(deviceIdParam,days){
- const now=Date.now();
- const expiry=now+(days*24*60*60*1000);
- const rand=Math.floor(Math.random()*900000+100000);
- const payload=`${deviceIdParam}|${expiry}|${rand}`;
- const key=btoa(payload);
- return {key,expiry};
-}
-function validateLicenseKeyForThisDevice(key,deviceIdToCheck){
- try{
-   const decoded=atob(key);
-   const parts=decoded.split("|");
-   if(parts.length<2)return{ok:false};
-   const[dId,expiryStr]=parts;
-   const expiry=parseInt(expiryStr,10);
-   if(String(dId)!==String(deviceIdToCheck))return{ok:false};
-   if(Date.now()>expiry)return{ok:false};
-   return{ok:true,expiry};
- }catch(e){return{ok:false};}
-}
-function saveLicenseToLocal(key,expiry,dev=deviceId){
- localStorage.setItem(LICENSE_STORAGE_PREFIX+dev,JSON.stringify({key,expiry}));
-}
+// License
 function loadLicenseLocal(){
- const raw=localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
- if(!raw)return false;
- try{
-   const obj=JSON.parse(raw);
-   if(Date.now()>obj.expiry){localStorage.removeItem(LICENSE_STORAGE_PREFIX+deviceId);return false;}
-   licenseStatus.textContent="License Active ✅";
-   licenseStatus.classList.add('active');
-   return true;
- }catch(e){return false;}
+ licenseStatus.textContent="License Active ✅";
+ licenseStatus.classList.add('active');
+ return true;
 }
-loadLicenseLocal();
+activateBtn.addEventListener('click',()=>{loadLicenseLocal();alert("✅ License activated!");});
 
-// License events
-activateBtn.addEventListener('click',()=>{
- const entered=licenseInput.value.trim();
- if(!entered){alert("Paste license key.");return;}
- const res=validateLicenseKeyForThisDevice(entered,deviceId);
- if(res.ok){saveLicenseToLocal(entered,res.expiry);alert("✅ License activated! Expires: "+new Date(res.expiry).toLocaleString());licenseStatus.textContent="License Active ✅";licenseStatus.classList.add('active');}
- else{alert("❌ Invalid license or expired.");}
-});
-
-showAdminLoginBtn.addEventListener('click',()=>{adminPasswordInput.value='';adminLoginModal.style.display='flex';adminPasswordInput.focus();});
-adminLoginCancel.addEventListener('click',()=>{adminLoginModal.style.display='none';});
-adminLoginSubmit.addEventListener('click',()=>{if(adminPasswordInput.value===ADMIN_PASSWORD){adminLoginModal.style.display='none';adminPanel.style.display='block';alert("Admin access granted.");}else{alert("Wrong password.");adminPasswordInput.value='';adminPasswordInput.focus();}});
-
-generateLicenseBtn.addEventListener('click',()=>{
- const targetDev=adminDeviceIdInput.value.trim();
- const days=parseInt(adminDurationInput.value,10);
- if(!targetDev||!days){alert("Enter device ID and duration.");return;}
- const {key,expiry}=makeLicenseKeyForDevice(targetDev,days);
- lastGenerated=key;
- generatedBox.textContent=key;
-});
-copyLastLicenseBtn.addEventListener('click',()=>{if(lastGenerated){navigator.clipboard.writeText(lastGenerated);}else{alert("No license generated yet.");}});
-
-// === Signal Generation ===
+// Signal
 function pad2(n){return String(n).padStart(2,'0');}
 function showSignal(){
  const selectedAssets=[...assetContainer.querySelectorAll('input:checked')].map(c=>c.value);
  if(selectedAssets.length===0){alert("Select at least one asset."); return;}
  const numSignals=parseInt(document.getElementById('numSignals').value)||1;
  const now=new Date();
- let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱"+timeframe.value+" Trade\n╭─────────────╮\n│ 🧠 Strategy: Opposite Candle │\n╰─────────────╯\n\n";
+ let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱1-Minute Trade \n╭─────────────╮\n│ 🧠 Strategy: Opposite Candle │\n╰─────────────╯\n\n";
  for(let i=0;i<numSignals;i++){
    const asset=selectedAssets[i%selectedAssets.length];
-   const gap=1+Math.floor(Math.random()*3);
+   const gap=2+Math.floor(Math.random()*4); // 2–5 min random
    now.setMinutes(now.getMinutes()+gap);
    const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
-   msg+=`𝙼${timeframe.value} ${timeStr} ${asset}\n`;
+   msg+=`𝙼1 ${timeStr} ${asset}\n`;
  }
  msg+="\n🔗 Software: Dragonfly AI Signal Bot\n👤 Owner: @TraderParvej";
  signalText.textContent=msg;
- candleBody.style.background='#4caf50';
- candleBody.style.animation='growUp 1s forwards';
  signalModal.style.display='flex';
 }
 function closeSignal(){signalModal.style.display='none';}
@@ -305,13 +170,9 @@ copySignalBtn.addEventListener('click',()=>{
 });
 
 generateBtn.addEventListener('click',()=>{
- if(!loadLicenseLocal()){alert("❌ License required.");return;}
- loadingModal.style.display='flex';
- setTimeout(()=>{
-   loadingModal.style.display='none';
-   showSignal();
- },1500);
+ showSignal();
 });
+
 resetBtn.addEventListener('click',()=>{
  licenseInput.value='';
  timeframe.selectedIndex=0;
