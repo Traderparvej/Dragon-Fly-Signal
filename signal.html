@@ -147,6 +147,7 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 </footer>
 
 <script>
+// === License & Device ===
 const ADMIN_PASSWORD="@Traderparvej@";
 const LICENSE_STORAGE_PREFIX="dragon_license_";
 let deviceId=localStorage.getItem("dragon_device_id");
@@ -179,42 +180,13 @@ const showAdminLoginBtn=document.getElementById('showAdminLoginBtn');
 const loadingModal=document.getElementById('loadingModal');
 let lastGenerated=null;
 
+// === Asset Lists ===
 const OTCpairs=[
-  "Boeing Company (OTC)",
-  "McDonald’s (OTC)",
-  "American Express (OTC)",
-  "Facebook Inc (OTC)",
-  "Johnson & Johnson (OTC)",
-  "Microsoft (OTC)",
-  "Pfizer Inc (OTC)",
-  "Solana (OTC)",
-  "Dogecoin (OTC)",
-  "Bitcoin (OTC)",
-  "Ethereum Classic (OTC)",
-  "Aptos (OTC)",
-  "Pepe (OTC)",
-  "Avalanche (OTC)",
-  "Melania Meme (OTC)",
-  "Notcoin (OTC)",
-  "Shiba Inu (OTC)",
-  "Celestia (OTC)",
-  "Toncoin (OTC)",
-  "Trump (OTC)",
-  "TRON (OTC)",
-  "USD/BDT (OTC)",
-  "USD/IDR (OTC)",
-  "USD/EGP (OTC)",
-  "USD/INR (OTC)",
-  "USD/ARS (OTC)",
-  "USD/PHP (OTC)",
-  "NZD/CHF (OTC)",
-  "USD/NGN (OTC)",
-  "USD/MXN (OTC)",
-  "NZD/CAD (OTC)",
-  "USD/BRL (OTC)",
-  "EUR/NZD (OTC)",
-  "USD/COP (OTC)",
-  "USD/TRY (OTC)"
+  "Boeing Company (OTC)","McDonald’s (OTC)","American Express (OTC)","Facebook Inc (OTC)","Johnson & Johnson (OTC)","Microsoft (OTC)",
+  "Pfizer Inc (OTC)","Solana (OTC)","Dogecoin (OTC)","Bitcoin (OTC)","Ethereum Classic (OTC)","Aptos (OTC)","Pepe (OTC)","Avalanche (OTC)",
+  "Melania Meme (OTC)","Notcoin (OTC)","Shiba Inu (OTC)","Celestia (OTC)","Toncoin (OTC)","Trump (OTC)","TRON (OTC)","USD/BDT (OTC)",
+  "USD/IDR (OTC)","USD/EGP (OTC)","USD/INR (OTC)","USD/ARS (OTC)","USD/PHP (OTC)","NZD/CHF (OTC)","USD/NGN (OTC)","USD/MXN (OTC)",
+  "NZD/CAD (OTC)","USD/BRL (OTC)","EUR/NZD (OTC)","USD/COP (OTC)","USD/TRY (OTC)"
 ];
 
 const REALpairs=['EUR/JPY','USD/JPY','EUR/USD','GBP/USD','AUD/JPY','USD/CHF','GBP/JPY'];
@@ -232,8 +204,7 @@ function fillAssetSelect(){
 fillAssetSelect();
 marketSel.addEventListener('change',fillAssetSelect);
 
-function pad2(n){return String(n).padStart(2,'0');}
-
+// === License Functions ===
 function makeLicenseKeyForDevice(deviceIdParam,days){
  const now=Date.now();
  const expiry=now+(days*24*60*60*1000);
@@ -242,7 +213,6 @@ function makeLicenseKeyForDevice(deviceIdParam,days){
  const key=btoa(payload);
  return {key,expiry};
 }
-
 function validateLicenseKeyForThisDevice(key,deviceIdToCheck){
  try{
    const decoded=atob(key);
@@ -255,7 +225,6 @@ function validateLicenseKeyForThisDevice(key,deviceIdToCheck){
    return{ok:true,expiry};
  }catch(e){return{ok:false};}
 }
-
 function saveLicenseToLocal(key,expiry,dev=deviceId){
  localStorage.setItem(LICENSE_STORAGE_PREFIX+dev,JSON.stringify({key,expiry}));
 }
@@ -294,14 +263,45 @@ generateLicenseBtn.addEventListener('click',()=>{
 });
 copyLastLicenseBtn.addEventListener('click',()=>{if(lastGenerated){navigator.clipboard.writeText(lastGenerated);}else{alert("No license generated yet.");}});
 
-function showSignal(){
-  const selectedAssets = Array.from(assetSelect.selectedOptions).map(opt => opt.value);
-  const numSignals = parseInt(document.getElementById('numSignals').value) || 1;
-  if(selectedAssets.length === 0){alert("Select at least one asset."); return;}
+// === Signal Generation ===
+function pad2(n){return String(n).padStart(2,'0');}
 
-  const now = new Date();
-  let output = "🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n";
-  output += "✔️1-Step MTG | ⏰ UTC +06:00\n";
-  output += "⏱" + timeframe.options[timeframe.selectedIndex].text + " Trade\n";
-  output += "╭─────────────╮\n";
-  output += "│ 🧠 Strategy: Opp
+function showSignal(){
+ const selectedAssets=[...assetSelect.selectedOptions].map(opt=>opt.value);
+ if(selectedAssets.length===0){alert("Select at least one asset."); return;}
+ const numSignals=parseInt(document.getElementById('numSignals').value)||1;
+ const now=new Date();
+ let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝘢𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱"+timeframe.value+" Trade\n╭─────────────╮\n│ 🧠 Strategy: Opposite Candle │\n╰─────────────╯\n\n";
+ for(let i=0;i<numSignals;i++){
+   const asset=selectedAssets[i%selectedAssets.length];
+   const gap=1+Math.floor(Math.random()*3);
+   now.setMinutes(now.getMinutes()+gap);
+   const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
+   msg+=`𝙼${timeframe.value} ${timeStr} ${asset}\n`;
+ }
+ msg+="\n🔗 Software: Dragonfly AI Signal Bot\n👤 Owner: @TraderParvej";
+ signalText.textContent=msg;
+ candleBody.style.background='#4caf50';
+ candleBody.style.animation='growUp 1s forwards';
+ signalModal.style.display='flex';
+}
+function closeSignal(){signalModal.style.display='none';}
+
+copySignalBtn.addEventListener('click',()=>{
+ const text=signalText.textContent;
+ navigator.clipboard.writeText(text);
+});
+
+generateBtn.addEventListener('click',()=>{
+ if(!loadLicenseLocal()){alert("❌ License required.");return;}
+ loadingModal.style.display='flex';
+ setTimeout(()=>{
+   loadingModal.style.display='none';
+   showSignal();
+ },1500);
+});
+resetBtn.addEventListener('click',()=>{licenseInput.value='';assetSelect.selectedIndex=-1;timeframe.selectedIndex=0;document.getElementById('numSignals').value=1;});
+</script>
+</div>
+</body>
+</html>
