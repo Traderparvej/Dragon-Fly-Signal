@@ -6,68 +6,67 @@
 <title>DragonFly — AI Real Time Signal</title>
 <style>
 :root {
-  --bg:#081024; --panel:#0f1530; --muted:#9fb0d6; --text:#fff; --accent:#6af1ff;
+  --bg:#081024;--panel:#0f1530;--muted:#9fb0d6;--text:#fff;--accent:#6a8dff;
 }
 body {
-  background:var(--bg); color:var(--text); font-family:'Poppins',sans-serif;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  min-height:100vh; margin:0; padding:20px;
+  background:var(--bg);color:var(--text);font-family:Arial, sans-serif;margin:0;padding:0;display:flex;flex-direction:column;align-items:center;min-height:100vh;
 }
 .container {
-  background:var(--panel); border-radius:10px; padding:20px; width:100%;
-  max-width:420px; box-shadow:0 0 10px #0005; text-align:center;
+  width:90%;max-width:600px;background:var(--panel);padding:20px;border-radius:10px;margin-top:30px;box-shadow:0 0 15px #00000040;
 }
-h1 {color:var(--accent); font-size:1.4em; margin-bottom:10px;}
-label, input, button {display:block; width:100%; margin-top:10px;}
-input, select {
-  background:#10193a; border:none; color:var(--text); padding:8px; border-radius:6px;
+h1 {
+  text-align:center;color:var(--accent);margin-bottom:10px;font-size:22px;
+}
+label {
+  display:block;margin:10px 0 5px;color:var(--muted);
+}
+input {
+  width:100%;padding:10px;border:none;border-radius:5px;background:#141b3a;color:var(--text);font-size:16px;
 }
 button {
-  background:var(--accent); border:none; color:#000; padding:10px; border-radius:6px;
-  font-weight:600; margin-top:15px; cursor:pointer;
+  width:100%;padding:10px;margin-top:15px;background:var(--accent);border:none;border-radius:5px;font-size:16px;color:#fff;cursor:pointer;
 }
 button:hover {opacity:0.9;}
-.signal-box {
-  background:#0002; border:1px solid var(--accent); padding:15px; border-radius:8px;
-  margin-top:20px; white-space:pre-wrap; text-align:left; font-family:monospace;
-}
-.admin-panel {display:none; flex-direction:column; margin-top:15px;}
-#assetContainer {display:flex; flex-wrap:wrap; justify-content:space-between;}
-#assetContainer label {
-  width:48%; background:#10193a; padding:5px; border-radius:5px;
-  margin-top:5px; text-align:center; cursor:pointer;
+.output {
+  margin-top:20px;background:#0b1030;padding:15px;border-radius:8px;white-space:pre-wrap;font-family:"Courier New",monospace;font-size:15px;line-height:1.5;
 }
 .copy-btn {
-  background:var(--accent); color:#000; padding:8px; border:none;
-  border-radius:6px; font-weight:600; cursor:pointer; margin-top:10px;
+  margin-top:10px;padding:8px 15px;background:#1b254d;border:none;border-radius:5px;color:#fff;cursor:pointer;font-size:14px;
 }
+.hidden {display:none;}
+.admin-panel {margin-top:30px;text-align:center;}
 </style>
 </head>
 <body>
-
 <div class="container">
   <h1>DragonFly — AI Real Time Signal</h1>
 
-  <input type="text" id="licenseKey" placeholder="Enter License Key">
-  <button onclick="activateLicense()">Activate License</button>
-
-  <div class="admin-panel" id="adminPanel">
-    <input type="password" id="adminPass" placeholder="Enter Admin Password">
-    <button onclick="loginAdmin()">Login Admin</button>
-
-    <div id="adminArea" style="display:none;">
-      <input type="number" id="numSignals" placeholder="Number of Signals">
-      <div id="assetContainer"></div>
-      <button onclick="showSignal()">Generate Signal</button>
-    </div>
+  <div id="license-section">
+    <label>Enter License Key</label>
+    <input type="password" id="licenseKey" placeholder="Enter your license...">
+    <button onclick="checkLicense()">Activate License</button>
   </div>
 
-  <div class="signal-box" id="signalText" style="display:none;"></div>
-  <button class="copy-btn" id="copyBtn" style="display:none;" onclick="copySignal()">Copy Signal</button>
+  <div id="signal-section" class="hidden">
+    <label>Number of Signals</label>
+    <input type="number" id="signalCount" placeholder="Enter number of signals" min="1" max="20">
+    <button onclick="generateSignal()">Generate Signal</button>
+    <div class="output" id="outputBox"></div>
+    <button class="copy-btn" onclick="copyOutput()">Copy Signal</button>
+  </div>
+
+  <div id="admin-section" class="hidden admin-panel">
+    <label>Enter Admin Password</label>
+    <input type="password" id="adminPass" placeholder="Admin password">
+    <button onclick="checkAdmin()">Login Admin Panel</button>
+    <div id="admin-panel-content" class="hidden">
+      <p>✅ Admin License Control Panel Active</p>
+    </div>
+  </div>
 </div>
 
 <script>
-const assets = [
+const pairs = [
 "USD/ARS (OTC)","USD/EGP (OTC)","USD/BDT (OTC)","USD/INR (OTC)","NZD/JPY (OTC)","AUD/CHF (OTC)",
 "CAD/CHF (OTC)","USD/CHF (OTC)","USD/ZAR (OTC)","USD/BRL (OTC)","GBP/CAD (OTC)","GBP/CHF (OTC)",
 "USD/COP (OTC)","EUR/CHF (OTC)","USD/PKR (OTC)","NZD/CHF (OTC)","AUD/JPY (OTC)","CAD/JPY (OTC)",
@@ -77,73 +76,54 @@ const assets = [
 "USD/PHP (OTC)","USD/TRY (OTC)","EUR/AUD (OTC)","EUR/SGD (OTC)","EUR/NZD (OTC)","AUD/NZD (OTC)"
 ];
 
-const assetContainer=document.getElementById('assetContainer');
-assets.forEach(a=>{
-  const label=document.createElement('label');
-  const c=document.createElement('input'); c.type='checkbox'; c.value=a;
-  label.appendChild(c); label.append(' '+a); assetContainer.appendChild(label);
-});
-
-function activateLicense(){
+function checkLicense(){
   const key=document.getElementById('licenseKey').value.trim();
-  if(key==="@DragonflyPremium2025@"){
-    alert("License Activated ✅");
-    document.getElementById('adminPanel').style.display='flex';
-  } else alert("Invalid License ❌");
+  if(key==="@Traderparvej@2025"){
+    document.getElementById('license-section').classList.add('hidden');
+    document.getElementById('signal-section').classList.remove('hidden');
+    document.getElementById('admin-section').classList.remove('hidden');
+    alert("✅ License Activated Successfully!");
+  } else {
+    alert("❌ Invalid License Key");
+  }
 }
 
-function loginAdmin(){
+function checkAdmin(){
   const pass=document.getElementById('adminPass').value.trim();
   if(pass==="@Traderparvej@"){
-    alert("Welcome Admin 🧠");
-    document.getElementById('adminArea').style.display='block';
-  } else alert("Wrong Password ❌");
+    document.getElementById('admin-panel-content').classList.remove('hidden');
+    alert("✅ Admin Access Granted");
+  } else {
+    alert("❌ Wrong Password");
+  }
 }
 
-function pad2(n){return String(n).padStart(2,'0');}
-function toMono(str){
-  const map={"0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿",
-  "A":"𝙰","B":"𝙱","C":"𝙲","D":"𝙳","E":"𝙴","F":"𝙵","G":"𝙶","H":"𝙷","I":"𝙸",
-  "J":"𝙹","K":"𝙺","L":"𝙻","M":"𝙼","N":"𝙽","O":"𝙾","P":"𝙿","Q":"𝚀","R":"𝚁",
-  "S":"𝚂","T":"𝚃","U":"𝚄","V":"𝚅","W":"𝚆","X":"𝚇","Y":"𝚈","Z":"𝚉",
-  "/":"/"," ":" ","(":"(",")":")"};
-  return str.split('').map(ch=>map[ch]||ch).join('');
-}
-
-function showSignal(){
-  const selected=[...assetContainer.querySelectorAll('input:checked')].map(c=>c.value);
-  if(selected.length===0){alert("Select at least one asset.");return;}
-  const num=parseInt(document.getElementById('numSignals').value)||1;
-  const now=new Date();
-
-  // unique pairs
-  const shuffled=[...selected].sort(()=>Math.random()-0.5).slice(0,num);
-
-  let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n";
-  msg+="✔️1-Step MTG | ⏰ UTC +06:00\n";
-  msg+="⏱1-Minute Trade \n";
-  msg+="╭─────────────╮\n";
-  msg+="│ 🧠 Strategy: Opposite Candle │\n";
-  msg+="╰─────────────╯\n";
-
-  for(let i=0;i<shuffled.length;i++){
-    const a=shuffled[i];
-    const gap=2+Math.floor(Math.random()*4);
-    now.setMinutes(now.getMinutes()+gap);
-    const h=pad2(now.getHours());
-    const m=pad2(now.getMinutes());
-    msg+=`𝙼𝟷 ${toMono(h+":"+m)} ${toMono(a.toUpperCase())}\n`;
+function generateSignal(){
+  const count=parseInt(document.getElementById('signalCount').value)||6;
+  const selectedPairs=[];
+  while(selectedPairs.length<count && selectedPairs.length<pairs.length){
+    const rand=pairs[Math.floor(Math.random()*pairs.length)];
+    if(!selectedPairs.includes(rand)) selectedPairs.push(rand);
   }
 
-  msg+="\n🔗 Software: Dragonfly AI Signal Bot\n👤 Owner: @TraderParvej";
-  document.getElementById('signalText').textContent=msg;
-  document.getElementById('signalText').style.display='block';
-  document.getElementById('copyBtn').style.display='block';
+  let output=`🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱1-Minute Trade \n╭─────────────╮\n│ 🧠 Strategy: Opposite Candle │\n╰─────────────╯\n\n`;
+
+  let now=new Date();
+  for(let i=0;i<selectedPairs.length;i++){
+    const randomGap=Math.floor(Math.random()*4)+2; // 2–5 minutes
+    now.setMinutes(now.getMinutes()+randomGap);
+    const hr=String(now.getHours()).padStart(2,'0');
+    const min=String(now.getMinutes()).padStart(2,'0');
+    output+=`𝙼𝟷 ${hr}:${min} ${selectedPairs[i]}\n`;
+  }
+
+  output+=`\n🔗 Software: Dragonfly AI Signal Bot\n👤 Owner: @TraderParvej`;
+  document.getElementById('outputBox').textContent=output;
 }
 
-function copySignal(){
-  navigator.clipboard.writeText(document.getElementById('signalText').textContent);
-  alert("Signal Copied ✅");
+function copyOutput(){
+  const text=document.getElementById('outputBox').textContent;
+  navigator.clipboard.writeText(text);
 }
 </script>
 </body>
