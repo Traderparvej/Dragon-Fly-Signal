@@ -27,6 +27,10 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 .signal-modal{background:linear-gradient(180deg,#0f1530,#111a3a);padding:16px;border-radius:14px;width:92%;max-width:380px;color:#fff;box-shadow:0 12px 30px rgba(0,0,0,0.6);text-align:left;font-family:'Courier New',monospace;font-size:13px;line-height:1.4;border:1px solid rgba(255,255,255,0.05);}
 .signal-text{white-space:pre-wrap;font-family:'Courier New',monospace;font-size:13px;line-height:1.45;color:#eee;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:10px;margin-bottom:8px;}
 .signal-modal button{width:100%;padding:9px;border:none;border-radius:8px;background:var(--accent);font-weight:700;cursor:pointer;margin-top:6px;}
+.analysis-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:1400;flex-direction:column;color:#fff;font-family:Arial,sans-serif;text-align:center;}
+.analysis-overlay .text{font-size:18px;font-weight:700;margin-bottom:12px;}
+.analysis-overlay .spinner{width:50px;height:50px;border:6px solid #eee;border-top-color:#6dd6ff;border-radius:50%;animation:spin 1s linear infinite;margin:auto;}
+@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
 .admin-login-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center;z-index:1300;}
 .admin-login{background:#0b1220;padding:16px;border-radius:10px;width:90%;max-width:380px;color:#fff;box-shadow:0 12px 40px rgba(0,0,0,0.6);}
 .admin-login h3{margin:0 0 10px 0;}
@@ -110,6 +114,11 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 </div>
 </div>
 
+<div class="analysis-overlay" id="analysisOverlay">
+<div class="text">🔍 AI Market Analysis... Please wait 10s</div>
+<div class="spinner"></div>
+</div>
+
 <div class="admin-login-backdrop" id="adminLoginModal">
 <div class="admin-login">
 <h3>Admin Login</h3>
@@ -158,6 +167,7 @@ const adminPasswordInput=document.getElementById('adminPasswordInput');
 const adminLoginSubmit=document.getElementById('adminLoginSubmit');
 const adminLoginCancel=document.getElementById('adminLoginCancel');
 const showAdminLoginBtn=document.getElementById('showAdminLoginBtn');
+const analysisOverlay=document.getElementById('analysisOverlay');
 
 let lastGenerated=null;
 
@@ -284,38 +294,17 @@ copySignalBtn.addEventListener('click',()=>{navigator.clipboard.writeText(signal
 function closeSignal(){signalModal.style.display='none';}
 
 // ---------------------
-// Final-ready Auto 3-5 min Signal Scheduler
+// Generate Button with Analysis Overlay
 // ---------------------
-function scheduleRandomSignals(fn) {
-  const min = 3 * 60 * 1000;
-  const max = 5 * 60 * 1000;
-  function loop() {
-    const delay = Math.floor(Math.random() * (max - min + 1)) + min;
-    setTimeout(()=>{
-      try { fn(); } catch(e){ console.error("Error in auto signal:", e); }
-      loop();
-    }, delay);
-  }
-  loop();
-}
-
-let autoSignalStarted=false;
-
 generateBtn.addEventListener('click',()=>{
   if(!loadLicenseLocal()){ alert("❌ License required."); return; }
 
-  signalText.textContent="🔍 Dragonfly Market Analysis...\n\nPlease wait while AI analyzes the market.";
-  signalModal.style.display='flex';
+  analysisOverlay.style.display='flex';
 
-  // first signal after 3-5 min random
-  const firstDelay=Math.floor(Math.random()*(5*60*1000-3*60*1000+1))+3*60*1000;
   setTimeout(()=>{
+    analysisOverlay.style.display='none';
     showSignal();
-    if(!autoSignalStarted){
-      autoSignalStarted=true;
-      scheduleRandomSignals(showSignal);
-    }
-  }, firstDelay);
+  }, 10000); // 10s overlay
 });
 </script>
 </body>
