@@ -110,6 +110,18 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 </div>
 </div>
 
+<div class="admin-login-backdrop" id="adminLoginModal">
+<div class="admin-login">
+<h3>Admin Login</h3>
+<input type="password" id="adminPasswordInput" placeholder="Enter admin password">
+<div class="row" style="margin-top:6px;">
+<button id="adminLoginSubmit" style="background:#4caf50;color:#fff;">Login</button>
+<button id="adminLoginCancel" style="background:#f44336;color:#fff;">Cancel</button>
+</div>
+<div class="admin-note">Hint: use the password provided by owner.</div>
+</div>
+</div>
+
 <footer>
 © DragonFly — Advance signals
 <div style="margin-top:4px;font-size:10px;">
@@ -141,6 +153,11 @@ const resetBtn=document.getElementById('reset');
 const signalModal=document.getElementById('signalModal');
 const signalText=document.getElementById('signalText');
 const copySignalBtn=document.getElementById('copySignalBtn');
+const adminLoginModal=document.getElementById('adminLoginModal');
+const adminPasswordInput=document.getElementById('adminPasswordInput');
+const adminLoginSubmit=document.getElementById('adminLoginSubmit');
+const adminLoginCancel=document.getElementById('adminLoginCancel');
+const showAdminLoginBtn=document.getElementById('showAdminLoginBtn');
 
 let lastGenerated=null;
 
@@ -153,7 +170,6 @@ const OTCpairs=[
 "USD/ARS (OTC)","USD/BDT (OTC)","USD/CAD (OTC)","USD/DZD (OTC)","USD/EGP (OTC)","USD/IDR (OTC)",
 "EUR/NZD (OTC)","GBP/NZD (OTC)","AUD/CHF (OTC)","USD/ZAR (OTC)","GBP/USD (OTC)","AUD/NZD (OTC)"
 ];
-
 const REALpairs=['EUR/JPY','USD/JPY','EUR/USD'];
 
 function fillAssetContainer(){
@@ -174,18 +190,77 @@ function fillAssetContainer(){
 fillAssetContainer();
 marketSel.addEventListener('change',fillAssetContainer);
 
+function makeLicenseKeyForDevice(deviceIdParam,days){
+ const now=Date.now();
+ const expiry=now+(days*24*60*60*1000);
+ const rand=Math.floor(Math.random()*900000+100000);
+ const payload=`${deviceIdParam}|${expiry}|${rand}`;
+ return btoa(payload);
+}
+function validateLicenseKeyForThisDevice(key,deviceIdToCheck){
+ try{
+   const decoded=atob(key);
+   const [dId,expiryStr]=decoded.split("|");
+   const expiry=parseInt(expiryStr,10);
+   if(String(dId)!==String(deviceIdToCheck))return false;
+   if(Date.now()>expiry)return false;
+   return true;
+ }catch(e){return false;}
+}
+function saveLicenseToLocal(key){localStorage.setItem(LICENSE_STORAGE_PREFIX+deviceId,key);}
+function loadLicenseLocal(){
+ const key=localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
+ if(!key)return false;
+ if(validateLicenseKeyForThisDevice(key,deviceId)){
+   licenseStatus.textContent="License Active ✅";
+   licenseStatus.classList.add('active');
+   return true;
+ }
+ return false;
+}
+loadLicenseLocal();
+
+activateBtn.addEventListener('click',()=>{
+ const entered=licenseInput.value.trim();
+ if(!entered){alert("Paste license key.");return;}
+ if(validateLicenseKeyForThisDevice(entered,deviceId)){
+   saveLicenseToLocal(entered);
+   licenseStatus.textContent="License Active ✅";
+   licenseStatus.classList.add('active');
+   alert("✅ License activated successfully!");
+ }else alert("❌ Invalid or expired license.");
+});
+
+showAdminLoginBtn.addEventListener('click',()=>{adminPasswordInput.value='';adminLoginModal.style.display='flex';adminPasswordInput.focus();});
+adminLoginCancel.addEventListener('click',()=>{adminLoginModal.style.display='none';});
+adminLoginSubmit.addEventListener('click',()=>{
+ if(adminPasswordInput.value===ADMIN_PASSWORD){
+   adminLoginModal.style.display='none';
+   adminPanel.style.display='block';
+   alert("Admin access granted.");
+ }else alert("Wrong password.");
+});
+
+generateLicenseBtn.addEventListener('click',()=>{
+ const dev=adminDeviceIdInput.value.trim();
+ const days=parseInt(adminDurationInput.value,10);
+ if(!dev||!days){alert("Enter device ID and duration.");return;}
+ const key=makeLicenseKeyForDevice(dev,days);
+ lastGenerated=key;
+ generatedBox.textContent=key;
+});
+copyLastLicenseBtn.addEventListener('click',()=>{if(lastGenerated)navigator.clipboard.writeText(lastGenerated);});
+
 function pad2(n){return String(n).padStart(2,'0');}
 function toMono(str){
-  const map = {
-    "0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿",
-    "A":"𝙰","B":"𝙱","C":"𝙲","D":"𝙳","E":"𝙴","F":"𝙵","G":"𝙶","H":"𝙷","I":"𝙸","J":"𝙹","K":"𝙺","L":"𝙻","M":"𝙼","N":"𝙽","O":"𝙾","P":"𝙿","Q":"𝚀","R":"𝚁","S":"𝚂","T":"𝚃","U":"𝚄","V":"𝚅","W":"𝚆","X":"𝚇","Y":"𝚈","Z":"𝚉","/":"/"," ":" ","(":"(",")":")"
-  };
-  return str.split('').map(ch => map[ch] || ch).join('');
+ const map={"0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿",
+"A":"𝙰","B":"𝙱","C":"𝙲","D":"𝙳","E":"𝙴","F":"𝙵","G":"𝙶","H":"𝙷","I":"𝙸","J":"𝙹","K":"𝙺","L":"𝙻","M":"𝙼","N":"𝙽","O":"𝙾","P":"𝙿","Q":"𝚀","R":"𝚁","S":"𝚂","T":"𝚃","U":"𝚄","V":"𝚅","W":"𝚆","X":"𝚇","Y":"𝚈","Z":"𝚉","/":"/"," ":" ","(":"(",")":")"};
+ return str.split('').map(ch=>map[ch]||ch).join('');
 }
 
 function showSignal(){
  const selectedAssets=[...assetContainer.querySelectorAll('input:checked')].map(c=>c.value);
- if(selectedAssets.length===0){alert("Select at least one asset."); return;}
+ if(selectedAssets.length===0){alert("Select at least one asset.");return;}
  const numSignals=parseInt(document.getElementById('numSignals').value)||1;
  const now=new Date();
  let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱️1-Minute Trade \n╭─────────────╮\n│ 🧠 Strategy: Opposite Candle\n╰─────────────╯\n\n";
@@ -200,28 +275,20 @@ function showSignal(){
  }
  msg+="\n🔗 Software: Dragonfly AI Signal Bot\n👤 Owner: @TraderParvej";
  signalText.textContent=msg;
+ signalModal.style.display='flex';
 }
 
-function closeSignal(){signalModal.style.display='none';}
-copySignalBtn.addEventListener('click',()=>{navigator.clipboard.writeText(signalText.textContent);});
-
 generateBtn.addEventListener('click',()=>{
-  if(!licenseStatus.classList.contains('active')){
-    alert("❌ License required.");
-    return;
-  }
-  signalText.textContent = "🔍 Dragonfly Market Analysis...\n\nPlease wait while AI analyzes the market.";
-  signalModal.style.display = 'flex';
-  setTimeout(()=>{showSignal();},10000);
+ if(!loadLicenseLocal()){alert("❌ License required.");return;}
+ signalText.textContent="🔍 Dragonfly Market Analysis...\n\nPlease wait while AI analyzes the market.";
+ signalModal.style.display='flex';
+ setTimeout(()=>{showSignal();},10000);
 });
 
-resetBtn.addEventListener('click',()=>{
-  licenseInput.value='';
-  timeframe.selectedIndex=0;
-  document.getElementById('numSignals').value=1;
-  assetContainer.querySelectorAll('input').forEach(c=>c.checked=false);
-});
+resetBtn.addEventListener('click',()=>{assetContainer.querySelectorAll('input').forEach(c=>c.checked=false);});
+
+copySignalBtn.addEventListener('click',()=>{navigator.clipboard.writeText(signalText.textContent);alert("Copied!");});
+function closeSignal(){signalModal.style.display='none';}
 </script>
-</div>
 </body>
 </html>
