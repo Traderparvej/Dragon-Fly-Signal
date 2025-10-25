@@ -266,6 +266,9 @@ function toMono(str){
  return str.split('').map(ch=>map[ch]||ch).join('');
 }
 
+// ---------------------
+// Final Signal function with proper 3–5 min random gap
+// ---------------------
 function showSignal(){
  const selectedAssets=[...assetContainer.querySelectorAll('input:checked')].map(c=>c.value);
  if(selectedAssets.length===0){alert("Select at least one asset.");return;}
@@ -274,7 +277,7 @@ function showSignal(){
  let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱️1-Minute Trade \n╭─────────────╮\n│ 🧠 Strategy: Opposite Candle\n╰─────────────╯\n\n";
  for(let i=0;i<numSignals;i++){
    const asset=selectedAssets[i%selectedAssets.length];
-   const gap=3+Math.floor(Math.random()*4); // 3–6 minute random gap
+   const gap=3+Math.floor(Math.random()*3); // 3–5 minute random gap
    now.setMinutes(now.getMinutes()+gap);
    const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
    const monoTime=toMono(timeStr);
