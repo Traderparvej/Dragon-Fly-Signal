@@ -176,7 +176,8 @@ const OTCpairs=[
 "EUR/AUD (OTC)","EUR/CHF (OTC)","EUR/SGD (OTC)","GBP/CHF (OTC)","NZD/CAD (OTC)","AUD/NZD (OTC)",
 "CAD/CHF (OTC)","EUR/NZD (OTC)","USD/PHP (OTC)","GBP/NZD (OTC)","USD/BRL (OTC)","USD/ZAR (OTC)",
 "EUR/CAD (OTC)","AUD/CHF (OTC)","CHF/JPY (OTC)","NZD/CHF (OTC)","USD/COP (OTC)","USD/DZD (OTC)",
-"USD/NGN (OTC)","USD/TRY (OTC)","USD/PKR (OTC)","NZD/JPY (OTC)","NZD/USD (OTC)"
+"USD/NGN (OTC)","USD/TRY (OTC)","USD/PKR (OTC)","NZD/JPY (OTC)","NZD/USD (OTC)",
+"Arbitrum (OTC)","Avalanche (OTC)","Bitcoin Cash (OTC)","Bonk (OTC)","Shiba Inu (OTC)","Trump (OTC)","Dogwifhat (OTC)","Axie Infinity (OTC)","Solana (OTC)","Celestia (OTC)","Zcash (OTC)","Notcoin (OTC)","Decentraland (OTC)","Toncoin (OTC)","Dash (OTC)","Bitcoin (OTC)","Binance Coin (OTC)","Gala (OTC)","Chainlink (OTC)","Litecoin (OTC)","Pepe (OTC)","TRON (OTC)","Ethereum Classic (OTC)","Floki (OTC)","Cardano (OTC)","Ethereum (OTC)","Beam (OTC)","Cosmos (OTC)","Dogecoin (OTC)","Melania Meme (OTC)","Ripple (OTC)","Aptos (OTC)","Hamster Kombat (OTC)"
 ];
 const REALpairs=['EUR/JPY','USD/JPY','EUR/USD'];
 
@@ -263,50 +264,44 @@ function pad2(n){return String(n).padStart(2,'0');}
 function toMono(str){
  const map={"0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿",
 "A":"𝙰","B":"𝙱","C":"𝙲","D":"𝙳","E":"𝙴","F":"𝙵","G":"𝙶","H":"𝙷","I":"𝙸","J":"𝙹","K":"𝙺","L":"𝙻","M":"𝙼","N":"𝙽","O":"𝙾","P":"𝙿","Q":"𝚀","R":"𝚁","S":"𝚂","T":"𝚃","U":"𝚄","V":"𝚅","W":"𝚆","X":"𝚇","Y":"𝚈","Z":"𝚉","/":"/"," ":" ","(":"(",")":")"};
- return str.split('').map(ch=>map[ch]||ch).join('');
+ return str.split('').map(ch=>map[ch.toUpperCase()]||ch).join('');
 }
-
-// ---------------------
-// Final Signal function with proper 3–5 min random gap
-// ---------------------
-function showSignal(){
- const selectedAssets=[...assetContainer.querySelectorAll('input:checked')].map(c=>c.value);
- if(selectedAssets.length===0){alert("Select at least one asset.");return;}
- const numSignals=parseInt(document.getElementById('numSignals').value)||1;
+function getRandomSignalType(){return Math.random()>0.5?"CALL ⬆️":"PUT ⬇️";}
+function formatSignal(pair,signal,timeframe){
  const now=new Date();
- let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱️1-Minute Trade \n╭─────────────╮\n│ 🧠 Strategy: Opposite Candle\n╰─────────────╯\n\n";
- for(let i=0;i<numSignals;i++){
-   const asset=selectedAssets[i%selectedAssets.length];
-   const gap=3+Math.floor(Math.random()*3); // 3–5 minute random gap
-   now.setMinutes(now.getMinutes()+gap);
-   const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
-   const monoTime=toMono(timeStr);
-   const monoAsset=toMono(asset.toUpperCase());
-   msg+=`𝙼𝟷 ${monoTime} ${monoAsset}\n`;
- }
- msg+="\n🔗 Software: Dragonfly AI Signal Bot\n👤 Owner: @TraderParvej";
- signalText.textContent=msg;
- signalModal.style.display='flex';
+ const h=pad2(now.getHours());
+ const m=pad2(now.getMinutes());
+ const s=pad2(now.getSeconds());
+ const timeMono=toMono(`${h}:${m}:${s}`);
+ const pairMono=toMono(pair);
+ const tfMono=toMono(timeframe.toUpperCase());
+ const sigMono=toMono(signal);
+ return `📊 ${pairMono}\n⌚ ${timeMono}\n🕐 ${tfMono}\n💹 ${sigMono}`;
 }
-
+function generateSignal(){
+ if(!licenseStatus.classList.contains('active')){alert("License inactive!");return;}
+ const selected=Array.from(assetContainer.querySelectorAll('input:checked')).map(x=>x.value);
+ const tf=timeframe.value;
+ const n=parseInt(document.getElementById('numSignals').value,10)||1;
+ if(selected.length===0){alert("Select at least one asset.");return;}
+ analysisOverlay.style.display='flex';
+ setTimeout(()=>{
+   analysisOverlay.style.display='none';
+   let final='';
+   for(let i=0;i<n;i++){
+     const pair=selected[Math.floor(Math.random()*selected.length)];
+     const sig=getRandomSignalType();
+     final+=formatSignal(pair,sig,tf)+"\n\n";
+   }
+   signalText.textContent=final.trim();
+   signalModal.style.display='flex';
+ },5000);
+}
+generateBtn.addEventListener('click',generateSignal);
 resetBtn.addEventListener('click',()=>{assetContainer.querySelectorAll('input').forEach(c=>c.checked=false);});
-
 copySignalBtn.addEventListener('click',()=>{navigator.clipboard.writeText(signalText.textContent);alert("Copied!");});
 function closeSignal(){signalModal.style.display='none';}
-
-// ---------------------
-// Generate Button with Analysis Overlay
-// ---------------------
-generateBtn.addEventListener('click',()=>{
-  if(!loadLicenseLocal()){ alert("❌ License required."); return; }
-
-  analysisOverlay.style.display='flex';
-
-  setTimeout(()=>{
-    analysisOverlay.style.display='none';
-    showSignal();
-  }, 10000); // 10s overlay
-});
 </script>
+</div>
 </body>
 </html>
