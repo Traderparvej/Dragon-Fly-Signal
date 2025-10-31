@@ -84,10 +84,23 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
     <div id="assetContainer" class="asset-checkbox" style="max-height:200px;overflow-y:auto;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;background:rgba(255,255,255,0.05);"></div>
     <small style="color:#9fb0d6;">Tap to select multiple assets</small>
   </div>
+
   <div>
     <label>Number of Signals</label>
     <input type="number" id="numSignals" value="1" min="1" placeholder="Enter number of signals">
   </div>
+
+  <div>
+    <label>Signal Mode</label>
+    <select id="signalMode">
+      <option value="OPPOSITE" selected>Opposite Candle</option>
+      <option value="CALL">Call (Only)</option>
+      <option value="PUT">Put (Only)</option>
+      <option value="BOTH">Both (Random Call/Put)</option>
+    </select>
+    <small class="small-note">Opposite = existing format (no CALL/PUT). Others will show CALL/PUT beside time.</small>
+  </div>
+
 </div>
 <div class="controls" style="margin-top:12px;">
 <button id="generate">Generate Signal</button>
@@ -168,6 +181,7 @@ const adminLoginSubmit=document.getElementById('adminLoginSubmit');
 const adminLoginCancel=document.getElementById('adminLoginCancel');
 const showAdminLoginBtn=document.getElementById('showAdminLoginBtn');
 const analysisOverlay=document.getElementById('analysisOverlay');
+const signalModeSel=document.getElementById('signalMode');
 
 let lastGenerated=null;
 
@@ -273,15 +287,18 @@ function toMono(str){
  return str.split('').map(ch=>map[ch]||ch).join('');
 }
 
+function randomChoice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
 // ---------------------
-// Final Signal function with proper 3–5 min random gap
+// Final Signal function with proper 3–5 min random gap and Signal Mode support
 // ---------------------
 function showSignal(){
  const selectedAssets=[...assetContainer.querySelectorAll('input:checked')].map(c=>c.value);
  if(selectedAssets.length===0){alert("Select at least one asset.");return;}
  const numSignals=parseInt(document.getElementById('numSignals').value)||1;
+ const mode=signalModeSel.value; // OPPOSITE, CALL, PUT, BOTH
  const now=new Date();
- let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱️1-Minute Trade \n╭─────────────╮\n│ 🧠 Strategy: Opposite Candle\n╰─────────────╯\n\n";
+ let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱️1-Minute Trade \n╭─────────────╮\n│ 🧠 Strategy: "+(mode==="OPPOSITE"?"Opposite Candle":(mode==="CALL"?"Force: CALL":(mode==="PUT"?"Force: PUT":"Both Call/Put (Random)")))+"\n╰─────────────╯\n\n";
  for(let i=0;i<numSignals;i++){
    const asset=selectedAssets[i%selectedAssets.length];
    const gap=3+Math.floor(Math.random()*3); // 3–5 minute random gap
@@ -289,7 +306,18 @@ function showSignal(){
    const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
    const monoTime=toMono(timeStr);
    const monoAsset=toMono(asset.toUpperCase());
-   msg+=`𝙼𝟷 ${monoTime} ${monoAsset}\n`;
+   let sideLabel=""; // default empty for Opposite
+   if(mode==="CALL") sideLabel="CALL";
+   else if(mode==="PUT") sideLabel="PUT";
+   else if(mode==="BOTH") sideLabel=randomChoice(["CALL","PUT"]);
+   // If Opposite mode -> keep same format as before (no CALL/PUT)
+   if(mode==="OPPOSITE"){
+     msg+=`𝙼𝟷 ${monoTime} ${monoAsset}\n`;
+   }else{
+     // append the side label (mono)
+     const monoSide=toMono(" "+sideLabel);
+     msg+=`𝙼𝟷 ${monoTime} ${monoAsset} ${monoSide}\n`;
+   }
  }
  msg+="\n🔗 Software: Dragonfly AI Signal Bot\n👤 Owner: @TraderParvej";
  signalText.textContent=msg;
