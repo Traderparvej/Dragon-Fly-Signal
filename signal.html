@@ -19,9 +19,7 @@ select,input,textarea{background:rgba(255,255,255,0.95);color:#000;font-weight:5
 .controls{display:flex;gap:10px;margin-top:12px;}
 .controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:700;transition:0.18s;}
 .controls button:hover{opacity:0.95;}
-.small-note{font-size:12px;color:var(--muted);}
 .license-status{margin-top:6px;font-weight:600;font-size:14px;}
-.license-status.active{color:var(--green);}
 footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 .signal-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1200;}
 .signal-modal{background:linear-gradient(180deg,#0f1530,#111a3a);padding:16px;border-radius:14px;width:92%;max-width:380px;color:#fff;box-shadow:0 12px 30px rgba(0,0,0,0.6);text-align:left;font-family:'Courier New',monospace;font-size:13px;line-height:1.4;border:1px solid rgba(255,255,255,0.05);}
@@ -37,7 +35,6 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 .admin-login input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);margin-bottom:8px;}
 .admin-login .row{display:flex;gap:8px;}
 .admin-login .row button{flex:1;padding:10px;border-radius:8px;border:none;cursor:pointer;}
-.admin-note{font-size:13px;color:#9fb0d6;margin-top:6px;}
 #adminPanel{display:none;margin-top:10px;}
 .code-box{word-break:break-all;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;margin-top:8px;font-family:monospace;font-size:13px;}
 .asset-checkbox label{cursor:pointer;display:block;margin-bottom:4px;}
@@ -82,7 +79,6 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
   <div>
     <label>Assets (Tap to select multiple)</label>
     <div id="assetContainer" class="asset-checkbox" style="max-height:200px;overflow-y:auto;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;background:rgba(255,255,255,0.05);"></div>
-    <small style="color:#9fb0d6;">Tap to select multiple assets</small>
   </div>
 
   <div>
@@ -98,8 +94,8 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
       <option value="PUT">Put (Only)</option>
       <option value="BOTH">Both (Call/Put)</option>
     </select>
-    <small class="small-note">Opposite = existing format (no CALL/PUT). Others will show CALL/PUT beside time.</small>
   </div>
+
 </div>
 <div class="controls" style="margin-top:12px;">
 <button id="generate">Generate Signal</button>
@@ -139,7 +135,6 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 <button id="adminLoginSubmit" style="background:#4caf50;color:#fff;">Login</button>
 <button id="adminLoginCancel" style="background:#f44336;color:#fff;">Cancel</button>
 </div>
-<div class="admin-note">Hint: use the password provided by owner.</div>
 </div>
 </div>
 
@@ -184,22 +179,25 @@ const signalModeSel=document.getElementById('signalMode');
 
 let lastGenerated=null;
 
-const OTCpairs=[/*Your OTC List*/];
+const OTCpairs=[
+"USD/ARS (OTC)","USD/BDT (OTC)","USD/EGP (OTC)","USD/INR (OTC)","USD/IDR (OTC)","USD/MXN (OTC)",
+"EUR/AUD (OTC)","EUR/CHF (OTC)","EUR/SGD (OTC)","GBP/CHF (OTC)","NZD/CAD (OTC)","AUD/NZD (OTC)",
+"CAD/CHF (OTC)","EUR/NZD (OTC)","USD/PHP (OTC)","GBP/NZD (OTC)","USD/BRL (OTC)","USD/ZAR (OTC)",
+"EUR/CAD (OTC)","AUD/CHF (OTC)","CHF/JPY (OTC)","NZD/CHF (OTC)","USD/COP (OTC)","USD/DZD (OTC)",
+"USD/NGN (OTC)","USD/TRY (OTC)","USD/PKR (OTC)","NZD/JPY (OTC)","NZD/USD (OTC)"];
 const REALpairs=['EUR/JPY','USD/JPY','EUR/USD'];
 
 function fillAssetContainer(){
   assetContainer.innerHTML='';
   const pairs=marketSel.value==='REAL'?REALpairs:OTCpairs;
   pairs.forEach(p=>{
-    const div=document.createElement('div');
     const label=document.createElement('label');
     const checkbox=document.createElement('input');
     checkbox.type='checkbox';
     checkbox.value=p;
     label.appendChild(checkbox);
     label.appendChild(document.createTextNode(p));
-    div.appendChild(label);
-    assetContainer.appendChild(div);
+    assetContainer.appendChild(label);
   });
 }
 fillAssetContainer();
@@ -268,8 +266,7 @@ copyLastLicenseBtn.addEventListener('click',()=>{if(lastGenerated)navigator.clip
 
 function pad2(n){return String(n).padStart(2,'0');}
 function toMono(str){
- const map={"0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿",
-"A":"𝙰","B":"𝙱","C":"𝙲","D":"𝙳","E":"𝙴","F":"𝙵","G":"𝙶","H":"𝙷","I":"𝙸","J":"𝙹","K":"𝙺","L":"𝙻","M":"𝙼","N":"𝙽","O":"𝙾","P":"𝙿","Q":"𝚀","R":"𝚁","S":"𝚂","T":"𝚃","U":"𝚄","V":"𝚅","W":"𝚆","X":"𝚇","Y":"𝚈","Z":"𝚉","/":"/"," ":" ","(":"(",")":")"};
+ const map={"0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿","A":"𝙰","B":"𝙱","C":"𝙲","D":"𝙳","E":"𝙴","F":"𝙵","G":"𝙶","H":"𝙷","I":"𝙸","J":"𝙹","K":"𝙺","L":"𝙻","M":"𝙼","N":"𝙽","O":"𝙾","P":"𝙿","Q":"𝚀","R":"𝚁","S":"𝚂","T":"𝚃","U":"𝚄","V":"𝚅","W":"𝚆","X":"𝚇","Y":"𝚈","Z":"𝚉","/":"/"," ":" ","(":"(",")":")"};
  return str.split('').map(ch=>map[ch]||ch).join('');
 }
 
@@ -277,20 +274,20 @@ function showSignal(){
  const selectedAssets=[...assetContainer.querySelectorAll('input:checked')].map(c=>c.value);
  if(selectedAssets.length===0){alert("Select at least one asset.");return;}
  const numSignals=parseInt(document.getElementById('numSignals').value)||1;
- const mode=signalModeSel.value; 
+ const mode=signalModeSel.value;
  const now=new Date();
  let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱️1-Minute Trade \n╭─────────────╮\n│ 🧠 Strategy: "+(mode==="OPPOSITE"?"Opposite Candle":(mode==="CALL"?"Force: CALL":(mode==="PUT"?"Force: PUT":"Both Call/Put")))+"\n╰─────────────╯\n\n";
  for(let i=0;i<numSignals;i++){
    const asset=selectedAssets[i%selectedAssets.length];
-   const gap=3; 
+   const gap=3+Math.floor(Math.random()*3);
    now.setMinutes(now.getMinutes()+gap);
    const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
    const monoTime=toMono(timeStr);
    const monoAsset=toMono(asset.toUpperCase());
-   let sideLabel=""; 
+   let sideLabel="";
    if(mode==="CALL") sideLabel="CALL";
    else if(mode==="PUT") sideLabel="PUT";
-   else if(mode==="BOTH") sideLabel="CALL"; // Fixed CALL first to avoid random
+   else if(mode==="BOTH") sideLabel=Math.random()<0.5?"CALL":"PUT";
    if(mode==="OPPOSITE"){
      msg+=`𝙼𝟷 ${monoTime} ${monoAsset}\n`;
    }else{
