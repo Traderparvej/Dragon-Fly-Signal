@@ -24,6 +24,7 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 .signal-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1200;}
 .signal-modal{background:linear-gradient(180deg,#0f1530,#111a3a);padding:16px;border-radius:14px;width:92%;max-width:380px;color:#fff;box-shadow:0 12px 30px rgba(0,0,0,0.6);text-align:left;font-family:'Courier New',monospace;font-size:13px;line-height:1.4;border:1px solid rgba(255,255,255,0.05);}
 .signal-text{white-space:pre-wrap;font-family:'Courier New',monospace;font-size:13px;line-height:1.45;color:#eee;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:10px;margin-bottom:8px;}
+.signal-modal button{width:100%;padding:9px;border:none;border-radius:8px;background:var(--accent);font-weight:700;cursor:pointer;margin-top:6px;}
 .analysis-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:1400;flex-direction:column;color:#fff;font-family:Arial,sans-serif;text-align:center;}
 .analysis-overlay .text{font-size:18px;font-weight:700;margin-bottom:12px;}
 .analysis-overlay .spinner{width:50px;height:50px;border:6px solid #eee;border-top-color:#6dd6ff;border-radius:50%;animation:spin 1s linear infinite;margin:auto;}
@@ -38,6 +39,8 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 .code-box{word-break:break-all;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;margin-top:8px;font-family:monospace;font-size:13px;}
 .asset-checkbox label{cursor:pointer;display:block;margin-bottom:4px;}
 .asset-checkbox input{margin-right:6px;}
+#loginPopup{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1500;}
+#loginPopup .popup-content{background:#0f1530;padding:16px;border-radius:12px;color:#fff;text-align:center;width:90%;max-width:360px;}
 @media (max-width:880px){.grid{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -113,31 +116,30 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 <div class="code-box" id="generatedBox" style="margin-top:10px;">Generated license will appear here.</div>
 </section>
 
-<!-- Signal Generate Popup -->
+<!-- Signal Modal -->
 <div class="signal-modal-backdrop" id="signalModal">
-  <div class="signal-modal">
-    <div id="signalText" class="signal-text"></div>
-    <button id="copySignalBtn" style="margin-top:6px;background:#6dd6ff;color:#000;">📋 Copy Signal</button>
-    <button onclick="closeSignal()" style="margin-top:6px;background:#f44336;color:#fff;">Close</button>
-  </div>
+<div class="signal-modal">
+<div id="signalText" class="signal-text"></div>
+<button id="copySignalBtn">📋 Copy Signal</button>
+<button onclick="closeSignal()">Close</button>
+</div>
 </div>
 
-<!-- Login Smart Popup -->
-<div class="signal-modal-backdrop" id="loginPopup">
-  <div class="signal-modal">
-    <div class="signal-text">🎯 Dragonfly AI 90% Accurate Signal Generate করার উপায়!</div>
-    <a href="https://t.me/TraderParvej_Community/2259" target="_blank" style="text-decoration:none;">
-      <button style="margin-top:6px;background:#ffcc00;color:#000;width:100%;font-weight:700;">👉 Watch Now</button>
-    </a>
-    <button onclick="closeLoginPopup()" style="margin-top:6px;background:#f44336;color:#fff;width:100%;">Close</button>
-  </div>
-</div>
-
+<!-- Analysis Overlay -->
 <div class="analysis-overlay" id="analysisOverlay">
 <div class="text">🔍 AI Market Analysis... Please wait 10s</div>
 <div class="spinner"></div>
 </div>
 
+<!-- Smart Login Popup -->
+<div id="loginPopup">
+  <div class="popup-content">
+    <div>🎯 Dragonfly AI 90% Accurate Signal Generate করার উপায়!<br>👉 ভিডিও দেখুন এখনই: <a href="https://t.me/TraderParvej_Community/2259" target="_blank" style="color:#6dd6ff;">Watch Now</a></div>
+    <button onclick="closeLoginPopup()" style="margin-top:10px;background:#6dd6ff;color:#000;border:none;padding:8px;border-radius:6px;cursor:pointer;">Close</button>
+  </div>
+</div>
+
+<!-- Admin Login Modal -->
 <div class="admin-login-backdrop" id="adminLoginModal">
 <div class="admin-login">
 <h3>Admin Login</h3>
@@ -236,14 +238,15 @@ function validateLicenseKeyForThisDevice(key,deviceIdToCheck){
 function saveLicenseToLocal(key){localStorage.setItem(LICENSE_STORAGE_PREFIX+deviceId,key);}
 function loadLicenseLocal(){
  const key=localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
- if(!key)return false;
+ if(!key) return false;
  if(validateLicenseKeyForThisDevice(key,deviceId)){
    licenseStatus.textContent="License Active ✅";
    licenseStatus.classList.add('active');
    licenseActive=true;
-   showLoginPopup(); // show smart popup
+   showLoginPopup(); // Show every time
    return true;
  }
+ showLoginPopup(); // also show if license inactive
  return false;
 }
 loadLicenseLocal();
@@ -293,7 +296,7 @@ function showSignal(){
  const numSignals=parseInt(document.getElementById('numSignals').value)||1;
  const mode=signalModeSel.value;
  const now=new Date();
- let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱️1-Minute Trade \n╭─────────────╮\n│ 🧠 Strategy: "+(mode==="OPPOSITE"?"Opposite Candle":(mode==="CALL"?"Force: CALL":(mode==="PUT"?"Force: PUT":"Both Call/Put")))+"\n╰─────────────╯\n\n";
+ let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝘢𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱️1-Minute Trade \n╭─────────────╮\n│ 🧠 Strategy: "+(mode==="OPPOSITE"?"Opposite Candle":(mode==="CALL"?"Force: CALL":(mode==="PUT"?"Force: PUT":"Both Call/Put")))+"\n╰─────────────╯\n\n";
  for(let i=0;i<numSignals;i++){
    const asset=selectedAssets[i%selectedAssets.length];
    const gap=3+Math.floor(Math.random()*3);
@@ -319,9 +322,10 @@ function showSignal(){
 
 resetBtn.addEventListener('click',()=>{assetContainer.querySelectorAll('input').forEach(c=>c.checked=false);});
 copySignalBtn.addEventListener('click',()=>{navigator.clipboard.writeText(signalText.textContent);alert("Copied!");});
+function closeSignal(){signalModal.style.display='none';}
 
 generateBtn.addEventListener('click',()=>{
-  if(!licenseActive){ alert("❌ License required."); return; }
+  if(!loadLicenseLocal()){ alert("❌ License required."); return; }
   analysisOverlay.style.display='flex';
   setTimeout(()=>{
     analysisOverlay.style.display='none';
@@ -329,12 +333,9 @@ generateBtn.addEventListener('click',()=>{
   }, 10000);
 });
 
-// Smart login popup
+// Smart popup functions
 function showLoginPopup(){ loginPopup.style.display='flex'; }
 function closeLoginPopup(){ loginPopup.style.display='none'; }
-
-// Close signal popup
-function closeSignal(){signalModal.style.display='none';}
 </script>
 </body>
 </html>
