@@ -40,86 +40,6 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 .asset-checkbox label{cursor:pointer;display:block;margin-bottom:4px;}
 .asset-checkbox input{margin-right:6px;}
 @media (max-width:880px){.grid{grid-template-columns:1fr;}}
-/* Popup CSS */
-.df-popup-backdrop{
-  position: fixed;
-  inset: 0;
-  background: rgba(10,10,12,0.45);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  backdrop-filter: blur(3px);
-}
-.df-popup{
-  width: min(720px,92%);
-  max-width:720px;
-  border-radius:12px;
-  background: linear-gradient(180deg,#0f172a,#021027);
-  color:#fff;
-  box-shadow:0 10px 30px rgba(2,6,23,0.6);
-  transform: translateY(20px) scale(0.98);
-  opacity:0;
-  transition:transform 260ms ease, opacity 260ms ease;
-  overflow:hidden;
-  display:grid;
-  grid-template-columns:1fr 360px;
-  position: relative;
-}
-.df-popup-backdrop.show{display:flex;}
-.df-popup-backdrop.show .df-popup{transform: translateY(0) scale(1); opacity:1;}
-.df-popup-content{
-  padding:20px 22px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-.df-popup-title{font-size:18px;font-weight:700;letter-spacing:-0.2px;}
-.df-popup-sub{font-size:14px;opacity:0.9;line-height:1.35;}
-.df-popup-features{margin-top:8px;font-size:13px;color:#dbeafe;opacity:0.95;}
-.df-popup-cta{
-  padding:18px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  background: linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));
-  align-items:center;
-  justify-content:center;
-}
-.df-btn{
-  background: linear-gradient(90deg,#ffb86b,#ff6b6b);
-  border:none;
-  padding:12px 18px;
-  border-radius:10px;
-  font-weight:700;
-  cursor:pointer;
-  color:#071229;
-  box-shadow:0 6px 18px rgba(255,107,107,0.14);
-  font-size:15px;
-  width:100%;
-}
-.df-btn.secondary{
-  background: transparent;
-  color:#cfe8ff;
-  border:1px solid rgba(255,255,255,0.06);
-  font-weight:600;
-}
-.df-popup-close{
-  position:absolute;
-  right:14px;
-  top:12px;
-  background:transparent;
-  border:none;
-  color:rgba(255,255,255,0.9);
-  font-size:18px;
-  cursor:pointer;
-}
-.df-note{font-size:12px;opacity:0.85;margin-top:6px;}
-@media (max-width:720px){
-  .df-popup{grid-template-columns:1fr;}
-  .df-popup-cta{order:2;width:100%;padding:12px;}
-}
-.df-popup:focus { outline:3px solid rgba(255,182,48,0.18); outline-offset:2px; border-radius:8px;}
 </style>
 </head>
 <body>
@@ -225,27 +145,6 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 </div>
 </footer>
 
-<!-- Popup HTML -->
-<div class="df-popup-backdrop" id="dfPopupBackdrop" aria-hidden="true">
-  <div role="dialog" aria-modal="true" class="df-popup" tabindex="-1">
-    <button class="df-popup-close" id="dfPopupCloseBtn" aria-label="Close popup">&times;</button>
-    <div class="df-popup-content">
-      <h2 class="df-popup-title">🎯 Dragonfly AI — ৯০% একুরেট সিগনাল</h2>
-      <p class="df-popup-sub">Dragonfly AI দ্বারা ৯০% সঠিক সিগনাল জেনারেট করার কার্যকর উপায় জানতে দেখুন এখনই।</p>
-      <ul class="df-popup-features">
-        <li>🔹 সহজ স্টেপ-বাই-স্টেপ নির্দেশনা</li>
-        <li>🔹 রিয়েল-টাইম উদাহরণ ও রেজাল্ট</li>
-        <li>🔹 টিপস: লস ম্যানেজমেন্ট & রিস্ক কন্ট্রোল</li>
-      </ul>
-      <p class="df-note">আপনি যেকোনো সময় ‘✖️ বন্ধ’ বাটনে ক্লিক করে এটি বন্ধ করতে পারেন। প্রতি লগইনে আবার দেখাবে।</p>
-    </div>
-    <div class="df-popup-cta">
-      <button id="dfWatchBtn" class="df-btn" data-video-url="https://t.me/TraderParvej_Community/2259">👉 ভিডিও দেখুন এখনই</button>
-      <button id="dfLaterBtn" class="df-btn secondary">✖️ পরে দেখব</button>
-    </div>
-  </div>
-</div>
-
 <script>
 const ADMIN_PASSWORD="@Traderparvej@";
 const LICENSE_STORAGE_PREFIX="dragon_license_";
@@ -279,6 +178,7 @@ const analysisOverlay=document.getElementById('analysisOverlay');
 const signalModeSel=document.getElementById('signalMode');
 
 let lastGenerated=null;
+let licenseActive=false;
 
 const OTCpairs=[
 "USD/ARS (OTC)","USD/BDT (OTC)","USD/EGP (OTC)","USD/INR (OTC)","USD/IDR (OTC)","USD/MXN (OTC)",
@@ -324,12 +224,12 @@ function validateLicenseKeyForThisDevice(key,deviceIdToCheck){
 function saveLicenseToLocal(key){localStorage.setItem(LICENSE_STORAGE_PREFIX+deviceId,key);}
 function loadLicenseLocal(){
  const key=localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
- if(!key)return false;
+ if(!key) return false;
  if(validateLicenseKeyForThisDevice(key,deviceId)){
    licenseStatus.textContent="License Active ✅";
    licenseStatus.classList.add('active');
-   // Trigger popup when license just activated
-   showSignalPopup();
+   licenseActive=true;
+   showSmartPopup(); // Auto popup on valid license
    return true;
  }
  return false;
@@ -343,9 +243,9 @@ activateBtn.addEventListener('click',()=>{
    saveLicenseToLocal(entered);
    licenseStatus.textContent="License Active ✅";
    licenseStatus.classList.add('active');
+   licenseActive=true;
    alert("✅ License activated successfully!");
-   // On successful activation, show popup
-   showSignalPopup();
+   showSmartPopup(); // popup immediately after activation
  }else alert("❌ Invalid or expired license.");
 });
 
@@ -405,55 +305,27 @@ function showSignal(){
  signalModal.style.display='flex';
 }
 
-resetBtn.addEventListener('click',()=>{assetContainer.querySelectorAll('input').forEach(c=>c.checked=false);});
+function resetSelections(){assetContainer.querySelectorAll('input').forEach(c=>c.checked=false);}
+resetBtn.addEventListener('click',resetSelections);
 copySignalBtn.addEventListener('click',()=>{navigator.clipboard.writeText(signalText.textContent);alert("Copied!");});
 function closeSignal(){signalModal.style.display='none';}
 
-// Popup script
-(function(){
-  const BACKDROP_ID='dfPopupBackdrop';
-  const backdrop=document.getElementById(BACKDROP_ID);
-  const closeBtn=document.getElementById('dfPopupCloseBtn');
-  const watchBtn=document.getElementById('dfWatchBtn');
-  const laterBtn=document.getElementById('dfLaterBtn');
-  const dialog=backdrop.querySelector('[role="dialog"]');
+generateBtn.addEventListener('click',()=>{
+ if(!licenseActive){ alert("❌ License required."); return; }
+ analysisOverlay.style.display='flex';
+ setTimeout(()=>{
+   analysisOverlay.style.display='none';
+   showSignal();
+ }, 10000);
+});
 
-  // open popup
-  function openPopup(videoUrl){
-    if(videoUrl) watchBtn.setAttribute('data-video-url', videoUrl);
-    backdrop.classList.add('show');
-    backdrop.setAttribute('aria-hidden','false');
-    dialog.focus();
-  }
-
-  // close popup
-  function closePopup(){
-    backdrop.classList.remove('show');
-    backdrop.setAttribute('aria-hidden','true');
-  }
-
-  // button actions
-  watchBtn.addEventListener('click', ()=>{
-    const url=watchBtn.getAttribute('data-video-url');
-    closePopup();
-    window.open(url,'_blank','noopener');
-  });
-
-  laterBtn.addEventListener('click', closePopup);
-  closeBtn.addEventListener('click', closePopup);
-
-  // ESC key to close
-  document.addEventListener('keydown', function(e){
-    if(e.key==='Escape'){
-      closePopup();
-    }
-  });
-
-  // Public function: call when needed
-  window.showSignalPopup = function(videoUrl){
-    setTimeout(()=> openPopup(videoUrl), 700);
-  };
-})();
+// Smart popup notification on login
+function showSmartPopup(){
+ if(!licenseActive) return;
+ const popupMsg="🎯 Dragonfly AI 90% Accurate Signal Generate করার উপায়!\n👉 ভিডিও দেখুন এখনই: Watch Now";
+signalText.textContent=popupMsg;
+signalModal.style.display='flex';
+}
 </script>
 </body>
 </html>
