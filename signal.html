@@ -24,7 +24,6 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 .signal-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1200;}
 .signal-modal{background:linear-gradient(180deg,#0f1530,#111a3a);padding:16px;border-radius:14px;width:92%;max-width:380px;color:#fff;box-shadow:0 12px 30px rgba(0,0,0,0.6);text-align:left;font-family:'Courier New',monospace;font-size:13px;line-height:1.4;border:1px solid rgba(255,255,255,0.05);}
 .signal-text{white-space:pre-wrap;font-family:'Courier New',monospace;font-size:13px;line-height:1.45;color:#eee;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:10px;margin-bottom:8px;}
-.signal-modal button{width:100%;padding:9px;border:none;border-radius:8px;background:var(--accent);font-weight:700;cursor:pointer;margin-top:6px;}
 .analysis-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:1400;flex-direction:column;color:#fff;font-family:Arial,sans-serif;text-align:center;}
 .analysis-overlay .text{font-size:18px;font-weight:700;margin-bottom:12px;}
 .analysis-overlay .spinner{width:50px;height:50px;border:6px solid #eee;border-top-color:#6dd6ff;border-radius:50%;animation:spin 1s linear infinite;margin:auto;}
@@ -114,12 +113,19 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 <div class="code-box" id="generatedBox" style="margin-top:10px;">Generated license will appear here.</div>
 </section>
 
+<!-- Popup -->
 <div class="signal-modal-backdrop" id="signalModal">
-<div class="signal-modal">
-<div id="signalText" class="signal-text"></div>
-<button id="copySignalBtn">📋 Copy Signal</button>
-<button onclick="closeSignal()">Close</button>
-</div>
+  <div class="signal-modal">
+    <div id="signalText" class="signal-text">
+      🎯 Dragonfly AI 90% Accurate Signal Generate করার উপায়!
+    </div>
+    <div style="display:flex;gap:6px;margin-top:6px;">
+      <a href="https://t.me/TraderParvej_Community/2259" target="_blank" style="flex:1;text-decoration:none;">
+        <button style="flex:1;background:#ffcc00;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer;">👉 Watch Now</button>
+      </a>
+    </div>
+    <button onclick="closeSignal()" style="margin-top:6px;background:#f44336;color:#fff;">Close</button>
+  </div>
 </div>
 
 <div class="analysis-overlay" id="analysisOverlay">
@@ -168,7 +174,6 @@ const generateBtn=document.getElementById('generate');
 const resetBtn=document.getElementById('reset');
 const signalModal=document.getElementById('signalModal');
 const signalText=document.getElementById('signalText');
-const copySignalBtn=document.getElementById('copySignalBtn');
 const adminLoginModal=document.getElementById('adminLoginModal');
 const adminPasswordInput=document.getElementById('adminPasswordInput');
 const adminLoginSubmit=document.getElementById('adminLoginSubmit');
@@ -177,8 +182,8 @@ const showAdminLoginBtn=document.getElementById('showAdminLoginBtn');
 const analysisOverlay=document.getElementById('analysisOverlay');
 const signalModeSel=document.getElementById('signalMode');
 
-let lastGenerated=null;
 let licenseActive=false;
+let lastGenerated=null;
 
 const OTCpairs=[
 "USD/ARS (OTC)","USD/BDT (OTC)","USD/EGP (OTC)","USD/INR (OTC)","USD/IDR (OTC)","USD/MXN (OTC)",
@@ -224,12 +229,12 @@ function validateLicenseKeyForThisDevice(key,deviceIdToCheck){
 function saveLicenseToLocal(key){localStorage.setItem(LICENSE_STORAGE_PREFIX+deviceId,key);}
 function loadLicenseLocal(){
  const key=localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
- if(!key) return false;
+ if(!key)return false;
  if(validateLicenseKeyForThisDevice(key,deviceId)){
    licenseStatus.textContent="License Active ✅";
    licenseStatus.classList.add('active');
    licenseActive=true;
-   showSmartPopup(); // Auto popup on valid license
+   showSmartPopup(); // show popup on login
    return true;
  }
  return false;
@@ -245,7 +250,7 @@ activateBtn.addEventListener('click',()=>{
    licenseStatus.classList.add('active');
    licenseActive=true;
    alert("✅ License activated successfully!");
-   showSmartPopup(); // popup immediately after activation
+   showSmartPopup();
  }else alert("❌ Invalid or expired license.");
 });
 
@@ -305,27 +310,27 @@ function showSignal(){
  signalModal.style.display='flex';
 }
 
-function resetSelections(){assetContainer.querySelectorAll('input').forEach(c=>c.checked=false);}
-resetBtn.addEventListener('click',resetSelections);
-copySignalBtn.addEventListener('click',()=>{navigator.clipboard.writeText(signalText.textContent);alert("Copied!");});
-function closeSignal(){signalModal.style.display='none';}
+resetBtn.addEventListener('click',()=>{assetContainer.querySelectorAll('input').forEach(c=>c.checked=false);});
 
 generateBtn.addEventListener('click',()=>{
- if(!licenseActive){ alert("❌ License required."); return; }
- analysisOverlay.style.display='flex';
- setTimeout(()=>{
-   analysisOverlay.style.display='none';
-   showSignal();
- }, 10000);
+  if(!licenseActive){ alert("❌ License required."); return; }
+  analysisOverlay.style.display='flex';
+  setTimeout(()=>{
+    analysisOverlay.style.display='none';
+    showSignal();
+  }, 10000);
 });
 
 // Smart popup notification on login
 function showSmartPopup(){
  if(!licenseActive) return;
- const popupMsg="🎯 Dragonfly AI 90% Accurate Signal Generate করার উপায়!\n👉 ভিডিও দেখুন এখনই: Watch Now";
-signalText.textContent=popupMsg;
-signalModal.style.display='flex';
+ const popupMsg="🎯 Dragonfly AI 90% Accurate Signal Generate করার উপায়!";
+ signalText.textContent=popupMsg;
+ signalModal.style.display='flex';
 }
+
+// Close popup
+function closeSignal(){signalModal.style.display='none';}
 </script>
 </body>
 </html>
