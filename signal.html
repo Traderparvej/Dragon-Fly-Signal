@@ -301,7 +301,7 @@ function showSignal(){
  let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝘢𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱️1-Minute Trade \n╭─────────────╮\n│ 🧠 Strategy: "+(mode==="OPPOSITE"?"Opposite Candle":(mode==="CALL"?"Force: CALL":(mode==="PUT"?"Force: PUT":"Both Call/Put")))+"\n╰─────────────╯\n\n";
  for(let i=0;i<numSignals;i++){
    const asset=selectedAssets[i%selectedAssets.length];
-   const gap=2+Math.floor(Math.random()*3);
+   const gap=3+Math.floor(Math.random()*3);
    now.setMinutes(now.getMinutes()+gap);
    const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
    const monoTime=toMono(timeStr);
