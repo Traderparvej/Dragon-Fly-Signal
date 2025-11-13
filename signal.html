@@ -288,56 +288,53 @@ copyLastLicenseBtn.addEventListener('click',()=>{if(lastGenerated)navigator.clip
 
 function pad2(n){return String(n).padStart(2,'0');}
 function toMono(str){
- const map={"0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿","A":"𝙰","B":"𝙱","C":"𝙲","D":"𝙳","E":"𝙴","F":"𝙵","G":"𝙶","H":"𝙷","I":"𝙸","J":"𝙹","K":"𝙺","L":"𝙻","M":"𝙼","N":"𝙽","O":"𝙾","P":"𝙿","Q":"𝚀","R":"𝚁","S":"𝚂","T":"𝚃","U":"𝚄","V":"𝚅","W":"𝚆","X":"𝚇","Y":"𝚈","Z":"𝚉","/":"/"," ":" ","(":"(",")":")"};
- return str.split('').map(ch=>map[ch]||ch).join('');
+ const map={"0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿","A":"𝙰","B":"𝙱","C":"𝙲","D":"𝙳","E":"𝙴","F":"𝙵","G":"𝙶","H":"𝙷","I":"𝙸","J":"𝙹","K":"𝙺","L":"𝙻","M":"𝙼","N":"𝙽","O":"𝙾","P":"𝙿","Q":"𝚀","R":"𝚁","S":"𝚂","T":"𝚃","U":"𝚄","V":"𝚅","W":"𝚆","X":"𝚇","Y":"𝚈","Z":"𝚉","/":"/"," ":" "};
+ return str.toUpperCase().split("").map(c=>map[c]||c).join("");
 }
-
-function showSignal(){
- const selectedAssets=[...assetContainer.querySelectorAll('input:checked')].map(c=>c.value);
- if(selectedAssets.length===0){alert("Select at least one asset.");return;}
- const numSignals=parseInt(document.getElementById('numSignals').value)||1;
- const mode=signalModeSel.value;
- const now=new Date();
- let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝘢𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱️1-Minute Trade \n╭─────────────╮\n│ 🧠 Strategy: "+(mode==="OPPOSITE"?"Opposite Candle":(mode==="CALL"?"Force: CALL":(mode==="PUT"?"Force: PUT":"Both Call/Put")))+"\n╰─────────────╯\n\n";
- for(let i=0;i<numSignals;i++){
-   const asset=selectedAssets[i%selectedAssets.length];
-   const gap=2+Math.floor(Math.random()*2);
-   now.setMinutes(now.getMinutes()+gap);
-   const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
-   const monoTime=toMono(timeStr);
-   const monoAsset=toMono(asset.toUpperCase());
-   let sideLabel="";
-   if(mode==="CALL") sideLabel="CALL";
-   else if(mode==="PUT") sideLabel="PUT";
-   else if(mode==="BOTH") sideLabel=Math.random()<0.5?"CALL":"PUT";
-   if(mode==="OPPOSITE"){
-     msg+=`𝙼𝟷 ${monoTime} ${monoAsset}\n`;
-   }else{
-     const monoSide=toMono(" "+sideLabel);
-     msg+=`𝙼𝟷 ${monoTime} ${monoAsset}${monoSide}\n`;
-   }
- }
- msg+="\n🔗 Software: https://t.me/Dragonflyaisignal_bot\n👤 Owner: @TraderParvej";
- signalText.textContent=msg;
- signalModal.style.display='flex';
-}
-
-resetBtn.addEventListener('click',()=>{assetContainer.querySelectorAll('input').forEach(c=>c.checked=false);});
-copySignalBtn.addEventListener('click',()=>{navigator.clipboard.writeText(signalText.textContent);alert("Copied!");});
-function closeSignal(){signalModal.style.display='none';}
 
 generateBtn.addEventListener('click',()=>{
-  if(!loadLicenseLocal()){ alert("❌ License required."); return; }
-  analysisOverlay.style.display='flex';
-  setTimeout(()=>{
-    analysisOverlay.style.display='none';
-    showSignal();
-  }, 10000);
+ if(!licenseActive){alert("Activate license first.");return;}
+ const selectedAssets=Array.from(assetContainer.querySelectorAll("input:checked")).map(i=>i.value);
+ if(selectedAssets.length===0){alert("Select at least one asset.");return;}
+ const numSignals=parseInt(document.getElementById("numSignals").value,10);
+ const mode=signalModeSel.value;
+ if(isNaN(numSignals)||numSignals<1){alert("Enter valid signal count.");return;}
+ analysisOverlay.style.display='flex';
+ setTimeout(()=>{
+   analysisOverlay.style.display='none';
+   let msg="";
+   const now=new Date();
+   // 🔧 Updated 2–4 minute random gap logic
+   for(let i=0;i<numSignals;i++){
+     const asset=selectedAssets[i%selectedAssets.length];
+     const gap=2+Math.floor(Math.random()*3); // random 2,3,4
+     now.setMinutes(now.getMinutes()+gap);
+     const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
+     const monoTime=toMono(timeStr);
+     const monoAsset=toMono(asset.toUpperCase());
+     let sideLabel="";
+     if(mode==="CALL")sideLabel="CALL";
+     else if(mode==="PUT")sideLabel="PUT";
+     else if(mode==="BOTH")sideLabel=Math.random()<0.5?"CALL":"PUT";
+     if(mode==="OPPOSITE"){
+       msg+=`𝙼𝟷 ${monoTime} ${monoAsset}\n`;
+     }else{
+       const monoSide=toMono(" "+sideLabel);
+       msg+=`𝙼𝟷 ${monoTime} ${monoAsset}${monoSide}\n`;
+     }
+   }
+   signalText.textContent=msg.trim();
+   signalModal.style.display='flex';
+ },10000);
 });
 
-// Smart popup functions
-function showLoginPopup(){ loginPopup.style.display='flex'; }
-function closeLoginPopup(){ loginPopup.style.display='none'; }
+function closeSignal(){signalModal.style.display='none';}
+copySignalBtn.addEventListener('click',()=>{navigator.clipboard.writeText(signalText.textContent.trim());alert("Signal copied!");});
+resetBtn.addEventListener('click',()=>{Array.from(assetContainer.querySelectorAll("input:checked")).forEach(i=>i.checked=false);document.getElementById("numSignals").value=1;});
+
+function showLoginPopup(){loginPopup.style.display='flex';}
+function closeLoginPopup(){loginPopup.style.display='none';}
 </script>
+</div>
 </body>
 </html>
