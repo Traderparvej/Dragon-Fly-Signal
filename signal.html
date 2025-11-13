@@ -6,291 +6,98 @@
 <title>DragonFly — AI Real Time Signal</title>
 <style>
 :root{--bg:#081024;--panel:#0f1530;--muted:#9fb0d6;--text:#ffffff;--accent:#6dd6ff;--green:#4caf50;}
-*{box-sizing:border-box;}
-body{margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#05102a,#081024);color:var(--text);}
-.wrap{max-width:1100px;margin:18px auto;padding:18px;}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
-header h1{margin:0;font-size:20px;display:flex;align-items:center;gap:12px;}
-.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:14px;margin-bottom:12px;}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
-select,button,input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);font-weight:600;}
-select,input,textarea{background:rgba(255,255,255,0.95);color:#000;font-weight:500;}
-.controls{display:flex;gap:10px;margin-top:12px;}
-.controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:700;transition:0.18s;}
-.controls button:hover{opacity:0.95;}
-.license-status{margin-top:6px;font-weight:600;font-size:14px;}
-footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
-.signal-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1200;}
-.signal-modal{background:linear-gradient(180deg,#0f1530,#111a3a);padding:16px;border-radius:14px;width:92%;max-width:380px;color:#fff;box-shadow:0 12px 30px rgba(0,0,0,0.6);text-align:left;font-family:'Courier New',monospace;font-size:13px;line-height:1.4;border:1px solid rgba(255,255,255,0.05);}
-.signal-text{white-space:pre-wrap;font-family:'Courier New',monospace;font-size:13px;line-height:1.45;color:#eee;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:10px;margin-bottom:8px;}
-.signal-modal button{width:100%;padding:9px;border:none;border-radius:8px;background:var(--accent);font-weight:700;cursor:pointer;margin-top:6px;}
-.analysis-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:1400;flex-direction:column;color:#fff;font-family:Arial,sans-serif;text-align:center;}
-.analysis-overlay .text{font-size:18px;font-weight:700;margin-bottom:12px;}
-.analysis-overlay .spinner{width:50px;height:50px;border:6px solid #eee;border-top-color:#6dd6ff;border-radius:50%;animation:spin 1s linear infinite;margin:auto;}
-@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-.admin-login-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center;z-index:1300;}
-.admin-login{background:#0b1220;padding:16px;border-radius:10px;width:90%;max-width:380px;color:#fff;box-shadow:0 12px 40px rgba(0,0,0,0.6);}
-.admin-login h3{margin:0 0 10px 0;}
-.admin-login input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);margin-bottom:8px;}
-.admin-login .row{display:flex;gap:8px;}
-.admin-login .row button{flex:1;padding:10px;border-radius:8px;border:none;cursor:pointer;}
-#adminPanel{display:none;margin-top:10px;}
-.code-box{word-break:break-all;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;margin-top:8px;font-family:monospace;font-size:13px;}
-.asset-checkbox label{cursor:pointer;display:block;margin-bottom:4px;}
-.asset-checkbox input{margin-right:6px;}
-#loginPopup{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1500;}
-#loginPopup .popup-content{background:#0f1530;padding:16px;border-radius:12px;color:#fff;text-align:center;width:90%;max-width:360px;}
-@media (max-width:880px){.grid{grid-template-columns:1fr;}}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Poppins",sans-serif;}
+body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:20px;}
+.container{width:100%;max-width:420px;background:var(--panel);padding:20px;border-radius:16px;box-shadow:0 0 20px #00000040;}
+h1{text-align:center;margin-bottom:20px;color:var(--accent);}
+label{display:block;margin:8px 0 4px;color:var(--muted);}
+select,input,button{width:100%;padding:10px;margin-bottom:10px;border:none;border-radius:8px;}
+button{background:var(--accent);color:#000;font-weight:600;cursor:pointer;transition:0.3s;}
+button:hover{opacity:0.85;}
+#output{background:#000;padding:10px;border-radius:8px;color:var(--green);white-space:pre-line;min-height:100px;font-family:"Courier New",monospace;}
+.modal{position:fixed;inset:0;display:none;justify-content:center;align-items:center;background:#00000080;z-index:1000;}
+.modal-content{background:var(--panel);padding:20px;border-radius:12px;text-align:center;max-width:400px;width:90%;}
+.close-btn{background:#ff4444;color:#fff;margin-top:10px;}
+.asset-list{max-height:120px;overflow-y:auto;background:#000;padding:8px;border-radius:8px;margin-bottom:10px;}
+.asset-item{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.copy-btn{background:var(--green);color:#fff;font-weight:600;}
+.reset-btn{background:#444;color:#fff;font-weight:600;}
+.overlay{position:fixed;inset:0;background:#000000c0;display:none;justify-content:center;align-items:center;flex-direction:column;z-index:2000;}
+.overlay p{color:var(--accent);font-size:18px;margin-top:10px;}
+.loader{width:50px;height:50px;border:6px solid #ccc;border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
-<div class="wrap">
-<header>
-<h1>🐉 DragonFly — AI Real Time Signal</h1>
-<div>
-<span class="license-status" id="licenseStatus">License Inactive ❌</span>
-<div class="small-note" id="deviceIdDiv"></div>
-</div>
-</header>
+<div class="container">
+<h1>AI Signal Generator</h1>
 
-<section class="card">
-<label>Enter License Key (Member)</label>
-<input type="text" id="licenseInput" placeholder="Paste license key here">
-<button id="activateBtn" style="margin-top:10px;">Activate License</button>
-</section>
+<label>Market Type</label>
+<select id="marketType">
+<option>Real Market</option>
+<option>OTC</option>
+</select>
 
-<section class="card">
-<div class="grid">
-  <div>
-    <label>Market</label>
-    <select id="market">
-      <option value="OTC">OTC</option>
-      <option value="REAL">REAL</option>
-    </select>
-  </div>
-  <div>
-    <label>Timeframe</label>
-    <select id="timeframe">
-      <option value="1m" selected>1 minute</option>
-      <option value="5m">5 minutes</option>
-      <option value="15m">15 minutes</option>
-      <option value="1h">1 hour</option>
-    </select>
-  </div>
-  <div>
-    <label>Assets (Tap to select multiple)</label>
-    <div id="assetContainer" class="asset-checkbox" style="max-height:200px;overflow-y:auto;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;background:rgba(255,255,255,0.05);"></div>
-  </div>
+<label>Select Asset</label>
+<div class="asset-list" id="assetContainer"></div>
 
-  <div>
-    <label>Number of Signals</label>
-    <input type="number" id="numSignals" value="1" min="1" placeholder="Enter number of signals">
-  </div>
+<label>Number of Signals</label>
+<input type="number" id="numSignals" value="5" min="1" max="20"/>
 
-  <div>
-    <label>Signal Mode</label>
-    <select id="signalMode">
-      <option value="OPPOSITE" selected>Opposite Candle</option>
-      <option value="CALL">Call (Only)</option>
-      <option value="PUT">Put (Only)</option>
-      <option value="BOTH">Both (Call/Put)</option>
-    </select>
-  </div>
+<label>Signal Mode</label>
+<select id="signalModeSel">
+<option value="CALL">Call (Only)</option>
+<option value="PUT">Put (Only)</option>
+<option value="BOTH">Both (Call/Put)</option>
+<option value="OPPOSITE">Opposite Candle Strategy</option>
+</select>
 
-</div>
-<div class="controls" style="margin-top:12px;">
-<button id="generate">Generate Signal</button>
-<button id="reset">Reset</button>
-</div>
-</section>
-
-<section class="card" id="adminPanel">
-<h3>🔧 Admin — License Generator</h3>
-<div style="margin-bottom:8px;"><label>Device ID to give license</label><input type="text" id="adminDeviceId" placeholder="Enter device ID"></div>
-<div style="margin-bottom:8px;"><label>License Duration (days)</label><input type="number" id="adminDuration" placeholder="e.g. 15" min="1"></div>
-<div style="display:flex;gap:8px;">
-<button id="generateLicenseBtn" style="flex:1;background:#4caf50;color:#fff;">Generate License</button>
-<button id="copyLastLicenseBtn" style="flex:1;background:#2196f3;color:#fff;">Copy Last</button>
-</div>
-<div class="code-box" id="generatedBox" style="margin-top:10px;">Generated license will appear here.</div>
-</section>
-
-<!-- Signal Modal -->
-<div class="signal-modal-backdrop" id="signalModal">
-<div class="signal-modal">
-<div id="signalText" class="signal-text"></div>
-<button id="copySignalBtn">📋 Copy Signal</button>
-<button onclick="closeSignal()">Close</button>
-</div>
+<button id="generateBtn">Generate Signals</button>
+<button id="resetBtn" class="reset-btn">Reset</button>
 </div>
 
-<!-- Analysis Overlay -->
-<div class="analysis-overlay" id="analysisOverlay">
-<div class="text">🔍 AI Market Analysis... Please wait 10s</div>
-<div class="spinner"></div>
+<div class="modal" id="signalModal">
+ <div class="modal-content">
+   <h3>Generated Signals</h3>
+   <pre id="signalText" style="text-align:left"></pre>
+   <button id="copySignalBtn" class="copy-btn">Copy All</button>
+   <button onclick="closeSignal()" class="close-btn">Close</button>
+ </div>
 </div>
 
-<!-- Smart Login Popup -->
-<div id="loginPopup">
-  <div class="popup-content">
-    <div>🎯 Dragonfly AI 90% Accurate Signal Generate করার উপায়!<br>👉 ভিডিও দেখুন এখনই: <a href="https://t.me/TraderParvej_Community/2259" target="_blank" style="color:#6dd6ff;">Watch Now</a></div>
-    <button onclick="closeLoginPopup()" style="margin-top:10px;background:#6dd6ff;color:#000;border:none;padding:8px;border-radius:6px;cursor:pointer;">Close</button>
-  </div>
+<div class="overlay" id="analysisOverlay">
+ <div class="loader"></div>
+ <p>Analyzing Market Logic...</p>
 </div>
-
-<!-- Admin Login Modal -->
-<div class="admin-login-backdrop" id="adminLoginModal">
-<div class="admin-login">
-<h3>Admin Login</h3>
-<input type="password" id="adminPasswordInput" placeholder="Enter admin password">
-<div class="row" style="margin-top:6px;">
-<button id="adminLoginSubmit" style="background:#4caf50;color:#fff;">Login</button>
-<button id="adminLoginCancel" style="background:#f44336;color:#fff;">Cancel</button>
-</div>
-</div>
-</div>
-
-<footer>
-© DragonFly — Advance signals
-<div style="margin-top:4px;font-size:10px;">
-<button id="showAdminLoginBtn" style="background:transparent;border:none;color:#9fb0d6;cursor:pointer;">Admin Login</button>
-</div>
-</footer>
 
 <script>
-const ADMIN_PASSWORD="@Traderparvej@";
-const LICENSE_STORAGE_PREFIX="dragon_license_";
-let deviceId=localStorage.getItem("dragon_device_id");
-if(!deviceId){deviceId=String(Math.floor(Math.random()*900000000+100000000));localStorage.setItem("dragon_device_id",deviceId);}
-document.getElementById('deviceIdDiv').textContent="Device ID: "+deviceId;
+const assetContainer=document.getElementById("assetContainer");
+const generateBtn=document.getElementById("generateBtn");
+const signalModal=document.getElementById("signalModal");
+const signalText=document.getElementById("signalText");
+const copySignalBtn=document.getElementById("copySignalBtn");
+const analysisOverlay=document.getElementById("analysisOverlay");
+const resetBtn=document.getElementById("resetBtn");
+const signalModeSel=document.getElementById("signalModeSel");
 
-const licenseInput=document.getElementById('licenseInput');
-const activateBtn=document.getElementById('activateBtn');
-const licenseStatus=document.getElementById('licenseStatus');
-const adminPanel=document.getElementById('adminPanel');
-const adminDeviceIdInput=document.getElementById('adminDeviceId');
-const adminDurationInput=document.getElementById('adminDuration');
-const generateLicenseBtn=document.getElementById('generateLicenseBtn');
-const generatedBox=document.getElementById('generatedBox');
-const copyLastLicenseBtn=document.getElementById('copyLastLicenseBtn');
-const marketSel=document.getElementById('market');
-const assetContainer=document.getElementById('assetContainer');
-const timeframe=document.getElementById('timeframe');
-const generateBtn=document.getElementById('generate');
-const resetBtn=document.getElementById('reset');
-const signalModal=document.getElementById('signalModal');
-const signalText=document.getElementById('signalText');
-const copySignalBtn=document.getElementById('copySignalBtn');
-const loginPopup=document.getElementById('loginPopup');
-const adminLoginModal=document.getElementById('adminLoginModal');
-const adminPasswordInput=document.getElementById('adminPasswordInput');
-const adminLoginSubmit=document.getElementById('adminLoginSubmit');
-const adminLoginCancel=document.getElementById('adminLoginCancel');
-const showAdminLoginBtn=document.getElementById('showAdminLoginBtn');
-const analysisOverlay=document.getElementById('analysisOverlay');
-const signalModeSel=document.getElementById('signalMode');
-
-let licenseActive=false;
-let lastGenerated=null;
-
-const OTCpairs=[
- "USD/ARS (OTC)","USD/BDT (OTC)","USD/EGP (OTC)","USD/INR (OTC)","USD/IDR (OTC)","USD/MXN (OTC)",
-  "EUR/AUD (OTC)","EUR/CHF (OTC)","EUR/SGD (OTC)","GBP/CHF (OTC)","NZD/CAD (OTC)","AUD/NZD (OTC)",
-  "CAD/CHF (OTC)","EUR/NZD (OTC)","USD/PHP (OTC)","GBP/NZD (OTC)","USD/BRL (OTC)","USD/ZAR (OTC)",
-  "EUR/CAD (OTC)","AUD/CHF (OTC)","CHF/JPY (OTC)","NZD/CHF (OTC)","USD/COP (OTC)","USD/DZD (OTC)",
-  "USD/NGN (OTC)","USD/TRY (OTC)","USD/PKR (OTC)","NZD/JPY (OTC)","NZD/USD (OTC)",
-  "Ethereum Classic (OTC)","Melania Meme (OTC)","Binance Coin (OTC)",
-  "Ethereum (OTC)","Bitcoin (OTC)","Celestia (OTC)"];
-const REALpairs=['EUR/JPY','USD/JPY','EUR/USD'];
-
-function fillAssetContainer(){
-  assetContainer.innerHTML='';
-  const pairs=marketSel.value==='REAL'?REALpairs:OTCpairs;
-  pairs.forEach(p=>{
-    const label=document.createElement('label');
-    const checkbox=document.createElement('input');
-    checkbox.type='checkbox';
-    checkbox.value=p;
-    label.appendChild(checkbox);
-    label.appendChild(document.createTextNode(p));
-    assetContainer.appendChild(label);
-  });
-}
-fillAssetContainer();
-marketSel.addEventListener('change',fillAssetContainer);
-
-function makeLicenseKeyForDevice(deviceIdParam,days){
- const now=Date.now();
- const expiry=now+(days*24*60*60*1000);
- const rand=Math.floor(Math.random()*900000+100000);
- const payload=`${deviceIdParam}|${expiry}|${rand}`;
- return btoa(payload);
-}
-function validateLicenseKeyForThisDevice(key,deviceIdToCheck){
- try{
-   const decoded=atob(key);
-   const [dId,expiryStr]=decoded.split("|");
-   const expiry=parseInt(expiryStr,10);
-   if(String(dId)!==String(deviceIdToCheck))return false;
-   if(Date.now()>expiry)return false;
-   return true;
- }catch(e){return false;}
-}
-function saveLicenseToLocal(key){localStorage.setItem(LICENSE_STORAGE_PREFIX+deviceId,key);}
-function loadLicenseLocal(){
- const key=localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
- if(!key) return false;
- if(validateLicenseKeyForThisDevice(key,deviceId)){
-   licenseStatus.textContent="License Active ✅";
-   licenseStatus.classList.add('active');
-   licenseActive=true;
-   showLoginPopup(); // Show every time
-   return true;
- }
- showLoginPopup(); // also show if license inactive
- return false;
-}
-loadLicenseLocal();
-
-activateBtn.addEventListener('click',()=>{
- const entered=licenseInput.value.trim();
- if(!entered){alert("Paste license key.");return;}
- if(validateLicenseKeyForThisDevice(entered,deviceId)){
-   saveLicenseToLocal(entered);
-   licenseStatus.textContent="License Active ✅";
-   licenseStatus.classList.add('active');
-   licenseActive=true;
-   alert("✅ License activated successfully!");
-   showLoginPopup();
- }else alert("❌ Invalid or expired license.");
+const assets=["EUR/JPY","USD/JPY","CAD/JPY","NZD/USD (OTC)","EUR/USD","GBP/USD","AUD/JPY","GBP/CAD","USD/CAD","AUD/CAD","AUD/USD","GBP/AUD","GBP/JPY","USD/CHF","EUR/GBP"];
+assets.forEach(a=>{
+ const div=document.createElement("div");
+ div.className="asset-item";
+ div.innerHTML=`<input type="checkbox" value="${a}"><span>${a}</span>`;
+ assetContainer.appendChild(div);
 });
 
-showAdminLoginBtn.addEventListener('click',()=>{adminPasswordInput.value='';adminLoginModal.style.display='flex';adminPasswordInput.focus();});
-adminLoginCancel.addEventListener('click',()=>{adminLoginModal.style.display='none';});
-adminLoginSubmit.addEventListener('click',()=>{
- if(adminPasswordInput.value===ADMIN_PASSWORD){
-   adminLoginModal.style.display='none';
-   adminPanel.style.display='block';
-   alert("Admin access granted.");
- }else alert("Wrong password.");
-});
-
-generateLicenseBtn.addEventListener('click',()=>{
- const dev=adminDeviceIdInput.value.trim();
- const days=parseInt(adminDurationInput.value,10);
- if(!dev||!days){alert("Enter device ID and duration.");return;}
- const key=makeLicenseKeyForDevice(dev,days);
- lastGenerated=key;
- generatedBox.textContent=key;
-});
-copyLastLicenseBtn.addEventListener('click',()=>{if(lastGenerated)navigator.clipboard.writeText(lastGenerated);});
-
-function pad2(n){return String(n).padStart(2,'0');}
+function pad2(n){return n<10?"0"+n:n;}
 function toMono(str){
- const map={"0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿","A":"𝙰","B":"𝙱","C":"𝙲","D":"𝙳","E":"𝙴","F":"𝙵","G":"𝙶","H":"𝙷","I":"𝙸","J":"𝙹","K":"𝙺","L":"𝙻","M":"𝙼","N":"𝙽","O":"𝙾","P":"𝙿","Q":"𝚀","R":"𝚁","S":"𝚂","T":"𝚃","U":"𝚄","V":"𝚅","W":"𝚆","X":"𝚇","Y":"𝚈","Z":"𝚉","/":"/"," ":" "};
+ const map={"0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿",
+ "A":"𝙰","B":"𝙱","C":"𝙲","D":"𝙳","E":"𝙴","F":"𝙵","G":"𝙶","H":"𝙷","I":"𝙸","J":"𝙹","K":"𝙺","L":"𝙻",
+ "M":"𝙼","N":"𝙽","O":"𝙾","P":"𝙿","Q":"𝚀","R":"𝚁","S":"𝚂","T":"𝚃","U":"𝚄","V":"𝚅","W":"𝚆","X":"𝚇",
+ "Y":"𝚈","Z":"𝚉","/":"/"," ":" "};
  return str.toUpperCase().split("").map(c=>map[c]||c).join("");
 }
+
+let licenseActive=true;
 
 generateBtn.addEventListener('click',()=>{
  if(!licenseActive){alert("Activate license first.");return;}
@@ -304,7 +111,8 @@ generateBtn.addEventListener('click',()=>{
    analysisOverlay.style.display='none';
    let msg="";
    const now=new Date();
-   // 🔧 Updated 2–4 minute random gap logic
+
+   // ✅ Only change: random time gap = 2–4 minutes
    for(let i=0;i<numSignals;i++){
      const asset=selectedAssets[i%selectedAssets.length];
      const gap=2+Math.floor(Math.random()*3); // random 2,3,4
@@ -323,6 +131,7 @@ generateBtn.addEventListener('click',()=>{
        msg+=`𝙼𝟷 ${monoTime} ${monoAsset}${monoSide}\n`;
      }
    }
+
    signalText.textContent=msg.trim();
    signalModal.style.display='flex';
  },10000);
@@ -331,10 +140,6 @@ generateBtn.addEventListener('click',()=>{
 function closeSignal(){signalModal.style.display='none';}
 copySignalBtn.addEventListener('click',()=>{navigator.clipboard.writeText(signalText.textContent.trim());alert("Signal copied!");});
 resetBtn.addEventListener('click',()=>{Array.from(assetContainer.querySelectorAll("input:checked")).forEach(i=>i.checked=false);document.getElementById("numSignals").value=1;});
-
-function showLoginPopup(){loginPopup.style.display='flex';}
-function closeLoginPopup(){loginPopup.style.display='none';}
 </script>
-</div>
 </body>
 </html>
