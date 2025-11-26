@@ -1,9 +1,11 @@
 {
-  "cleanUrls": true,
-  "rewrites": [
-    {
-      "source": "/signal",
-      "destination": "/signal.html"
-    }
+  "version": 2,
+  "builds": [
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "signal.html", "use": "@vercel/static" },
+    { "src": "api/login.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" }
   ]
 }
