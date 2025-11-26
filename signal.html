@@ -232,7 +232,7 @@ function makeLicenseKeyForDevice(deviceIdParam,days){
  const now=Date.now();
  const expiry=now+(days*24*60*60*1000);
  const rand=Math.floor(Math.random()*900000+100000);
- const payload=${deviceIdParam}|${expiry}|${rand};
+ const payload=`${deviceIdParam}|${expiry}|${rand}`;
  return btoa(payload);
 }
 function validateLicenseKeyForThisDevice(key,deviceIdToCheck){
@@ -343,10 +343,10 @@ function showSignal(){
    else if(mode==="BOTH") sideLabel = signalSides[i];
 
    if(mode==="OPPOSITE"){
-     msg+=𝙼𝟷 ${monoTime} ${monoAsset}\n;
+     msg+=`𝙼𝟷 ${monoTime} ${monoAsset}\n`;
    }else{
      const monoSide=toMono(" "+sideLabel);
-     msg+=𝙼𝟷 ${monoTime} ${monoAsset}${monoSide}\n;
+     msg+=`𝙼𝟷 ${monoTime} ${monoAsset}${monoSide}\n`;
    }
  }
  msg+="\n❗ Avoid signal after Doji, <80%, Gap, or 3–4 B2B opposite candles";
