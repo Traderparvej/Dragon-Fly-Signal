@@ -6,7 +6,6 @@
     { "src": "api/login.js", "use": "@vercel/node" }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/", "dest": "/signal.html" }
+    { "src": "/api/(.*)", "dest": "/api/$1" }
   ]
 }
