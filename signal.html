@@ -253,10 +253,10 @@ function loadLicenseLocal(){
    licenseStatus.textContent="License Active ✅";
    licenseStatus.classList.add('active');
    licenseActive=true;
-   showLoginPopup(); // Show every time
+   showLoginPopup(); 
    return true;
  }
- showLoginPopup(); // also show if license inactive
+ showLoginPopup();
  return false;
 }
 loadLicenseLocal();
@@ -300,13 +300,35 @@ function toMono(str){
  return str.split('').map(ch=>map[ch]||ch).join('');
 }
 
+function generateBalancedBothSignals(total) {
+    let half = Math.floor(total / 2);
+    let signals = [];
+
+    for (let i = 0; i < half; i++) signals.push("CALL");
+    for (let i = 0; i < half; i++) signals.push("PUT");
+
+    if (total % 2 === 1) signals.push(Math.random() < 0.5 ? "CALL" : "PUT");
+
+    for (let i = signals.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [signals[i], signals[j]] = [signals[j], signals[i]];
+    }
+    return signals;
+}
+
 function showSignal(){
  const selectedAssets=[...assetContainer.querySelectorAll('input:checked')].map(c=>c.value);
  if(selectedAssets.length===0){alert("Select at least one asset.");return;}
  const numSignals=parseInt(document.getElementById('numSignals').value)||1;
  const mode=signalModeSel.value;
  const now=new Date();
- let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝘢𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱️1-Minute Trade \n╭─────────────╮\n│ 🧠 Strategy: "+(mode==="OPPOSITE"?"Opposite Candle":(mode==="CALL"?"Force: CALL":(mode==="PUT"?"Force: PUT":"Both Call/Put")))+"\n╰─────────────╯\n\n";
+ let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱️1-Minute Trade \n╭─────────────╮\n│ 🧠 Strategy: "+(mode==="OPPOSITE"?"Opposite Candle":(mode==="CALL"?"Force: CALL":(mode==="PUT"?"Force: PUT":"Both Balanced")))+"\n╰─────────────╯\n\n";
+
+ let signalSides=[];
+ if(mode==="BOTH"){
+    signalSides = generateBalancedBothSignals(numSignals);
+ }
+
  for(let i=0;i<numSignals;i++){
    const asset=selectedAssets[i%selectedAssets.length];
    const gap=Math.floor(Math.random() * 3) + 2;
@@ -315,9 +337,11 @@ function showSignal(){
    const monoTime=toMono(timeStr);
    const monoAsset=toMono(asset.toUpperCase());
    let sideLabel="";
+
    if(mode==="CALL") sideLabel="CALL";
    else if(mode==="PUT") sideLabel="PUT";
-   else if(mode==="BOTH") sideLabel=Math.random()<0.5?"CALL":"PUT";
+   else if(mode==="BOTH") sideLabel = signalSides[i];
+
    if(mode==="OPPOSITE"){
      msg+=`𝙼𝟷 ${monoTime} ${monoAsset}\n`;
    }else{
@@ -343,7 +367,6 @@ generateBtn.addEventListener('click',()=>{
   }, 10000);
 });
 
-// Smart popup functions
 function showLoginPopup(){ loginPopup.style.display='flex'; }
 function closeLoginPopup(){ loginPopup.style.display='none'; }
 </script>
