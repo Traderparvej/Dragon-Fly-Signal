@@ -104,8 +104,8 @@ button:hover{background:#4dc9f3;}
 </div>
 
 <script>
-// ---- LOGIN USING /api/login ----
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
+// ---- LOGIN VALIDATION ----
+document.getElementById("loginForm").addEventListener("submit", (e) => {
   e.preventDefault();
 
   const user = document.getElementById("username").value.trim();
@@ -115,26 +115,16 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   msg.textContent = "Checking...";
   msg.style.color = "#fff";
 
-  try {
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: user, password: pass })
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      msg.style.color = "limegreen";
-      msg.textContent = "✅ Login successful! Redirecting...";
-      setTimeout(() => (window.location.href = "signal.html"), 800);
-    } else {
-      msg.style.color = "tomato";
-      msg.textContent = "❌ Invalid username or password";
-    }
-  } catch (error) {
+  // Hardcoded credentials
+  if(user === "Dragonfly11" && pass === "@Dragon") {
+    msg.style.color = "limegreen";
+    msg.textContent = "✅ Login successful! Redirecting...";
+    setTimeout(() => {
+      window.location.href = "signal.html";
+    }, 800);
+  } else {
     msg.style.color = "tomato";
-    msg.textContent = "⚠ Server error!";
+    msg.textContent = "❌ Invalid username or password";
   }
 });
 </script>
