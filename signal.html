@@ -5,180 +5,68 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>DragonFly — AI Real Time Signal</title>
 <style>
-:root {
-  --bg: #081024;
-  --panel: #0f1530;
-  --muted: #9fb0d6;
-  --text: #ffffff;
-  --accent: #6dd6ff;
-  --green: #4caf50;
+:root{
+  --bg:#081024;
+  --panel:#0f1530;
+  --muted:#9fb0d6;
+  --text:#ffffff;
+  --accent:#6dd6ff;
+  --green:#4caf50;
 }
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  font-family: Inter, system-ui, Arial;
-  background: linear-gradient(180deg, #05102a, #081024);
-  color: var(--text);
-}
-.wrap {
-  max-width: 1100px;
-  margin: 18px auto;
-  padding: 18px;
-}
-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-header h1 {
-  margin: 0;
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.card {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
-  border: 1px solid rgba(255,255,255,0.04);
-  border-radius: 12px;
-  padding: 14px;
-  margin-bottom: 12px;
-}
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-label {
-  font-size: 13px;
-  color: var(--muted);
-  display: block;
-  margin-bottom: 6px;
-}
-select, button, input, textarea {
-  width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.06);
-  font-weight: 600;
-}
-select, input, textarea {
-  background: rgba(255,255,255,0.95);
-  color: #000;
-  font-weight: 500;
-}
-.controls {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
-}
-.controls button {
-  flex: 1;
-  background: var(--accent);
-  color: #000;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 700;
-  transition: 0.18s;
-}
-.controls button:hover { opacity: 0.95; }
-.license-status {
-  margin-top: 6px;
-  font-weight: 600;
-  font-size: 14px;
-}
-footer {
-  text-align: center;
-  color: var(--muted);
-  font-size: 13px;
-  margin-top: 16px;
-}
-.signal-modal-backdrop, .admin-login-backdrop, #loginPopup, .analysis-overlay {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 1200;
-}
-.signal-modal-backdrop { background: rgba(0,0,0,0.6); }
-.signal-modal {
-  background: linear-gradient(180deg,#0f1530,#111a3a);
-  padding: 16px;
-  border-radius: 14px;
-  width: 92%;
-  max-width: 380px;
-  color: #fff;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.6);
-  text-align: left;
-  font-family: 'Courier New', monospace;
-  font-size: 13px;
-  line-height: 1.4;
-  border: 1px solid rgba(255,255,255,0.05);
-}
-.signal-text {
-  white-space: pre-wrap;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 8px;
-  color: #eee;
-}
-.signal-modal button { width: 100%; padding: 9px; border: none; border-radius: 8px; background: var(--accent); font-weight: 700; cursor: pointer; margin-top: 6px; }
-.analysis-overlay {
-  background: rgba(0,0,0,0.85);
-  z-index: 1400;
-  flex-direction: column;
-  color: #fff;
-  font-family: Arial, sans-serif;
-  text-align: center;
-}
-.analysis-overlay .text { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
-.analysis-overlay .spinner {
-  width: 50px;
-  height: 50px;
-  border: 6px solid #eee;
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: auto;
-}
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-.admin-login { background: #0b1220; padding: 16px; border-radius: 10px; width: 90%; max-width: 380px; color: #fff; box-shadow: 0 12px 40px rgba(0,0,0,0.6); }
-.admin-login h3 { margin: 0 0 10px 0; }
-.admin-login input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 8px; }
-.admin-login .row { display: flex; gap: 8px; }
-.admin-login .row button { flex: 1; padding: 10px; border-radius: 8px; border: none; cursor: pointer; }
-.code-box { word-break: break-all; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 6px; margin-top: 8px; font-family: monospace; font-size: 13px; }
-.asset-checkbox label { cursor: pointer; display: block; margin-bottom: 4px; }
-.asset-checkbox input { margin-right: 6px; }
-#loginPopup .popup-content { background: #0f1530; padding: 16px; border-radius: 12px; color: #fff; text-align: center; width: 90%; max-width: 360px; }
-@media (max-width:880px){ .grid { grid-template-columns: 1fr; } }
+*{box-sizing:border-box;}
+body{margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#05102a,#081024);color:var(--text);}
+.wrap{max-width:1100px;margin:18px auto;padding:18px;}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+header h1{margin:0;font-size:20px;display:flex;align-items:center;gap:12px;}
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:14px;margin-bottom:12px;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
+select,button,input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);font-weight:600;}
+select,input,textarea{background:rgba(255,255,255,0.95);color:#000;font-weight:500;}
+.controls{display:flex;gap:10px;margin-top:12px;}
+.controls button{flex:1;background:var(--accent);color:#000;border:none;border-radius:10px;cursor:pointer;font-weight:700;transition:0.18s;}
+.controls button:hover{opacity:0.95;}
+.license-status{margin-top:6px;font-weight:600;font-size:14px;}
+footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
+.signal-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1200;}
+.signal-modal{background:linear-gradient(180deg,#0f1530,#111a3a);padding:16px;border-radius:14px;width:92%;max-width:380px;color:#fff;box-shadow:0 12px 30px rgba(0,0,0,0.6);text-align:left;font-family:'Courier New',monospace;font-size:13px;line-height:1.4;border:1px solid rgba(255,255,255,0.05);}
+.signal-text{white-space:pre-wrap;font-family:'Courier New',monospace;font-size:13px;line-height:1.45;color:#eee;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:10px;margin-bottom:8px;}
+.signal-modal button{width:100%;padding:9px;border:none;border-radius:8px;background:var(--accent);font-weight:700;cursor:pointer;margin-top:6px;}
+.analysis-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:1400;flex-direction:column;color:#fff;font-family:Arial,sans-serif;text-align:center;}
+.analysis-overlay .text{font-size:18px;font-weight:700;margin-bottom:12px;}
+.analysis-overlay .spinner{width:50px;height:50px;border:6px solid #eee;border-top-color:#6dd6ff;border-radius:50%;animation:spin 1s linear infinite;margin:auto;}
+@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+.admin-login-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center;z-index:1300;}
+.admin-login{background:#0b1220;padding:16px;border-radius:10px;width:90%;max-width:380px;color:#fff;box-shadow:0 12px 40px rgba(0,0,0,0.6);}
+.admin-login h3{margin:0 0 10px 0;}
+.admin-login input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);margin-bottom:8px;}
+.admin-login .row{display:flex;gap:8px;}
+.admin-login .row button{flex:1;padding:10px;border-radius:8px;border:none;cursor:pointer;}
+#adminPanel{display:none;margin-top:10px;}
+.code-box{word-break:break-all;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;margin-top:8px;font-family:monospace;font-size:13px;}
+.asset-checkbox label{cursor:pointer;display:block;margin-bottom:4px;}
+.asset-checkbox input{margin-right:6px;}
+#loginPopup{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1500;}
+#loginPopup .popup-content{background:#0f1530;padding:16px;border-radius:12px;color:#fff;text-align:center;width:90%;max-width:360px;}
+@media (max-width:880px){.grid{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
 <div class="wrap">
-
 <header>
 <h1>🐉 DragonFly — AI Real Time Signal</h1>
 <div>
 <span class="license-status" id="licenseStatus">License Inactive ❌</span>
-<div id="deviceIdDiv"></div>
+<div class="small-note" id="deviceIdDiv"></div>
 </div>
 </header>
 
-<!-- License Section -->
 <section class="card">
 <label>Enter License Key (Member)</label>
 <input type="text" id="licenseInput" placeholder="Paste license key here">
-<button id="activateBtn">Activate License</button>
+<button id="activateBtn" style="margin-top:10px;">Activate License</button>
 </section>
 
-<!-- Signal Generator Section -->
 <section class="card">
 <div class="grid">
   <div>
@@ -198,39 +86,38 @@ footer {
     </select>
   </div>
   <div>
-    <label>Assets (Select multiple)</label>
+    <label>Assets (Tap to select multiple)</label>
     <div id="assetContainer" class="asset-checkbox" style="max-height:200px;overflow-y:auto;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;background:rgba(255,255,255,0.05);"></div>
   </div>
   <div>
     <label>Number of Signals</label>
-    <input type="number" id="numSignals" value="1" min="1">
+    <input type="number" id="numSignals" value="1" min="1" placeholder="Enter number of signals">
   </div>
   <div>
     <label>Signal Mode</label>
     <select id="signalMode">
       <option value="OPPOSITE" selected>Opposite Candle</option>
-      <option value="CALL">Call Only</option>
-      <option value="PUT">Put Only</option>
-      <option value="BOTH">Both (Balanced)</option>
+      <option value="CALL">Call (Only)</option>
+      <option value="PUT">Put (Only)</option>
+      <option value="BOTH">Both (Call/Put)</option>
     </select>
   </div>
 </div>
-<div class="controls">
+<div class="controls" style="margin-top:12px;">
 <button id="generate">Generate Signal</button>
 <button id="reset">Reset</button>
 </div>
 </section>
 
-<!-- Admin Panel -->
 <section class="card" id="adminPanel">
 <h3>🔧 Admin — License Generator</h3>
-<div><label>Device ID</label><input type="text" id="adminDeviceId"></div>
-<div><label>Duration (days)</label><input type="number" id="adminDuration" min="1"></div>
-<div class="row">
-<button id="generateLicenseBtn" style="background:#4caf50;color:#fff;">Generate</button>
-<button id="copyLastLicenseBtn" style="background:#2196f3;color:#fff;">Copy Last</button>
+<div style="margin-bottom:8px;"><label>Device ID to give license</label><input type="text" id="adminDeviceId" placeholder="Enter device ID"></div>
+<div style="margin-bottom:8px;"><label>License Duration (days)</label><input type="number" id="adminDuration" placeholder="e.g. 15" min="1"></div>
+<div style="display:flex;gap:8px;">
+<button id="generateLicenseBtn" style="flex:1;background:#4caf50;color:#fff;">Generate License</button>
+<button id="copyLastLicenseBtn" style="flex:1;background:#2196f3;color:#fff;">Copy Last</button>
 </div>
-<div class="code-box" id="generatedBox">Generated license will appear here.</div>
+<div class="code-box" id="generatedBox" style="margin-top:10px;">Generated license will appear here.</div>
 </section>
 
 <!-- Signal Modal -->
@@ -248,12 +135,12 @@ footer {
 <div class="spinner"></div>
 </div>
 
-<!-- Login Popup -->
+<!-- Smart Login Popup -->
 <div id="loginPopup">
-<div class="popup-content">
-<div>🎯 Dragonfly AI 90% Accurate Signal!<br>👉 <a href="https://t.me/TraderParvej_Community/2259" target="_blank" style="color: var(--accent)">Watch Now</a></div>
-<button onclick="closeLoginPopup()" style="margin-top:10px;background:var(--accent);color:#000;border:none;padding:8px;border-radius:6px;cursor:pointer;">Close</button>
-</div>
+  <div class="popup-content">
+    <div>🎯 Dragonfly AI 90% Accurate Signal Generate করার উপায়!<br>👉 ভিডিও দেখুন এখনই: <a href="https://t.me/TraderParvej_Community/2259" target="_blank" style="color:#6dd6ff;">Watch Now</a></div>
+    <button onclick="closeLoginPopup()" style="margin-top:10px;background:#6dd6ff;color:#000;border:none;padding:8px;border-radius:6px;cursor:pointer;">Close</button>
+  </div>
 </div>
 
 <!-- Admin Login Modal -->
@@ -261,7 +148,7 @@ footer {
 <div class="admin-login">
 <h3>Admin Login</h3>
 <input type="password" id="adminPasswordInput" placeholder="Enter admin password">
-<div class="row">
+<div class="row" style="margin-top:6px;">
 <button id="adminLoginSubmit" style="background:#4caf50;color:#fff;">Login</button>
 <button id="adminLoginCancel" style="background:#f44336;color:#fff;">Cancel</button>
 </div>
@@ -271,7 +158,7 @@ footer {
 <footer>
 © DragonFly — Advance signals
 <div style="margin-top:4px;font-size:10px;">
-<button id="showAdminLoginBtn" style="background:transparent;border:none;color:var(--muted);cursor:pointer;">Admin Login</button>
+<button id="showAdminLoginBtn" style="background:transparent;border:none;color:#9fb0d6;cursor:pointer;">Admin Login</button>
 </div>
 </footer>
 
@@ -279,74 +166,45 @@ footer {
 // ==== Config ====
 const ADMIN_PASSWORD="@Traderparvej@";
 const LICENSE_STORAGE_PREFIX="dragon_license_";
+let deviceId=localStorage.getItem("dragon_device_id");
+if(!deviceId){deviceId=String(Math.floor(Math.random()*900000000+100000000));localStorage.setItem("dragon_device_id",deviceId);}
+document.getElementById('deviceIdDiv').textContent="Device ID: "+deviceId;
 
-// ==== Device ID ====
-let deviceId = localStorage.getItem("dragon_device_id");
-if(!deviceId){ deviceId = String(Math.floor(Math.random()*900000000+100000000)); localStorage.setItem("dragon_device_id",deviceId);}
-document.getElementById('deviceIdDiv').textContent = "Device ID: " + deviceId;
+// ==== Elements ====
+const licenseInput=document.getElementById('licenseInput');
+const activateBtn=document.getElementById('activateBtn');
+const licenseStatus=document.getElementById('licenseStatus');
+const adminPanel=document.getElementById('adminPanel');
+const adminDeviceIdInput=document.getElementById('adminDeviceId');
+const adminDurationInput=document.getElementById('adminDuration');
+const generateLicenseBtn=document.getElementById('generateLicenseBtn');
+const generatedBox=document.getElementById('generatedBox');
+const copyLastLicenseBtn=document.getElementById('copyLastLicenseBtn');
+const marketSel=document.getElementById('market');
+const assetContainer=document.getElementById('assetContainer');
+const timeframe=document.getElementById('timeframe');
+const generateBtn=document.getElementById('generate');
+const resetBtn=document.getElementById('reset');
+const signalModal=document.getElementById('signalModal');
+const signalText=document.getElementById('signalText');
+const copySignalBtn=document.getElementById('copySignalBtn');
+const loginPopup=document.getElementById('loginPopup');
+const adminLoginModal=document.getElementById('adminLoginModal');
+const adminPasswordInput=document.getElementById('adminPasswordInput');
+const adminLoginSubmit=document.getElementById('adminLoginSubmit');
+const adminLoginCancel=document.getElementById('adminLoginCancel');
+const showAdminLoginBtn=document.getElementById('showAdminLoginBtn');
+const analysisOverlay=document.getElementById('analysisOverlay');
+const signalModeSel=document.getElementById('signalMode');
 
-// ==== License Functions ====
-function makeLicenseKeyForDevice(deviceIdParam,days){
-  const now=Date.now();
-  const expiry=now+(days*24*60*60*1000);
-  const rand=Math.floor(Math.random()*900000+100000);
-  return btoa(`${deviceIdParam}|${expiry}|${rand}`);
-}
-function validateLicenseKeyForThisDevice(key,deviceIdToCheck){
-  try{
-    const decoded = atob(key);
-    const [dId,expiryStr] = decoded.split("|");
-    const expiry=parseInt(expiryStr,10);
-    return String(dId) === String(deviceIdToCheck) && Date.now() <= expiry;
-  }catch(e){ return false; }
-}
-function saveLicenseToLocal(key){ localStorage.setItem(LICENSE_STORAGE_PREFIX+deviceId,key); }
-function loadLicenseLocal(){
-  const key = localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
-  if(key && validateLicenseKeyForThisDevice(key,deviceId)){
-    document.getElementById('licenseStatus').textContent = "License Active ✅";
-    showLoginPopup();
-    return true;
-  }
-  showLoginPopup();
-  return false;
-}
-loadLicenseLocal();
-
-// ==== UI Elements ====
-const licenseInput = document.getElementById('licenseInput');
-const activateBtn = document.getElementById('activateBtn');
-const licenseStatus = document.getElementById('licenseStatus');
-const adminPanel = document.getElementById('adminPanel');
-const adminDeviceIdInput = document.getElementById('adminDeviceId');
-const adminDurationInput = document.getElementById('adminDuration');
-const generateLicenseBtn = document.getElementById('generateLicenseBtn');
-const generatedBox = document.getElementById('generatedBox');
-const copyLastLicenseBtn = document.getElementById('copyLastLicenseBtn');
-const marketSel = document.getElementById('market');
-const assetContainer = document.getElementById('assetContainer');
-const timeframe = document.getElementById('timeframe');
-const generateBtn = document.getElementById('generate');
-const resetBtn = document.getElementById('reset');
-const signalModal = document.getElementById('signalModal');
-const signalText = document.getElementById('signalText');
-const copySignalBtn = document.getElementById('copySignalBtn');
-const loginPopup = document.getElementById('loginPopup');
-const adminLoginModal = document.getElementById('adminLoginModal');
-const adminPasswordInput = document.getElementById('adminPasswordInput');
-const adminLoginSubmit = document.getElementById('adminLoginSubmit');
-const adminLoginCancel = document.getElementById('adminLoginCancel');
-const showAdminLoginBtn = document.getElementById('showAdminLoginBtn');
-const analysisOverlay = document.getElementById('analysisOverlay');
-const signalModeSel = document.getElementById('signalMode');
-
+let licenseActive=false;
 let lastGenerated=null;
 
 // ==== Asset Lists ====
-const OTCpairs = ["USD/ARS (OTC)","USD/BDT (OTC)","USD/EGP (OTC)","USD/INR (OTC)","USD/IDR (OTC)","USD/MXN (OTC)","EUR/AUD (OTC)","EUR/CHF (OTC)","EUR/SGD (OTC)","GBP/CHF (OTC)","NZD/CAD (OTC)","AUD/NZD (OTC)","CAD/CHF (OTC)","EUR/NZD (OTC)","USD/PHP (OTC)","GBP/NZD (OTC)","USD/BRL (OTC)","USD/ZAR (OTC)","EUR/CAD (OTC)","AUD/CHF (OTC)","CHF/JPY (OTC)","NZD/CHF (OTC)","USD/COP (OTC)","USD/DZD (OTC)","USD/NGN (OTC)","USD/TRY (OTC)","USD/PKR (OTC)","NZD/JPY (OTC)","NZD/USD (OTC)","Ethereum Classic (OTC)","Melania Meme (OTC)","Binance Coin (OTC)","Ethereum (OTC)","Bitcoin (OTC)","Celestia (OTC)"];
-const REALpairs = ['EUR/JPY','USD/JPY','EUR/USD','GBP/USD','USD/CHF','USD/CAD','AUD/USD','NZD/USD','EUR/GBP','EUR/CHF','EUR/AUD','EUR/CAD','EUR/NZD','GBP/JPY','GBP/CHF','GBP/AUD','GBP/CAD','GBP/NZD','AUD/JPY','AUD/NZD','AUD/CAD','AUD/CHF','NZD/JPY','NZD/CAD','NZD/CHF','CAD/JPY','CAD/CHF','CHF/JPY'];
+const OTCpairs=[ "USD/ARS (OTC)","USD/BDT (OTC)","USD/EGP (OTC)","USD/INR (OTC)","USD/IDR (OTC)","USD/MXN (OTC)","EUR/AUD (OTC)","EUR/CHF (OTC)","EUR/SGD (OTC)","GBP/CHF (OTC)","NZD/CAD (OTC)","AUD/NZD (OTC)","CAD/CHF (OTC)","EUR/NZD (OTC)","USD/PHP (OTC)","GBP/NZD (OTC)","USD/BRL (OTC)","USD/ZAR (OTC)","EUR/CAD (OTC)","AUD/CHF (OTC)","CHF/JPY (OTC)","NZD/CHF (OTC)","USD/COP (OTC)","USD/DZD (OTC)","USD/NGN (OTC)","USD/TRY (OTC)","USD/PKR (OTC)","NZD/JPY (OTC)","NZD/USD (OTC)","Ethereum Classic (OTC)","Melania Meme (OTC)","Binance Coin (OTC)","Ethereum (OTC)","Bitcoin (OTC)","Celestia (OTC)"];
+const REALpairs=['EUR/JPY','USD/JPY','EUR/USD','GBP/USD','USD/CHF','USD/CAD','AUD/USD','NZD/USD','EUR/GBP','EUR/CHF','EUR/AUD','EUR/CAD','EUR/NZD','GBP/JPY','GBP/CHF','GBP/AUD','GBP/CAD','GBP/NZD','AUD/JPY','AUD/NZD','AUD/CAD','AUD/CHF','NZD/JPY','NZD/CAD','NZD/CHF','CAD/JPY','CAD/CHF','CHF/JPY'];
 
-// ==== Populate Asset Checkboxes ====
+// ==== Functions ====
 function fillAssetContainer(){
   assetContainer.innerHTML='';
   const pairs = marketSel.value==='REAL'?REALpairs:OTCpairs;
@@ -361,36 +219,81 @@ function fillAssetContainer(){
   });
 }
 fillAssetContainer();
-marketSel.addEventListener('change', fillAssetContainer);
+marketSel.addEventListener('change',fillAssetContainer);
+
+function makeLicenseKeyForDevice(deviceIdParam,days){
+  const now = Date.now();
+  const expiry = now + (days*24*60*60*1000);
+  const rand = Math.floor(Math.random()*900000+100000);
+  const payload = `${deviceIdParam}|${expiry}|${rand}`;
+  return btoa(payload);
+}
+
+function validateLicenseKeyForThisDevice(key,deviceIdToCheck){
+  try{
+    const decoded = atob(key);
+    const [dId,expiryStr] = decoded.split("|");
+    const expiry = parseInt(expiryStr,10);
+    if(String(dId)!==String(deviceIdToCheck)) return false;
+    if(Date.now()>expiry) return false;
+    return true;
+  }catch(e){return false;}
+}
+
+function saveLicenseToLocal(key){ localStorage.setItem(LICENSE_STORAGE_PREFIX+deviceId,key); }
+
+function loadLicenseLocal(){
+  const key = localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
+  if(!key) return false;
+  if(validateLicenseKeyForThisDevice(key,deviceId)){
+    licenseStatus.textContent="License Active ✅";
+    licenseStatus.classList.add('active');
+    licenseActive=true;
+    showLoginPopup();
+    return true;
+  }
+  showLoginPopup();
+  return false;
+}
+loadLicenseLocal();
 
 // ==== License Activation ====
 activateBtn.addEventListener('click',()=>{
-  const key = licenseInput.value.trim();
-  if(!key){ alert("Paste license key."); return; }
-  if(validateLicenseKeyForThisDevice(key,deviceId)){
-    saveLicenseToLocal(key);
-    licenseStatus.textContent = "License Active ✅";
-    alert("✅ License activated!");
+  const entered = licenseInput.value.trim();
+  if(!entered){ alert("Paste license key."); return; }
+  if(validateLicenseKeyForThisDevice(entered,deviceId)){
+    saveLicenseToLocal(entered);
+    licenseStatus.textContent="License Active ✅";
+    licenseStatus.classList.add('active');
+    licenseActive=true;
+    alert("✅ License activated successfully!");
     showLoginPopup();
-  }else alert("❌ Invalid or expired license.");
+  } else alert("❌ Invalid or expired license.");
 });
 
 // ==== Admin Login ====
-showAdminLoginBtn.addEventListener('click',()=>{ adminPasswordInput.value=''; adminLoginModal.style.display='flex'; adminPasswordInput.focus(); });
+showAdminLoginBtn.addEventListener('click',()=>{
+    adminPasswordInput.value='';
+    adminLoginModal.style.display='flex';
+    adminPasswordInput.focus();
+});
+
 adminLoginCancel.addEventListener('click',()=>{ adminLoginModal.style.display='none'; });
+
 adminLoginSubmit.addEventListener('click',()=>{
   if(adminPasswordInput.value===ADMIN_PASSWORD){
     adminLoginModal.style.display='none';
     adminPanel.style.display='block';
+    fillAssetContainer(); // ensure assets show
     alert("Admin access granted.");
   } else alert("Wrong password.");
 });
 
-// ==== License Generation ====
+// ==== Admin License Generation ====
 generateLicenseBtn.addEventListener('click',()=>{
   const dev = adminDeviceIdInput.value.trim();
   const days = parseInt(adminDurationInput.value,10);
-  if(!dev || !days){ alert("Enter device ID and duration."); return; }
+  if(!dev||!days){ alert("Enter device ID and duration."); return; }
   lastGenerated = makeLicenseKeyForDevice(dev,days);
   generatedBox.textContent = lastGenerated;
 });
@@ -399,63 +302,71 @@ copyLastLicenseBtn.addEventListener('click',()=>{ if(lastGenerated) navigator.cl
 // ==== Utilities ====
 function pad2(n){ return String(n).padStart(2,'0'); }
 function toMono(str){
-  const map = {"0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿","A":"𝙰","B":"𝙱","C":"𝙲","D":"𝙳","E":"𝙴","F":"𝙵","G":"𝙶","H":"𝙷","I":"𝙸","J":"𝙹","K":"𝙺","L":"𝙻","M":"𝙼","N":"𝙽","O":"𝙾","P":"𝙿","Q":"𝚀","R":"𝚁","S":"𝚂","T":"𝚃","U":"𝚄","V":"𝚅","W":"𝚆","X":"𝚇","Y":"𝚈","Z":"𝚉","/":"/"," ":" ","(":"(",")":")"};
+  const map={"0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿"};
   return str.split('').map(ch=>map[ch]||ch).join('');
 }
+
+// ==== Balanced Signals ====
 function generateBalancedBothSignals(total){
-  let half = Math.floor(total/2);
-  let signals = [];
+  let half=Math.floor(total/2);
+  let signals=[];
   for(let i=0;i<half;i++) signals.push("CALL");
   for(let i=0;i<half;i++) signals.push("PUT");
   if(total%2===1) signals.push(Math.random()<0.5?"CALL":"PUT");
   for(let i=signals.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
+    const j=Math.floor(Math.random()*(i+1));
     [signals[i],signals[j]]=[signals[j],signals[i]];
   }
   return signals;
 }
 
-// ==== Signal Generation ====
+// ==== Generate Signals ====
 function showSignal(){
-  const selectedAssets = [...assetContainer.querySelectorAll('input:checked')].map(c=>c.value);
+  const selectedAssets=[...assetContainer.querySelectorAll('input:checked')].map(c=>c.value);
   if(selectedAssets.length===0){ alert("Select at least one asset."); return; }
-  const numSignals = parseInt(document.getElementById('numSignals').value)||1;
-  const mode = signalModeSel.value;
-  const now = new Date();
-  let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱️1-Minute Trade\n╭─────────────╮\n│ 🧠 Strategy: "+(mode==="OPPOSITE"?"Opposite Candle":(mode==="CALL"?"Force: CALL":(mode==="PUT"?"Force: PUT":"Both Balanced")))+"\n╰─────────────╯\n\n";
-
+  const numSignals=parseInt(document.getElementById('numSignals').value)||1;
+  const mode=signalModeSel.value;
+  const now=new Date();
+  let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱️1-Minute Trade \n╭─────────────╮\n│ 🧠 Strategy: "+(mode==="OPPOSITE"?"Opposite Candle":(mode==="CALL"?"Force: CALL":(mode==="PUT"?"Force: PUT":"Both Balanced")))+"\n╰─────────────╯\n\n";
   let signalSides=[];
-  if(mode==="BOTH") signalSides = generateBalancedBothSignals(numSignals);
-
+  if(mode==="BOTH") signalSides=generateBalancedBothSignals(numSignals);
   for(let i=0;i<numSignals;i++){
-    const asset = selectedAssets[i%selectedAssets.length];
-    const gap = Math.floor(Math.random()*4)+4; // random 4–8 min
+    const asset=selectedAssets[i%selectedAssets.length];
+    const gap=Math.floor(Math.random()*5)+4; // 4-8 min random
     now.setMinutes(now.getMinutes()+gap);
-    const timeStr = pad2(now.getHours())+":"+pad2(now.getMinutes());
-    const monoTime = toMono(timeStr);
-    const monoAsset = toMono(asset.toUpperCase());
+    const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
+    const monoTime=toMono(timeStr);
+    const monoAsset=toMono(asset.toUpperCase());
     let sideLabel="";
     if(mode==="CALL") sideLabel="CALL";
     else if(mode==="PUT") sideLabel="PUT";
     else if(mode==="BOTH") sideLabel=signalSides[i];
-
-    if(mode==="OPPOSITE") msg += `𝙼𝟷 ${monoTime} ${monoAsset}\n`;
-    else msg += `𝙼𝟷 ${monoTime} ${monoAsset} ${toMono(sideLabel)}\n`;
+    if(mode==="OPPOSITE"){
+      msg+=`𝙼𝟷 ${monoTime} ${monoAsset}\n`;
+    } else {
+      const monoSide=toMono(" "+sideLabel);
+      msg+=`𝙼𝟷 ${monoTime} ${monoAsset}${monoSide}\n`;
+    }
   }
   msg+="\n❗️ Avoid signal after Doji, <80%, Gap, or 3–4 B2B opposite candles";
-  signalText.textContent = msg;
+  signalText.textContent=msg;
   signalModal.style.display='flex';
 }
 
-// ==== Event Listeners ====
-generateBtn.addEventListener('click',()=>{
-  if(!loadLicenseLocal()){ alert("❌ License required."); return; }
-  analysisOverlay.style.display='flex';
-  setTimeout(()=>{ analysisOverlay.style.display='none'; showSignal(); }, 10000);
-});
 resetBtn.addEventListener('click',()=>{ assetContainer.querySelectorAll('input').forEach(c=>c.checked=false); });
 copySignalBtn.addEventListener('click',()=>{ navigator.clipboard.writeText(signalText.textContent); alert("Copied!"); });
 function closeSignal(){ signalModal.style.display='none'; }
+
+generateBtn.addEventListener('click',()=>{
+  if(!loadLicenseLocal()){ alert("❌ License required."); return; }
+  analysisOverlay.style.display='flex';
+  setTimeout(()=>{
+    analysisOverlay.style.display='none';
+    showSignal();
+  },10000);
+});
+
+// ==== Login Popup ====
 function showLoginPopup(){ loginPopup.style.display='flex'; }
 function closeLoginPopup(){ loginPopup.style.display='none'; }
 </script>
