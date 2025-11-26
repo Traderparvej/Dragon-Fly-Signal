@@ -7,11 +7,7 @@
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
-
-    /* Rewrite: /signal → signal.html */
     { "src": "/signal", "dest": "/signal.html" },
-
-    /* Redirect: signal.html → /signal (URL clean) */
     { "src": "/signal\\.html", "status": 301, "headers": { "Location": "/signal" } }
   ]
 }
