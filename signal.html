@@ -39,13 +39,23 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 .code-box{word-break:break-all;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;margin-top:8px;font-family:monospace;font-size:13px;}
 .asset-checkbox label{cursor:pointer;display:block;margin-bottom:4px;}
 .asset-checkbox input{margin-right:6px;}
-#loginPopup{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1500;}
-#loginPopup .popup-content{background:#0f1530;padding:16px;border-radius:12px;color:#fff;text-align:center;width:90%;max-width:360px;}
-@media (max-width:880px){.grid{grid-template-columns:1fr;}}
+#loginOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;z-index:2000;flex-direction:column;color:#fff;}
+#loginOverlay input{margin:6px 0;padding:10px;border-radius:8px;border:none;width:220px;}
+#loginOverlay button{padding:10px 20px;border:none;border-radius:8px;background:var(--accent);color:#000;font-weight:700;cursor:pointer;margin-top:6px;}
 </style>
 </head>
 <body>
-<div class="wrap">
+
+<!-- Login Overlay -->
+<div id="loginOverlay">
+<h2>DragonFly Login</h2>
+<input type="text" id="loginUsername" placeholder="Username">
+<input type="password" id="loginPassword" placeholder="Password">
+<button id="loginBtn">Login</button>
+<div id="loginMsg" style="margin-top:8px;color:tomato;"></div>
+</div>
+
+<div class="wrap" id="mainContent" style="display:none;">
 <header>
 <h1>🐉 DragonFly — AI Real Time Signal</h1>
 <div>
@@ -54,6 +64,7 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 </div>
 </header>
 
+<!-- License Section & Signal Controls -->
 <section class="card">
 <label>Enter License Key (Member)</label>
 <input type="text" id="licenseInput" placeholder="Paste license key here">
@@ -131,26 +142,6 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 <div class="spinner"></div>
 </div>
 
-<!-- Smart Login Popup -->
-<div id="loginPopup">
-  <div class="popup-content">
-    <div>🎯 Dragonfly AI 90% Accurate Signal Generate করার উপায়!<br>👉 ভিডিও দেখুন এখনই: <a href="https://t.me/TraderParvej_Community/2259" target="_blank" style="color:#6dd6ff;">Watch Now</a></div>
-    <button onclick="closeLoginPopup()" style="margin-top:10px;background:#6dd6ff;color:#000;border:none;padding:8px;border-radius:6px;cursor:pointer;">Close</button>
-  </div>
-</div>
-
-<!-- Admin Login Modal -->
-<div class="admin-login-backdrop" id="adminLoginModal">
-<div class="admin-login">
-<h3>Admin Login</h3>
-<input type="password" id="adminPasswordInput" placeholder="Enter admin password">
-<div class="row" style="margin-top:6px;">
-<button id="adminLoginSubmit" style="background:#4caf50;color:#fff;">Login</button>
-<button id="adminLoginCancel" style="background:#f44336;color:#fff;">Cancel</button>
-</div>
-</div>
-</div>
-
 <footer>
 © DragonFly — Advance signals
 <div style="margin-top:4px;font-size:10px;">
@@ -159,6 +150,26 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 </footer>
 
 <script>
+/* === Login Protection === */
+const loginOverlay=document.getElementById('loginOverlay');
+const loginBtn=document.getElementById('loginBtn');
+const loginUsername=document.getElementById('loginUsername');
+const loginPassword=document.getElementById('loginPassword');
+const loginMsg=document.getElementById('loginMsg');
+const mainContent=document.getElementById('mainContent');
+
+loginBtn.addEventListener('click',()=>{
+  const user=loginUsername.value.trim();
+  const pass=loginPassword.value.trim();
+  if(user==="Dragonfly11" && pass==="@Dragon"){
+    loginOverlay.style.display="none";
+    mainContent.style.display="block";
+  }else{
+    loginMsg.textContent="❌ Invalid username or password";
+  }
+});
+
+/* === Device ID & License Logic === */
 const ADMIN_PASSWORD="@Traderparvej@";
 const LICENSE_STORAGE_PREFIX="dragon_license_";
 let deviceId=localStorage.getItem("dragon_device_id");
@@ -182,14 +193,13 @@ const resetBtn=document.getElementById('reset');
 const signalModal=document.getElementById('signalModal');
 const signalText=document.getElementById('signalText');
 const copySignalBtn=document.getElementById('copySignalBtn');
-const loginPopup=document.getElementById('loginPopup');
+const analysisOverlay=document.getElementById('analysisOverlay');
+const signalModeSel=document.getElementById('signalMode');
+const showAdminLoginBtn=document.getElementById('showAdminLoginBtn');
 const adminLoginModal=document.getElementById('adminLoginModal');
 const adminPasswordInput=document.getElementById('adminPasswordInput');
 const adminLoginSubmit=document.getElementById('adminLoginSubmit');
 const adminLoginCancel=document.getElementById('adminLoginCancel');
-const showAdminLoginBtn=document.getElementById('showAdminLoginBtn');
-const analysisOverlay=document.getElementById('analysisOverlay');
-const signalModeSel=document.getElementById('signalMode');
 
 let licenseActive=false;
 let lastGenerated=null;
@@ -253,10 +263,8 @@ function loadLicenseLocal(){
    licenseStatus.textContent="License Active ✅";
    licenseStatus.classList.add('active');
    licenseActive=true;
-   showLoginPopup(); 
    return true;
  }
- showLoginPopup();
  return false;
 }
 loadLicenseLocal();
@@ -270,10 +278,10 @@ activateBtn.addEventListener('click',()=>{
    licenseStatus.classList.add('active');
    licenseActive=true;
    alert("✅ License activated successfully!");
-   showLoginPopup();
  }else alert("❌ Invalid or expired license.");
 });
 
+/* Admin Panel */
 showAdminLoginBtn.addEventListener('click',()=>{adminPasswordInput.value='';adminLoginModal.style.display='flex';adminPasswordInput.focus();});
 adminLoginCancel.addEventListener('click',()=>{adminLoginModal.style.display='none';});
 adminLoginSubmit.addEventListener('click',()=>{
@@ -283,7 +291,6 @@ adminLoginSubmit.addEventListener('click',()=>{
    alert("Admin access granted.");
  }else alert("Wrong password.");
 });
-
 generateLicenseBtn.addEventListener('click',()=>{
  const dev=adminDeviceIdInput.value.trim();
  const days=parseInt(adminDurationInput.value,10);
@@ -294,81 +301,61 @@ generateLicenseBtn.addEventListener('click',()=>{
 });
 copyLastLicenseBtn.addEventListener('click',()=>{if(lastGenerated)navigator.clipboard.writeText(lastGenerated);});
 
+/* Signal Generation */
 function pad2(n){return String(n).padStart(2,'0');}
 function toMono(str){
- const map={"0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿","A":"𝙰","B":"𝙱","C":"𝙲","D":"𝙳","E":"𝙴","F":"𝙵","G":"𝙶","H":"𝙷","I":"𝙸","J":"𝙹","K":"𝙺","L":"𝙻","M":"𝙼","N":"𝙽","O":"𝙾","P":"𝙿","Q":"𝚀","R":"𝚁","S":"𝚂","T":"𝚃","U":"𝚄","V":"𝚅","W":"𝚆","X":"𝚇","Y":"𝚈","Z":"𝚉","/":"/"," ":" ","(":"(",")":")"};
- return str.split('').map(ch=>map[ch]||ch).join('');
+ const map={"0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿"};
+ return str.replace(/\d/g,m=>map[m]);
 }
-
-function generateBalancedBothSignals(total) {
-    let half = Math.floor(total / 2);
-    let signals = [];
-
-    for (let i = 0; i < half; i++) signals.push("CALL");
-    for (let i = 0; i < half; i++) signals.push("PUT");
-
-    if (total % 2 === 1) signals.push(Math.random() < 0.5 ? "CALL" : "PUT");
-
-    for (let i = signals.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [signals[i], signals[j]] = [signals[j], signals[i]];
-    }
-    return signals;
+function generateFutureTimes(num){
+ const now=Date.now();
+ const arr=[];
+ let last=now;
+ for(let i=0;i<num;i++){
+   const gap=(Math.floor(Math.random()*5)+4)*60000; // 4–8 min random
+   last+=gap;
+   const d=new Date(last);
+   arr.push(pad2(d.getHours())+":"+pad2(d.getMinutes()));
+ }
+ return arr;
 }
-
-function showSignal(){
- const selectedAssets=[...assetContainer.querySelectorAll('input:checked')].map(c=>c.value);
- if(selectedAssets.length===0){alert("Select at least one asset.");return;}
- const numSignals=parseInt(document.getElementById('numSignals').value)||1;
+function generateSignals(){
+ if(!licenseActive){alert("Activate license first!");return;}
+ const selectedAssets=[...assetContainer.querySelectorAll('input:checked')].map(x=>x.value);
+ if(selectedAssets.length===0){alert("Select at least 1 asset.");return;}
+ const num=parseInt(numSignals.value,10)||1;
  const mode=signalModeSel.value;
- const now=new Date();
- let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱️1-Minute Trade \n╭─────────────╮\n│ 🧠 Strategy: "+(mode==="OPPOSITE"?"Opposite Candle":(mode==="CALL"?"Force: CALL":(mode==="PUT"?"Force: PUT":"Both Balanced")))+"\n╰─────────────╯\n\n";
-
- let signalSides=[];
- if(mode==="BOTH"){
-    signalSides = generateBalancedBothSignals(numSignals);
- }
-
- for(let i=0;i<numSignals;i++){
+ let out="";
+ const times=generateFutureTimes(num);
+ for(let i=0;i<num;i++){
    const asset=selectedAssets[i%selectedAssets.length];
-   const gap=Math.floor(Math.random() * 3) + 2;
-   now.setMinutes(now.getMinutes()+gap);
-   const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
-   const monoTime=toMono(timeStr);
-   const monoAsset=toMono(asset.toUpperCase());
-   let sideLabel="";
-
-   if(mode==="CALL") sideLabel="CALL";
-   else if(mode==="PUT") sideLabel="PUT";
-   else if(mode==="BOTH") sideLabel = signalSides[i];
-
-   if(mode==="OPPOSITE"){
-     msg+=`𝙼𝟷 ${monoTime} ${monoAsset}\n`;
-   }else{
-     const monoSide=toMono(" "+sideLabel);
-     msg+=`𝙼𝟷 ${monoTime} ${monoAsset}${monoSide}\n`;
-   }
+   let signal="";
+   if(mode==='CALL')signal="CALL";
+   else if(mode==='PUT')signal="PUT";
+   else if(mode==='BOTH')signal=Math.random()>0.5?"CALL":"PUT";
+   else if(mode==='OPPOSITE')signal=Math.random()>0.5?"CALL":"PUT";
+   out+=`${times[i]} - ${asset} - ${signal}\n`;
  }
- msg+="\n❗ Avoid signal after Doji, <80%, Gap, or 3–4 B2B opposite candles";
- signalText.textContent=msg;
- signalModal.style.display='flex';
+ signalText.textContent=out;
+ signalModal.style.display="flex";
 }
-
-resetBtn.addEventListener('click',()=>{assetContainer.querySelectorAll('input').forEach(c=>c.checked=false);});
+generateBtn.addEventListener('click',generateSignals);
+resetBtn.addEventListener('click',()=>{assetContainer.querySelectorAll('input').forEach(x=>x.checked=false);signalText.textContent='';});
+function closeSignal(){signalModal.style.display="none";}
 copySignalBtn.addEventListener('click',()=>{navigator.clipboard.writeText(signalText.textContent);alert("Copied!");});
-function closeSignal(){signalModal.style.display='none';}
-
-generateBtn.addEventListener('click',()=>{
-  if(!loadLicenseLocal()){ alert("❌ License required."); return; }
-  analysisOverlay.style.display='flex';
-  setTimeout(()=>{
-    analysisOverlay.style.display='none';
-    showSignal();
-  }, 10000);
-});
-
-function showLoginPopup(){ loginPopup.style.display='flex'; }
-function closeLoginPopup(){ loginPopup.style.display='none'; }
 </script>
+
+<!-- Admin Login Modal -->
+<div id="adminLoginModal" class="admin-login-backdrop" style="display:none;">
+<div class="admin-login">
+<h3>🔑 Admin Login</h3>
+<input type="password" id="adminPasswordInput" placeholder="Password">
+<div class="row">
+<button id="adminLoginSubmit">Login</button>
+<button id="adminLoginCancel">Cancel</button>
+</div>
+</div>
+</div>
+
 </body>
 </html>
