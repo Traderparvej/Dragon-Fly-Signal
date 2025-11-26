@@ -1,58 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DragonFly — Login</title>
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #081024;
-    color: #ffffff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
+:root{
+  --bg:#0a0f1f;
+  --panel:#151b30;
+  --muted:#9fb0d6;
+  --text:#ffffff;
+  --accent:#6dd6ff;
 }
-#login-container {
-    background: #0f1530;
-    padding: 30px;
-    border-radius: 10px;
-    text-align: center;
-    width: 300px;
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:Inter,ui-sans-serif,system-ui;
+  background:radial-gradient(circle at top, #0f1f3d, #050912);
+  color:var(--text);
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-input {
-    width: 100%;
-    padding: 10px;
-    margin: 15px 0;
-    border-radius: 5px;
-    border: none;
+.card{
+  background:linear-gradient(180deg,rgba(255,255,255,0.04),rgba(0,0,0,0.2));
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:18px;
+  padding:30px;
+  width:100%;
+  max-width:380px;
+  text-align:center;
+  box-shadow:0 8px 30px rgba(0,0,0,0.5);
 }
-button {
-    padding: 10px 20px;
-    width: 100%;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    background: #4CAF50;
-    color: white;
-    font-size: 16px;
+.card h1{
+  margin:0 0 12px;
+  font-size:24px;
+  background:linear-gradient(90deg,#6dd6ff,#00ffaa);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
 }
-button:hover {
-    background: #45a049;
+.card p{
+  margin:0 0 24px;
+  font-size:14px;
+  color:var(--muted);
+}
+input{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:rgba(255,255,255,0.9);
+  color:#000;
+  font-weight:600;
+  margin-bottom:14px;
+}
+button{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  background:var(--accent);
+  color:#000;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  transition:all .2s;
+}
+button:hover{background:#4dc9f3;}
+.footer{
+  margin-top:16px;
+  font-size:12px;
+  color:var(--muted);
+}
+.footer a{color:var(--accent);text-decoration:none;}
+.footer a:hover{text-decoration:underline;}
+.logo{
+  font-size:40px;
+  margin-bottom:10px;
+}
+.message{
+  margin-top:12px;
+  font-size:14px;
+  font-weight:600;
 }
 </style>
 </head>
 <body>
 
-<div id="login-container">
-    <h2>Login</h2>
-    <input type="password" id="password" placeholder="Enter Password">
-    <button id="login-btn">Login</button>
+<div class="card">
+  <div class="logo">🐉</div>
+  <h1>DragonFly</h1>
+  <p>Sign in to continue to your trading signals</p>
+
+  <form id="loginForm">
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button type="submit">Login</button>
+  </form>
+
+  <div id="msg" class="message"></div>
+  <div class="footer">© 2025 DragonFly · Owner: <a href="https://t.me/TraderParvej" target="_blank">@TraderParvej</a></div>
 </div>
 
-<script src="login.js"></script>
+<script>
+// Correct SHA256 hashes for your credentials
+// Username: Dragonfly11
+// Password: @Dragon
+const HASHED_USER = "d64668570d36422532e34cdbe2ed81ac776735a29f6c8ab5d630a2fcccf07da3";
+const HASHED_PASS = "948f3a84a357dac22b2e915889fb0e412e27b57c61e0e29125b1c3978fbdfa03";
+const form = document.getElementById("loginForm");
+const msg = document.getElementById("msg");
+
+// SHA256 hashing function
+async function sha256(text) {
+  const data = new TextEncoder().encode(text);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+// Encoded credentials (simple obfuscation)
+const encodedUser = btoa("Dragonfly11"); // Username
+const encodedPass = btoa("@Dragon");     // Password
+
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+form.addEventListener("submit", (e)=>{
+  e.preventDefault();
+  const user = document.getElementById("username").value.trim();
+  const pass = document.getElementById("password").value.trim();
+  const msg = document.getElementById("msg");
+
+  const uHash = await sha256(user);
+  const pHash = await sha256(pass);
+
+  if(uHash === HASHED_USER && pHash === HASHED_PASS){
+  if(btoa(user) === encodedUser && btoa(pass) === encodedPass){
+    msg.style.color = "limegreen";
+    msg.textContent = "✅ Login successful! Redirecting...";
+    setTimeout(() => window.location.href = "signal.html", 800);
+    setTimeout(()=> window.location.href = "signal.html", 800);
+  } else {
+    msg.style.color = "tomato";
+    msg.textContent = "❌ Invalid username or password";
+  }
+});
+</script>
 
 </body>
 </html>
