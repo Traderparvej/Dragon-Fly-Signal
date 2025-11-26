@@ -5,9 +5,8 @@ export default function handler(req, res) {
 
   const { username, password } = req.body;
 
-  // ---- YOUR LOGIN DETAILS ----
   const CORRECT_USER = "admin";
-  const CORRECT_PASS = "11115"; // যেটা তুমি ব্যবহার করবে
+  const CORRECT_PASS = "11115";
 
   if (username === CORRECT_USER && password === CORRECT_PASS) {
     return res.status(200).json({ success: true });
