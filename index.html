@@ -74,6 +74,7 @@ button:hover{background:#4dc9f3;}
   color:var(--muted);
 }
 .footer a{color:var(--accent);text-decoration:none;}
+.footer a:hover{text-decoration:underline;}
 .logo{
   font-size:40px;
   margin-bottom:10px;
@@ -103,34 +104,22 @@ button:hover{background:#4dc9f3;}
 </div>
 
 <script>
-// Correct SHA256 hashes for your credentials
-// Username: Dragonfly11
-// Password: @Dragon
-const HASHED_USER = "d64668570d36422532e34cdbe2ed81ac776735a29f6c8ab5d630a2fcccf07da3";
-const HASHED_PASS = "948f3a84a357dac22b2e915889fb0e412e27b57c61e0e29125b1c3978fbdfa03";
+const form = document.getElementById("loginForm");
+const msg = document.getElementById("msg");
 
-// SHA256 hashing function
-async function sha256(text) {
-  const data = new TextEncoder().encode(text);
-  const hash = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(hash))
-    .map(b => b.toString(16).padStart(2, "0"))
-    .join("");
-}
+// Encoded credentials (simple obfuscation)
+const encodedUser = btoa("Dragonfly11"); // Username
+const encodedPass = btoa("@Dragon");     // Password
 
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
+form.addEventListener("submit", (e)=>{
   e.preventDefault();
   const user = document.getElementById("username").value.trim();
   const pass = document.getElementById("password").value.trim();
-  const msg = document.getElementById("msg");
 
-  const uHash = await sha256(user);
-  const pHash = await sha256(pass);
-
-  if(uHash === HASHED_USER && pHash === HASHED_PASS){
+  if(btoa(user) === encodedUser && btoa(pass) === encodedPass){
     msg.style.color = "limegreen";
     msg.textContent = "✅ Login successful! Redirecting...";
-    setTimeout(() => window.location.href = "signal.html", 800);
+    setTimeout(()=> window.location.href = "signal.html", 800);
   } else {
     msg.style.color = "tomato";
     msg.textContent = "❌ Invalid username or password";
