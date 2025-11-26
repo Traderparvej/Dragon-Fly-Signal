@@ -1,20 +1,17 @@
 export default function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
+    return res.status(405).json({ success: false, message: "Method not allowed" });
   }
 
-  // Client থেকে username এবং password নেওয়া হবে
   const { username, password } = req.body;
 
-  // ✅ শুধুমাত্র এখানে server-side এ password থাকে
-  const correctUser = "Dragonfly11";
-  const correctPass = "@Dragon";
+  // ---- YOUR LOGIN DETAILS ----
+  const CORRECT_USER = "admin";
+  const CORRECT_PASS = "11115"; // যেটা তুমি ব্যবহার করবে
 
-  // Login যাচাই
-  if (username === correctUser && password === correctPass) {
+  if (username === CORRECT_USER && password === CORRECT_PASS) {
     return res.status(200).json({ success: true });
+  } else {
+    return res.status(200).json({ success: false });
   }
-
-  // ভুল হলে
-  return res.status(401).json({ success: false });
 }
