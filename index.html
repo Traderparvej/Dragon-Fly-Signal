@@ -104,7 +104,7 @@ button:hover{background:#4dc9f3;}
 </div>
 
 <script>
-// ---- LOGIN USING /login.js API ----
+// ---- LOGIN USING /api/login ----
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -116,7 +116,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   msg.style.color = "#fff";
 
   try {
-    const res = await fetch("/login.js", {
+    const res = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: user, password: pass })
