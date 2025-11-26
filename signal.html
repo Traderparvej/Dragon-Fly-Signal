@@ -332,7 +332,7 @@ function showSignal(){
   if(mode==="BOTH") signalSides=generateBalancedBothSignals(numSignals);
   for(let i=0;i<numSignals;i++){
     const asset=selectedAssets[i%selectedAssets.length];
-    const gap=Math.floor(Math.random()*5)+4; // 4-8 min random
+    const gap=Math.floor(Math.random()*4)+2; // 2-5 min random
     now.setMinutes(now.getMinutes()+gap);
     const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
     const monoTime=toMono(timeStr);
