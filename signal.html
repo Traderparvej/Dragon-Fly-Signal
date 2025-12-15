@@ -120,7 +120,6 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 <div class="code-box" id="generatedBox" style="margin-top:10px;">Generated license will appear here.</div>
 </section>
 
-<!-- Signal Modal -->
 <div class="signal-modal-backdrop" id="signalModal">
 <div class="signal-modal">
 <div id="signalText" class="signal-text"></div>
@@ -129,13 +128,11 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 </div>
 </div>
 
-<!-- Analysis Overlay -->
 <div class="analysis-overlay" id="analysisOverlay">
 <div class="text">🔍 AI Market Analysis... Please wait 10s</div>
 <div class="spinner"></div>
 </div>
 
-<!-- Smart Login Popup -->
 <div id="loginPopup">
   <div class="popup-content">
     <div>🎯 Dragonfly AI 90% Accurate Signal Generate করার উপায়!<br>👉 ভিডিও দেখুন এখনই: <a href="https://t.me/TraderParvej_Community/2259" target="_blank" style="color:#6dd6ff;">Watch Now</a></div>
@@ -143,7 +140,6 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
   </div>
 </div>
 
-<!-- Admin Login Modal -->
 <div class="admin-login-backdrop" id="adminLoginModal">
 <div class="admin-login">
 <h3>Admin Login</h3>
@@ -163,14 +159,13 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 </footer>
 
 <script>
-// ==== Config ====
+// ==== Config & Elements ====
 const ADMIN_PASSWORD="@Traderparvej@";
 const LICENSE_STORAGE_PREFIX="dragon_license_";
 let deviceId=localStorage.getItem("dragon_device_id");
 if(!deviceId){deviceId=String(Math.floor(Math.random()*900000000+100000000));localStorage.setItem("dragon_device_id",deviceId);}
 document.getElementById('deviceIdDiv').textContent="Device ID: "+deviceId;
 
-// ==== Elements ====
 const licenseInput=document.getElementById('licenseInput');
 const activateBtn=document.getElementById('activateBtn');
 const licenseStatus=document.getElementById('licenseStatus');
@@ -284,7 +279,7 @@ adminLoginSubmit.addEventListener('click',()=>{
   if(adminPasswordInput.value===ADMIN_PASSWORD){
     adminLoginModal.style.display='none';
     adminPanel.style.display='block';
-    fillAssetContainer(); // ensure assets show
+    fillAssetContainer();
     alert("Admin access granted.");
   } else alert("Wrong password.");
 });
@@ -306,7 +301,6 @@ function toMono(str){
   return str.split('').map(ch=>map[ch]||ch).join('');
 }
 
-// ==== Balanced Signals ====
 function generateBalancedBothSignals(total){
   let half=Math.floor(total/2);
   let signals=[];
@@ -320,21 +314,23 @@ function generateBalancedBothSignals(total){
   return signals;
 }
 
-// ==== Generate Signals ====
+// ==== Generate Signals (All modes 4-8 min gap) ====
 function showSignal(){
   const selectedAssets=[...assetContainer.querySelectorAll('input:checked')].map(c=>c.value);
   if(selectedAssets.length===0){ alert("Select at least one asset."); return; }
   const numSignals=parseInt(document.getElementById('numSignals').value)||1;
   const mode=signalModeSel.value;
-  const now=new Date();
+
   let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱️1-Minute Trade \n╭─────────────╮\n│ 🧠 Strategy: "+(mode==="OPPOSITE"?"Opposite Candle":(mode==="CALL"?"Force: CALL":(mode==="PUT"?"Force: PUT":"Both Balanced")))+"\n╰─────────────╯\n\n";
+
   let signalSides=[];
   if(mode==="BOTH") signalSides=generateBalancedBothSignals(numSignals);
+
+  const now = new Date(); // start from current time
+
   for(let i=0;i<numSignals;i++){
     const asset=selectedAssets[i%selectedAssets.length];
-    let gap=0;
-    if(mode==="CALL" || mode==="PUT") gap=Math.floor(Math.random()*5)+4; // 4-8 min random
-    else gap=Math.floor(Math.random()*5)+4; // 4-8 min for other modes
+    const gap=Math.floor(Math.random()*5)+4; // 4-8 min random
     now.setMinutes(now.getMinutes()+gap);
     const timeStr=pad2(now.getHours())+":"+pad2(now.getMinutes());
     const monoTime=toMono(timeStr);
@@ -343,6 +339,7 @@ function showSignal(){
     if(mode==="CALL") sideLabel="CALL";
     else if(mode==="PUT") sideLabel="PUT";
     else if(mode==="BOTH") sideLabel=signalSides[i];
+
     if(mode==="OPPOSITE"){
       msg+=`𝙼𝟷 ${monoTime} ${monoAsset}\n`;
     } else {
@@ -350,6 +347,7 @@ function showSignal(){
       msg+=`𝙼𝟷 ${monoTime} ${monoAsset}${monoSide}\n`;
     }
   }
+
   msg+="\n❗️ Avoid signal after Doji, <80%, Gap, or 3–4 B2B opposite candles";
   signalText.textContent=msg;
   signalModal.style.display='flex';
@@ -374,4 +372,3 @@ function closeLoginPopup(){ loginPopup.style.display='none'; }
 </script>
 </body>
 </html>
-
