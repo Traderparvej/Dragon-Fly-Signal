@@ -46,7 +46,7 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 .code-box{word-break:break-all;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;margin-top:8px;font-family:monospace;font-size:13px;}
 .asset-checkbox label{cursor:pointer;display:block;margin-bottom:4px;}
 .asset-checkbox input{margin-right:6px;}
-#loginPopup{display:none;} /* Removed popup */
+#loginPopup{display:none;}
 @media (max-width:880px){.grid{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -89,7 +89,7 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
   </div>
   <div>
     <label>Number of Signals</label>
-    <input type="number" id="numSignals" value="1" min="1" placeholder="Enter number of signals">
+    <input type="number" id="numSignals" value="2" min="2" placeholder="Enter number of signals">
   </div>
 </div>
 <div class="controls" style="margin-top:12px;">
@@ -197,6 +197,7 @@ function fillAssetContainer(){
 fillAssetContainer();
 marketSel.addEventListener('change',fillAssetContainer);
 
+// License functions
 function makeLicenseKeyForDevice(deviceIdParam,days){
   const now = Date.now();
   const expiry = now + (days*24*60*60*1000);
@@ -217,7 +218,6 @@ function validateLicenseKeyForThisDevice(key,deviceIdToCheck){
 }
 
 function saveLicenseToLocal(key){ localStorage.setItem(LICENSE_STORAGE_PREFIX+deviceId,key); }
-
 function loadLicenseLocal(){
   const key = localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
   if(!key) return false;
@@ -231,7 +231,6 @@ function loadLicenseLocal(){
 }
 loadLicenseLocal();
 
-// ==== License Activation ====
 activateBtn.addEventListener('click',()=>{
   const entered = licenseInput.value.trim();
   if(!entered){ alert("Paste license key."); return; }
@@ -244,15 +243,13 @@ activateBtn.addEventListener('click',()=>{
   } else alert("❌ Invalid or expired license.");
 });
 
-// ==== Admin Login ====
+// Admin login
 showAdminLoginBtn.addEventListener('click',()=>{
-    adminPasswordInput.value='';
-    adminLoginModal.style.display='flex';
-    adminPasswordInput.focus();
+  adminPasswordInput.value='';
+  adminLoginModal.style.display='flex';
+  adminPasswordInput.focus();
 });
-
 adminLoginCancel.addEventListener('click',()=>{ adminLoginModal.style.display='none'; });
-
 adminLoginSubmit.addEventListener('click',()=>{
   if(adminPasswordInput.value===ADMIN_PASSWORD){
     adminLoginModal.style.display='none';
@@ -262,7 +259,7 @@ adminLoginSubmit.addEventListener('click',()=>{
   } else alert("Wrong password.");
 });
 
-// ==== Admin License Generation ====
+// Admin License
 generateLicenseBtn.addEventListener('click',()=>{
   const dev = adminDeviceIdInput.value.trim();
   const days = parseInt(adminDurationInput.value,10);
@@ -272,34 +269,71 @@ generateLicenseBtn.addEventListener('click',()=>{
 });
 copyLastLicenseBtn.addEventListener('click',()=>{ if(lastGenerated) navigator.clipboard.writeText(lastGenerated); });
 
-// ==== Utilities ====
+// Utils
 function pad2(n){ return String(n).padStart(2,'0'); }
 function toMono(str){
   const map={"0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿"};
   return str.split('').map(ch=>map[ch]||ch).join('');
 }
-function parseTimeHM(str){ // HH:MM to Date today
-  const [h,m]=str.split(":").map(Number);
-  const d=new Date();
-  d.setHours(h, m,0,0);
-  return d;
+function parseTimeHM(str){ const [h,m]=str.split(":").map(Number); const d=new Date(); d.setHours(h,m,0,0); return d; }
+
+// Reset
+resetBtn.addEventListener('click',()=>{ assetContainer.querySelectorAll('input').forEach(c=>c.checked=false); });
+
+// Modal
+copySignalBtn.addEventListener('click',()=>{ navigator.clipboard.writeText(signalText.textContent); alert("Copied!"); });
+function closeSignal(){ signalModal.style.display='none'; }
+
+// ==== Signal Generation with Cluster Logic ====
+function generateSignals(){
+  if(!licenseActive){ alert("❌ License required."); return; }
+  const selectedAssets=[...assetContainer.querySelectorAll('input:checked')].map(c=>c.value);
+  if(selectedAssets.length===0){ alert("Select at least one asset."); return; }
+  const numSignals=parseInt(numSignalsInput.value)||2;
+  const startTime=parseTimeHM(startTimeInput.value);
+  const endTime=parseTimeHM(endTimeInput.value);
+  if(endTime<=startTime){ alert("End Time must be after Start Time."); return; }
+
+  const totalMinutes=Math.floor((endTime-startTime)/60000);
+  const clusterCount=Math.ceil(numSignals/2);
+  const clusterInterval=Math.floor(totalMinutes/clusterCount)||1;
+
+  let signals=[];
+  let currentTime=new Date(startTime);
+  let assetIndex=0;
+  const totalMinutes=Math.floor((endTime-startTime)/60000);
+const clusterCount=Math.ceil(numSignals/2);
+const clusterInterval=Math.floor(totalMinutes/clusterCount)||1;
+
+let signals=[];
+let currentTime=new Date(startTime);
+let assetIndex=0;
+
+for(let i=0;i<clusterCount;i++){
+    const asset=selectedAssets[assetIndex % selectedAssets.length];
+    const side=Math.random()<0.5?"🟢 BUY":"🔴 PUT";
+    
+    // Two consecutive signals same side, same asset
+    for(let j=0;j<2;j++){
+        if(signals.length>=numSignals) break;
+        const timeStr=pad2(currentTime.getHours())+":"+pad2(currentTime.getMinutes());
+        const monoAsset=toMono(asset.toUpperCase());
+        signals.push(`${monoAsset} – ${timeStr} – ${side}`);
+        currentTime.setMinutes(currentTime.getMinutes()+1); // 1 min gap inside cluster
+    }
+    currentTime.setMinutes(currentTime.getMinutes()+clusterInterval); // gap to next cluster
+    assetIndex++;
 }
 
-// ==== Signal Logic with Cluster ====
-function generateClusterSignals(selectedAssets, numSignals){
-  const signals = [];
-  const startDate = parseTimeHM(startTimeInput.value);
-  const endDate = parseTimeHM(endTimeInput.value);
-  const totalMinutes = (endDate - startDate)/60000;
+signalText.textContent="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Signals\n\n"+signals.join("\n");
+signalModal.style.display='flex';
+}
 
-  const numClusters = Math.ceil(numSignals/2);
-  const clusterInterval = Math.floor((totalMinutes - numClusters)/numClusters);
-
-  let timePointer = new Date(startDate);
-  let assetIndex = 0;
-
-  for(let cluster=0; cluster<numClusters; cluster++){
-    const asset = selectedAssets[assetIndex % selectedAssets.length].toUpperCase();
-    const monoAsset = toMono(asset);
-    const side = Math.random()<0.5?"CALL":"PUT";
-    const symbolEmoji = side==="CALL"?"🟢 BUY":"🔴 PUT
+// Generate button
+generateBtn.addEventListener('click',()=>{
+  analysisOverlay.style.display='flex';
+  setTimeout(()=>{
+    analysisOverlay.style.display='none';
+    generateSignals();
+  },10000);
+});
