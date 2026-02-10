@@ -46,6 +46,7 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 .code-box{word-break:break-all;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;margin-top:8px;font-family:monospace;font-size:13px;}
 .asset-checkbox label{cursor:pointer;display:block;margin-bottom:4px;}
 .asset-checkbox input{margin-right:6px;}
+#loginPopup{display:none;} /* Removed popup */
 @media (max-width:880px){.grid{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -75,12 +76,12 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
     </select>
   </div>
   <div>
-    <label>Start Time (HH:MM)</label>
-    <input type="time" id="startTime" value="09:00">
+    <label>Start Time</label>
+    <input type="time" id="startTime">
   </div>
   <div>
-    <label>End Time (HH:MM)</label>
-    <input type="time" id="endTime" value="18:00">
+    <label>End Time</label>
+    <input type="time" id="endTime">
   </div>
   <div>
     <label>Assets (Tap to select multiple)</label>
@@ -121,13 +122,27 @@ footer{text-align:center;color:#9fb0d6;font-size:13px;margin-top:16px;}
 <div class="spinner"></div>
 </div>
 
+<div class="admin-login-backdrop" id="adminLoginModal">
+<div class="admin-login">
+<h3>Admin Login</h3>
+<input type="password" id="adminPasswordInput" placeholder="Enter admin password">
+<div class="row" style="margin-top:6px;">
+<button id="adminLoginSubmit" style="background:#4caf50;color:#fff;">Login</button>
+<button id="adminLoginCancel" style="background:#f44336;color:#fff;">Cancel</button>
+</div>
+</div>
+</div>
+
 <footer>
 © DragonFly — Advance signals
-<div style="margin-top:4px;font-size:10px;"></div>
+<div style="margin-top:4px;font-size:10px;">
+<button id="showAdminLoginBtn" style="background:transparent;border:none;color:#9fb0d6;cursor:pointer;">Admin Login</button>
+</div>
 </footer>
 
 <script>
 // ==== Config & Elements ====
+const ADMIN_PASSWORD="@Traderparvej@";
 const LICENSE_STORAGE_PREFIX="dragon_license_";
 let deviceId=localStorage.getItem("dragon_device_id");
 if(!deviceId){deviceId=String(Math.floor(Math.random()*900000000+100000000));localStorage.setItem("dragon_device_id",deviceId);}
@@ -146,13 +161,19 @@ const marketSel=document.getElementById('market');
 const assetContainer=document.getElementById('assetContainer');
 const startTimeInput=document.getElementById('startTime');
 const endTimeInput=document.getElementById('endTime');
+const numSignalsInput=document.getElementById('numSignals');
 const generateBtn=document.getElementById('generate');
 const resetBtn=document.getElementById('reset');
 const signalModal=document.getElementById('signalModal');
 const signalText=document.getElementById('signalText');
 const copySignalBtn=document.getElementById('copySignalBtn');
-const analysisOverlay=document.getElementById('analysisOverlay');
+const adminLoginModal=document.getElementById('adminLoginModal');
+const adminPasswordInput=document.getElementById('adminPasswordInput');
+const adminLoginSubmit=document.getElementById('adminLoginSubmit');
+const adminLoginCancel=document.getElementById('adminLoginCancel');
+const showAdminLoginBtn=document.getElementById('showAdminLoginBtn');
 
+let licenseActive=false;
 let lastGenerated=null;
 
 // ==== Asset Lists ====
@@ -176,81 +197,109 @@ function fillAssetContainer(){
 fillAssetContainer();
 marketSel.addEventListener('change',fillAssetContainer);
 
+function makeLicenseKeyForDevice(deviceIdParam,days){
+  const now = Date.now();
+  const expiry = now + (days*24*60*60*1000);
+  const rand = Math.floor(Math.random()*900000+100000);
+  const payload = `${deviceIdParam}|${expiry}|${rand}`;
+  return btoa(payload);
+}
+
+function validateLicenseKeyForThisDevice(key,deviceIdToCheck){
+  try{
+    const decoded = atob(key);
+    const [dId,expiryStr] = decoded.split("|");
+    const expiry = parseInt(expiryStr,10);
+    if(String(dId)!==String(deviceIdToCheck)) return false;
+    if(Date.now()>expiry) return false;
+    return true;
+  }catch(e){return false;}
+}
+
+function saveLicenseToLocal(key){ localStorage.setItem(LICENSE_STORAGE_PREFIX+deviceId,key); }
+
+function loadLicenseLocal(){
+  const key = localStorage.getItem(LICENSE_STORAGE_PREFIX+deviceId);
+  if(!key) return false;
+  if(validateLicenseKeyForThisDevice(key,deviceId)){
+    licenseStatus.textContent="License Active ✅";
+    licenseStatus.classList.add('active');
+    licenseActive=true;
+    return true;
+  }
+  return false;
+}
+loadLicenseLocal();
+
+// ==== License Activation ====
+activateBtn.addEventListener('click',()=>{
+  const entered = licenseInput.value.trim();
+  if(!entered){ alert("Paste license key."); return; }
+  if(validateLicenseKeyForThisDevice(entered,deviceId)){
+    saveLicenseToLocal(entered);
+    licenseStatus.textContent="License Active ✅";
+    licenseStatus.classList.add('active');
+    licenseActive=true;
+    alert("✅ License activated successfully!");
+  } else alert("❌ Invalid or expired license.");
+});
+
+// ==== Admin Login ====
+showAdminLoginBtn.addEventListener('click',()=>{
+    adminPasswordInput.value='';
+    adminLoginModal.style.display='flex';
+    adminPasswordInput.focus();
+});
+
+adminLoginCancel.addEventListener('click',()=>{ adminLoginModal.style.display='none'; });
+
+adminLoginSubmit.addEventListener('click',()=>{
+  if(adminPasswordInput.value===ADMIN_PASSWORD){
+    adminLoginModal.style.display='none';
+    adminPanel.style.display='block';
+    fillAssetContainer();
+    alert("Admin access granted.");
+  } else alert("Wrong password.");
+});
+
+// ==== Admin License Generation ====
+generateLicenseBtn.addEventListener('click',()=>{
+  const dev = adminDeviceIdInput.value.trim();
+  const days = parseInt(adminDurationInput.value,10);
+  if(!dev||!days){ alert("Enter device ID and duration."); return; }
+  lastGenerated = makeLicenseKeyForDevice(dev,days);
+  generatedBox.textContent = lastGenerated;
+});
+copyLastLicenseBtn.addEventListener('click',()=>{ if(lastGenerated) navigator.clipboard.writeText(lastGenerated); });
+
+// ==== Utilities ====
 function pad2(n){ return String(n).padStart(2,'0'); }
 function toMono(str){
   const map={"0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿"};
   return str.split('').map(ch=>map[ch]||ch).join('');
 }
-function parseTimeHM(hm){
-  const [h,m] = hm.split(":").map(Number);
-  const now = new Date();
-  now.setHours(h, m, 0, 0);
-  return now;
+function parseTimeHM(str){ // HH:MM to Date today
+  const [h,m]=str.split(":").map(Number);
+  const d=new Date();
+  d.setHours(h, m,0,0);
+  return d;
 }
 
-// ==== Generate Cluster Signals ====
+// ==== Signal Logic with Cluster ====
 function generateClusterSignals(selectedAssets, numSignals){
   const signals = [];
   const startDate = parseTimeHM(startTimeInput.value);
   const endDate = parseTimeHM(endTimeInput.value);
   const totalMinutes = (endDate - startDate)/60000;
-  const interval = Math.floor(totalMinutes / numSignals);
+
+  const numClusters = Math.ceil(numSignals/2);
+  const clusterInterval = Math.floor((totalMinutes - numClusters)/numClusters);
 
   let timePointer = new Date(startDate);
-  let i = 0;
+  let assetIndex = 0;
 
-  while(signals.length < numSignals){
-    const side = Math.random() < 0.5 ? "CALL" : "PUT";
-
-    for(let c=0; c<2 && signals.length < numSignals; c++){
-      const asset = selectedAssets[i % selectedAssets.length];
-      const timeStr = pad2(timePointer.getHours())+":"+pad2(timePointer.getMinutes());
-      signals.push({asset, side, timeStr});
-      i++;
-      timePointer.setMinutes(timePointer.getMinutes() + interval);
-      if(timePointer > endDate) break;
-    }
-    if(timePointer > endDate) break;
-  }
-  return signals;
-}
-
-// ==== Show Signal ====
-function showSignal(){
-  const selectedAssets=[...assetContainer.querySelectorAll('input:checked')].map(c=>c.value);
-  if(selectedAssets.length===0){ alert("Select at least one asset."); return; }
-  const numSignals=parseInt(document.getElementById('numSignals').value)||1;
-  const signals = generateClusterSignals(selectedAssets, numSignals);
-
-  let msg="🚀 𝗗𝗿𝗮𝗴𝗼𝗻𝗙𝗹𝘆 𝗔𝗜 Future 𝗦𝗶𝗴𝗻𝗮𝗹\n✔️1-Step MTG | ⏰ UTC +06:00\n⏱️1-Minute Trade \n\n";
-
-  signals.forEach(s=>{
-    const monoTime = toMono(s.timeStr);
-    const monoAsset = toMono(s.asset.toUpperCase());
-    const monoSide = toMono(" "+s.side);
-    msg+=`𝙼𝟷 ${monoTime} ${monoAsset}${monoSide}\n`;
-  });
-
-  msg+="\n❗️ Avoid signal after Doji, <80%, Gap, or 3–4 B2B opposite candles";
-  signalText.textContent = msg;
-  signalModal.style.display='flex';
-}
-
-// ==== Event Listeners ====
-generateBtn.addEventListener('click',()=>{
-  const selectedAssets=[...assetContainer.querySelectorAll('input:checked')].map(c=>c.value);
-  if(selectedAssets.length===0){ alert("Select at least one asset."); return; }
-  analysisOverlay.style.display='flex';
-  setTimeout(()=>{
-    analysisOverlay.style.display='none';
-    showSignal();
-  },10000);
-});
-
-resetBtn.addEventListener('click',()=>{ assetContainer.querySelectorAll('input').forEach(c=>c.checked=false); });
-copySignalBtn.addEventListener('click',()=>{ navigator.clipboard.writeText(signalText.textContent); alert("Copied!"); });
-function closeSignal(){ signalModal.style.display='none'; }
-
-</script>
-</body>
-</html>
+  for(let cluster=0; cluster<numClusters; cluster++){
+    const asset = selectedAssets[assetIndex % selectedAssets.length].toUpperCase();
+    const monoAsset = toMono(asset);
+    const side = Math.random()<0.5?"CALL":"PUT";
+    const symbolEmoji = side==="CALL"?"🟢 BUY":"🔴 PUT
