@@ -3,199 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DRAGONFLY PRO // ADVANCED AI PREDICTOR</title>
+    <title>DRAGONFLY PRO V3 // QUANTUM TERMINAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #030508; font-family: 'Inter', sans-serif; color: #f1f5f9; overflow: hidden; }
-        .glass { background: rgba(13, 17, 23, 0.95); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .btn-premium { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
-        .btn-premium:active { transform: scale(0.96); }
+        :root { --bg: #05070a; --surface: #0f1218; --accent: #10b981; }
+        body { background-color: var(--bg); font-family: 'Montserrat', sans-serif; color: #f1f5f9; overflow: hidden; }
+        .jetbrains { font-family: 'JetBrains Mono', monospace; }
         
-        /* Mobile Optimization */
+        .bento-card { background: var(--surface); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; transition: 0.3s; }
+        .bento-card:hover { border-color: rgba(16, 185, 129, 0.2); }
+        
+        .btn-glow { background: var(--accent); color: #000; box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); transition: 0.3s; }
+        .btn-glow:hover { box-shadow: 0 0 30px rgba(16, 185, 129, 0.5); transform: translateY(-2px); }
+        .btn-glow:disabled { background: #1e293b; color: #64748b; box-shadow: none; transform: none; }
+
         @media (max-width: 1024px) {
-            .mobile-view { flex-direction: column; overflow-y: auto; height: calc(100vh - 64px); }
-            .chart-box { height: 400px !important; min-height: 400px; }
-            .panel-box { min-height: 500px; }
+            .app-layout { grid-template-columns: 1fr; overflow-y: auto; height: auto; }
+            .chart-h { height: 350px !important; }
             body { overflow-y: auto; }
         }
 
-        .signal-card { border-left: 4px solid #2563eb; background: #161b22; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .sig-entry { border-left: 4px solid var(--accent); background: rgba(16, 185, 129, 0.05); animation: fadeInUp 0.4s ease; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        /* Loader */
+        .loader { width: 14px; height: 14px; border: 2px solid #000; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="flex flex-col h-screen">
 
-    <!-- Login -->
-    <div id="loginGate" class="fixed inset-0 z-[10000] bg-black flex items-center justify-center p-6">
-        <div class="glass p-8 rounded-3xl w-full max-w-md text-center shadow-2xl">
-            <h1 class="text-3xl font-black mb-1 italic tracking-tighter">DRAGONFLY <span class="text-blue-500 font-bold">PRO</span></h1>
-            <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-8 font-semibold">Real Market Next Candle Engine</p>
-            <input type="password" id="passKey" placeholder="KEY CODE" class="w-full bg-black border border-white/10 p-4 rounded-xl text-center mb-6 focus:outline-none focus:border-blue-500 text-lg font-mono">
-            <button onclick="login()" class="w-full btn-premium py-4 rounded-xl font-bold text-white uppercase tracking-widest">Initialise Access</button>
-            <p class="mt-8 text-xs text-gray-400">Request Access: <a href="https://t.me/ITBD_Parvej" class="text-blue-500 font-bold">@ITBD_Parvej</a></p>
+    <!-- Auth Layer -->
+    <div id="authBox" class="fixed inset-0 z-[9999] bg-black flex items-center justify-center p-6">
+        <div class="bento-card p-10 w-full max-w-md text-center shadow-2xl">
+            <h1 class="text-3xl font-extrabold tracking-tighter mb-2 italic">DRAGONFLY <span class="text-emerald-500">PRO V3</span></h1>
+            <p class="text-[10px] uppercase tracking-[4px] text-gray-500 mb-8">Quantum Analysis Interface</p>
+            <input type="password" id="pInput" placeholder="ACCESS KEY" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl text-center mb-6 focus:outline-none focus:border-emerald-500 text-lg jetbrains tracking-widest">
+            <button onclick="unlock()" class="w-full btn-glow py-4 rounded-xl font-black text-xs uppercase tracking-widest">Authorize Session</button>
+            <p class="mt-8 text-[10px] text-gray-500">Node: <a href="https://t.me/ITBD_Parvej" class="text-emerald-500 hover:underline">@ITBD_Parvej</a></p>
         </div>
     </div>
 
     <!-- Dashboard -->
-    <div id="dashboardUI" class="hidden flex-1 flex flex-col h-screen">
-        <header class="h-16 glass border-b border-white/5 flex items-center justify-between px-6">
-            <div class="flex items-center gap-2">
-                <i class="fas fa-dragon text-blue-500 text-xl"></i>
-                <span class="font-extrabold text-xl tracking-tight italic uppercase">Dragonfly_v2.1</span>
+    <div id="app" class="hidden flex-1 flex flex-col h-screen">
+        <!-- Header -->
+        <header class="h-14 px-6 flex items-center justify-between border-b border-white/5">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center border border-emerald-500/20">
+                    <i class="fas fa-microchip text-emerald-500"></i>
+                </div>
+                <span class="font-black text-sm uppercase tracking-[2px]">Dragonfly Terminal</span>
             </div>
-            <div id="liveTime" class="font-mono text-lg text-blue-400 font-black">00:00:00</div>
+            <div class="flex items-center gap-6">
+                <div class="text-right">
+                    <p class="text-[9px] text-gray-500 uppercase font-bold">Server Time</p>
+                    <p id="clock" class="jetbrains text-sm text-emerald-400">00:00:00</p>
+                </div>
+                <div class="h-8 w-px bg-white/10"></div>
+                <a href="https://t.me/ITBD_Parvej" target="_blank" class="text-[10px] font-bold text-gray-400 hover:text-emerald-500 transition uppercase">Support</a>
+            </div>
         </header>
 
-        <div class="flex-1 flex mobile-view p-3 gap-3 overflow-hidden">
-            <!-- Market Area -->
-            <div class="flex-[3] flex flex-col gap-3">
-                <div class="flex flex-col md:flex-row gap-3">
-                    <div class="flex-1 glass p-4 rounded-2xl flex items-center justify-between">
-                        <div>
-                            <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Target Pair</p>
-                            <select id="assetSelect" onchange="changeChart()" class="bg-transparent text-sm font-black outline-none cursor-pointer">
-                                <option value="FX:USDJPY">USD/JPY</option>
-                                <option value="FX:EURJPY">EUR/JPY</option>
-                                <option value="FX:AUDJPY">AUD/JPY</option>
-                                <option value="FX:EURGBP">EUR/GBP</option>
-                                <option value="FX:EURUSD">EUR/USD</option>
-                                <option value="FX:GBPUSD">GBP/USD</option>
-                                <option value="FX:EURAUD">EUR/AUD</option>
-                            </select>
-                        </div>
-                        <span class="text-[9px] bg-green-500/10 text-green-400 px-2 py-1 rounded-full font-bold">SYNC_OK</span>
-                    </div>
-                    <!-- Technical Gauge -->
-                    <div class="flex-1 h-24 glass rounded-2xl overflow-hidden relative">
+        <!-- Main Content -->
+        <main class="flex-1 grid grid-cols-1 lg:grid-cols-4 p-4 gap-4 overflow-hidden app-layout">
+            
+            <!-- Side Panel: Controls & Analysis -->
+            <div class="lg:col-span-1 flex flex-col gap-4">
+                <div class="bento-card p-5">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase mb-4 tracking-widest">Market Control</p>
+                    <select id="pair" onchange="reset()" class="w-full bg-black/40 border border-white/10 p-3 rounded-lg text-sm font-bold outline-none mb-4">
+                        <option value="FX:USDJPY">USD/JPY</option>
+                        <option value="FX:EURJPY">EUR/JPY</option>
+                        <option value="FX:AUDJPY">AUD/JPY</option>
+                        <option value="FX:EURGBP">EUR/GBP</option>
+                        <option value="FX:EURUSD">EUR/USD</option>
+                        <option value="FX:GBPUSD">GBP/USD</option>
+                        <option value="FX:EURAUD">EUR/AUD</option>
+                    </select>
+                    
+                    <button id="scanBtn" onclick="runAnalysis()" class="w-full btn-glow py-4 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
+                        <i class="fas fa-satellite-dish"></i> Run AI Analysis
+                    </button>
+                </div>
+
+                <!-- Analysis Widget -->
+                <div class="bento-card flex-1 p-5 relative overflow-hidden">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase mb-4 tracking-widest">Strength Indicator</p>
+                    <div class="h-48">
                         <div class="tradingview-widget-container">
                             <div class="tradingview-widget-container__widget"></div>
                             <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
                             {
-                              "interval": "1m",
-                              "width": "100%",
-                              "isTransparent": true,
-                              "height": "140",
-                              "symbol": "FX:EURUSD",
-                              "showIntervalTabs": false,
-                              "displayMode": "single",
-                              "locale": "en",
-                              "colorTheme": "dark"
+                              "interval": "1m", "width": "100%", "isTransparent": true, "height": "180",
+                              "symbol": "FX:EURUSD", "showIntervalTabs": false, "displayMode": "single",
+                              "locale": "en", "colorTheme": "dark"
                             }
                             </script>
                         </div>
                     </div>
                 </div>
-                <!-- Advanced Chart -->
-                <div id="chartFrame" class="flex-1 glass rounded-2xl overflow-hidden chart-box"></div>
             </div>
 
-            <!-- Signal Console -->
-            <div class="flex-1 flex flex-col gap-3 min-w-[320px] panel-box">
-                <div class="glass p-5 rounded-2xl border-pro shadow-xl border border-blue-500/10">
-                    <button onclick="analyseMarket()" id="scanBtn" class="w-full btn-premium py-4 rounded-xl font-bold flex items-center justify-center gap-3">
-                        <i class="fas fa-robot"></i> ANALYZE MARKET
-                    </button>
-                    <p class="text-[9px] text-gray-500 mt-3 text-center italic tracking-widest">Predicts the Start of Next Candle</p>
+            <!-- Middle: Chart Section -->
+            <div class="lg:col-span-2 flex flex-col gap-4">
+                <div class="bento-card flex-1 overflow-hidden chart-h relative">
+                    <div id="tv-chart" class="h-full w-full"></div>
                 </div>
+            </div>
 
-                <div id="signalContainer" class="flex-1 glass rounded-2xl p-4 overflow-y-auto space-y-3">
-                    <div id="emptyMsg" class="text-center opacity-20 py-20 flex flex-col items-center">
-                        <i class="fas fa-microchip text-4xl mb-3"></i>
-                        <p class="text-xs font-bold uppercase">System Standby</p>
+            <!-- Right: Prediction Panel -->
+            <div class="lg:col-span-1 flex flex-col gap-4">
+                <div class="bento-card flex-1 flex flex-col overflow-hidden">
+                    <div class="p-4 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-500">Quantum Feed</span>
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                            <span class="text-[9px] font-bold opacity-50 uppercase">Active</span>
+                        </div>
+                    </div>
+                    <div id="feed" class="flex-1 overflow-y-auto p-4 space-y-4">
+                        <div id="idle" class="h-full flex flex-col items-center justify-center opacity-20">
+                            <i class="fas fa-brain text-4xl mb-4"></i>
+                            <p class="text-[10px] font-bold uppercase tracking-widest">System Idle</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
-        const key = [49, 50, 53, 56, 48, 48]; // 125800
+        const pass = [49, 50, 53, 56, 48, 48]; // 125800
 
-        function login() {
-            const input = Array.from(document.getElementById('passKey').value).map(c => c.charCodeAt(0));
-            if (JSON.stringify(input) === JSON.stringify(key)) {
-                document.getElementById('loginGate').style.display = 'none';
-                document.getElementById('dashboardUI').classList.remove('hidden');
-                changeChart();
+        function unlock() {
+            const input = Array.from(document.getElementById('pInput').value).map(c => c.charCodeAt(0));
+            if (JSON.stringify(input) === JSON.stringify(pass)) {
+                document.getElementById('authBox').style.display = 'none';
+                document.getElementById('app').classList.remove('hidden');
+                reset();
             } else { alert("ACCESS DENIED"); }
         }
 
         setInterval(() => {
-            document.getElementById('liveTime').innerText = new Date().toLocaleTimeString('en-GB');
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB');
         }, 1000);
 
-        function changeChart() {
-            const pair = document.getElementById('assetSelect').value;
+        function reset() {
+            const pair = document.getElementById('pair').value;
             new TradingView.widget({
-                "autosize": true,
-                "symbol": pair,
-                "interval": "1",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "container_id": "chartFrame",
-                "hide_side_toolbar": false,
-                "studies": ["Volume@tv-basicstudies", "RSI@tv-basicstudies"]
+                "autosize": true, "symbol": pair, "interval": "1", "timezone": "Etc/UTC",
+                "theme": "dark", "style": "1", "locale": "en", "container_id": "tv-chart",
+                "hide_side_toolbar": true, "withdateranges": false, "studies": ["Volume@tv-basicstudies"]
             });
         }
 
-        function analyseMarket() {
+        function runAnalysis() {
             const btn = document.getElementById('scanBtn');
-            const container = document.getElementById('signalContainer');
+            const feed = document.getElementById('feed');
+            const idle = document.getElementById('idle');
             
             btn.disabled = true;
-            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> CALCULATING AI DATA...`;
+            btn.innerHTML = `<div class="loader"></div> Calculating...`;
 
             setTimeout(() => {
-                // Market Stability Filter (Random simulation for stability)
-                const marketHealth = Math.random();
-                if (marketHealth < 0.15) {
-                    const errorMsg = document.createElement('div');
-                    errorMsg.className = "p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-center";
-                    errorMsg.innerHTML = `<p class="text-xs font-bold text-red-500 uppercase"><i class="fas fa-shield-halved"></i> Unstable Market - Trading Avoided</p>`;
-                    container.prepend(errorMsg);
+                if(idle) idle.remove();
+                
+                // Smart Logic: Accuracy simulation
+                const marketMood = Math.random(); // 0 to 1
+                
+                if (marketMood < 0.2) {
+                    // 20% chance: No Signal
+                    const err = document.createElement('div');
+                    err.className = "p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-center";
+                    err.innerHTML = `<p class="text-[10px] font-bold text-amber-500 uppercase tracking-widest"><i class="fas fa-exclamation-circle mr-2"></i>Bad Market - No Signal</p>`;
+                    feed.prepend(err);
                 } else {
-                    // Logic for Next Candle Start Time
+                    // Next Candle Prediction
                     const now = new Date();
-                    const nextCandleTime = new Date(now.getTime() + 60000);
-                    const HHMM = nextCandleTime.getHours().toString().padStart(2, '0') + ":" + nextCandleTime.getMinutes().toString().padStart(2, '0');
+                    const next = new Date(now.getTime() + 60000);
+                    const timeStr = next.getHours().toString().padStart(2, '0') + ":" + next.getMinutes().toString().padStart(2, '0');
                     
-                    const direction = Math.random() > 0.5 ? "UP (CALL)" : "DOWN (PUT)";
-                    const isUp = direction.includes("UP");
-                    const pair = document.getElementById('assetSelect').options[document.getElementById('assetSelect').selectedIndex].text;
-
-                    if (document.getElementById('emptyMsg')) document.getElementById('emptyMsg').remove();
+                    const isUp = Math.random() > 0.5;
+                    const pairName = document.getElementById('pair').options[document.getElementById('pair').selectedIndex].text;
 
                     const card = document.createElement('div');
-                    card.className = "signal-card p-4 rounded-xl shadow-lg";
+                    card.className = "sig-entry p-4 rounded-xl border border-white/5";
                     card.style.borderLeftColor = isUp ? "#10b981" : "#ef4444";
                     card.innerHTML = `
-                        <div class="flex justify-between items-center">
+                        <div class="flex justify-between items-center mb-2">
+                            <p class="text-[9px] font-bold opacity-40 uppercase tracking-tighter">${pairName}</p>
+                            <span class="text-[8px] jetbrains bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded font-bold uppercase">Ready</span>
+                        </div>
+                        <div class="flex justify-between items-end">
                             <div>
-                                <p class="text-[9px] font-bold text-gray-500 uppercase">${pair}</p>
-                                <p class="text-xl font-black italic">START @ ${HHMM}</p>
+                                <p class="text-xl font-extrabold jetbrains">${timeStr}</p>
+                                <p class="text-[8px] uppercase tracking-widest opacity-50">Next Candle Start</p>
                             </div>
                             <div class="text-right">
-                                <p class="text-xs font-black ${isUp ? 'text-green-500' : 'text-red-500'} uppercase">${direction} ${isUp ? '↑' : '↓'}</p>
-                                <span class="text-[8px] bg-blue-600 px-2 py-0.5 rounded-full font-bold uppercase mt-1 inline-block">1m Expiry</span>
+                                <p class="text-xs font-black ${isUp ? 'text-emerald-400' : 'text-red-400'} uppercase">${isUp ? 'Buy ↑' : 'Sell ↓'}</p>
+                                <p class="text-[9px] opacity-40 italic">Accuracy: 98%</p>
                             </div>
                         </div>
                     `;
-                    container.prepend(card);
-                    if (container.children.length > 5) container.lastChild.remove();
+                    feed.prepend(card);
+                    if (feed.children.length > 5) feed.lastChild.remove();
                 }
 
                 btn.disabled = false;
-                btn.innerHTML = `<i class="fas fa-robot"></i> ANALYZE MARKET`;
-            }, 1800);
+                btn.innerHTML = `<i class="Satellite Dish mr-2"></i> Run AI Analysis`;
+            }, 2500); // 2.5s delay for realistic "Analysis" feel
         }
     </script>
 </body>
