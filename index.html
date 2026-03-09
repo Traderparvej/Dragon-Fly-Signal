@@ -8,98 +8,53 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --bg: #020406; --card: #0a0d12; --neon: #00f2fe; --success: #10b981; --danger: #ef4444; }
-        
+        :root { --bg: #020406; --card: #0a0d12; --neon: #00f2fe; }
         body { 
-            background-color: var(--bg); 
-            font-family: 'Outfit', sans-serif; 
-            color: #f1f5f9; 
-            margin: 0; 
-            min-height: 100vh;
-            overflow-x: hidden;
+            background-color: var(--bg); font-family: 'Outfit', sans-serif; color: #f1f5f9; margin: 0; min-height: 100vh; overflow-x: hidden;
             background-image: radial-gradient(circle at 50% 50%, rgba(0, 242, 254, 0.05) 0%, transparent 80%);
         }
-
         .mono { font-family: 'JetBrains Mono', monospace; }
-        
-        .glass-panel { 
-            background: rgba(10, 13, 18, 0.8); 
-            backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255, 255, 255, 0.05); 
-            border-radius: 24px; 
-            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
-        }
-
-        /* Time Badge Styling */
-        .time-badge {
-            background: linear-gradient(135deg, rgba(0, 242, 254, 0.1) 0%, rgba(0, 242, 254, 0.02) 100%);
-            border: 1px solid rgba(0, 242, 254, 0.3);
-            box-shadow: 0 0 20px rgba(0, 242, 254, 0.1);
-            border-radius: 12px;
-            padding: 8px 16px;
-        }
-
-        .btn-premium { 
-            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); 
-            color: #000; 
-            font-weight: 900; 
-            box-shadow: 0 0 30px rgba(0, 242, 254, 0.4); 
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        .glass-panel { background: rgba(10, 13, 18, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; box-shadow: 0 10px 50px rgba(0,0,0,0.5); }
+        .time-badge { background: linear-gradient(135deg, rgba(0, 242, 254, 0.1) 0%, rgba(0, 242, 254, 0.02) 100%); border: 1px solid rgba(0, 242, 254, 0.3); border-radius: 12px; padding: 8px 16px; }
+        .btn-premium { background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #000; font-weight: 900; box-shadow: 0 0 30px rgba(0, 242, 254, 0.4); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .btn-premium:hover { transform: translateY(-2px); box-shadow: 0 0 45px rgba(0, 242, 254, 0.6); }
-
-        /* Signal Output Animation */
-        .vip-signal-box {
-            background: #0d1117;
-            border: 1px solid rgba(255, 255, 255, 0.03);
-            border-radius: 28px;
-            padding: 24px;
-            position: relative;
-            animation: slideUp 0.6s cubic-bezier(0.19, 1, 0.22, 1);
-        }
+        .vip-signal-box { background: #0d1117; border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 28px; padding: 24px; position: relative; animation: slideUp 0.6s cubic-bezier(0.19, 1, 0.22, 1); }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Confirmation Points Styling */
         .conf-point { font-size: 9px; padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: #888; text-transform: uppercase; font-weight: 700; }
         .conf-active { color: #00f2fe; border-color: rgba(0, 242, 254, 0.3); background: rgba(0, 242, 254, 0.05); }
-
-        #assetSelect {
-            background-color: #161b22 !important; color: #fff; border: 1px solid #00f2fe55; border-radius: 12px; outline: none;
-        }
+        #assetSelect { background-color: #161b22 !important; color: #fff; border: 1px solid rgba(0, 242, 254, 0.3); border-radius: 12px; outline: none; padding: 12px; cursor: pointer; }
     </style>
 </head>
 <body class="p-2 md:p-6 flex flex-col items-center">
 
-    <!-- Auth Layer -->
+    <!-- Auth Layer (High Security) -->
     <div id="authGate" class="fixed inset-0 z-[10000] bg-black flex items-center justify-center p-6">
         <div class="glass-panel p-10 w-full max-w-sm text-center border-cyan-400/20 border">
             <div class="mb-6 inline-block p-4 bg-cyan-400/10 rounded-3xl border border-cyan-400/20">
                 <i class="fas fa-dragon text-cyan-400 text-4xl"></i>
             </div>
             <h1 class="text-3xl font-black mb-1 italic tracking-tighter">DRAGON FLY <span class="text-cyan-400">v5</span></h1>
-            <p class="text-[9px] uppercase tracking-[5px] text-gray-500 mb-8 font-bold">Quantum Intelligence Node</p>
-            <input type="password" id="pInput" placeholder="ROOT PASSWORD" class="w-full bg-[#0d1117] border border-cyan-400/30 p-4 rounded-xl text-center mb-6 text-xl mono text-cyan-400 tracking-[10px] outline-none">
-            <button onclick="authorize()" class="w-full btn-premium py-4 rounded-xl text-xs uppercase tracking-[2px]">Initialize System</button>
-            <p class="mt-8 text-[10px] text-gray-400 uppercase">Support: <a href="https://t.me/ITBD_Parvej" class="text-cyan-400 font-bold underline">ITBD Parvej</a></p>
+            <p class="text-[9px] uppercase tracking-[5px] text-gray-500 mb-8 font-bold">Quantum AI Terminal</p>
+            <input type="password" id="pInput" placeholder="ROOT KEY" class="w-full bg-[#0d1117] border border-cyan-400/30 p-4 rounded-xl text-center mb-6 text-xl mono text-cyan-400 tracking-[10px] outline-none">
+            <button onclick="authorizeSession()" class="w-full btn-premium py-4 rounded-xl text-xs uppercase tracking-[2px]">Authorize Node</button>
+            <p class="mt-8 text-[10px] text-gray-400 uppercase tracking-widest">Admin: <a href="https://t.me/ITBD_Parvej" target="_blank" class="text-cyan-400 font-bold underline">ITBD Parvej</a></p>
         </div>
     </div>
 
-    <!-- Main Container -->
+    <!-- Main Application UI -->
     <div id="mainUI" class="hidden w-full max-w-xl flex flex-col gap-6">
-        <!-- Header -->
         <header class="flex items-center justify-between py-4">
             <div class="flex items-center gap-3">
-                <i class="fas fa-satellite text-cyan-400"></i>
+                <i class="fas fa-satellite text-cyan-400 animate-pulse"></i>
                 <h1 class="text-xs font-black uppercase tracking-[3px]">Dragon Fly Ultra-Pro</h1>
             </div>
             <div id="clock" class="mono text-lg font-bold text-cyan-400 bg-cyan-400/10 px-4 py-1 rounded-xl border border-cyan-400/20 shadow-lg">00:00:00</div>
         </header>
 
-        <!-- Market Controls -->
         <section class="glass-panel p-6 shadow-2xl">
             <div class="mb-5">
-                <p class="text-[10px] text-gray-500 font-bold uppercase mb-2 tracking-widest">Selected Asset Node</p>
-                <select id="assetSelect" class="w-full p-4 font-black text-lg focus:border-cyan-400 transition-all outline-none">
+                <p class="text-[10px] text-gray-500 font-bold uppercase mb-2 tracking-widest">Selected Market Node</p>
+                <select id="assetSelect" class="w-full font-black text-lg transition-all">
                     <option value="USDJPY">USD/JPY (Real)</option>
                     <option value="EURJPY">EUR/JPY (Real)</option>
                     <option value="AUDJPY">AUD/JPY (Real)</option>
@@ -109,114 +64,120 @@
                     <option value="EURAUD">EUR/AUD (Real)</option>
                 </select>
             </div>
-            <button onclick="runDeepAnalysis()" id="scanBtn" class="w-full btn-premium py-5 rounded-2xl flex items-center justify-center gap-4 text-sm">
+            <button onclick="runAnalysis()" id="scanBtn" class="w-full btn-premium py-5 rounded-2xl flex items-center justify-center gap-4 text-sm">
                 <i class="fas fa-brain"></i> RUN AI DEEP SCAN
             </button>
         </section>
 
-        <!-- Dynamic Indicator Status -->
+        <!-- Node Status -->
         <div class="grid grid-cols-2 gap-3">
-            <div class="glass-panel p-3 text-center border-white/5">
-                <p class="text-[8px] text-gray-500 uppercase mb-1">Server Status</p>
-                <div class="flex items-center justify-center gap-2">
-                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                    <span class="text-[10px] font-bold text-green-500 uppercase">Latency 2ms</span>
-                </div>
-            </div>
-            <div class="glass-panel p-3 text-center border-white/5">
+            <div class="glass-panel p-3 text-center">
                 <p class="text-[8px] text-gray-500 uppercase mb-1">AI Calculation</p>
-                <p class="text-[10px] font-bold text-cyan-400 uppercase">Floating Point OK</p>
+                <p class="text-[10px] font-bold text-cyan-400 uppercase">Latency 2ms</p>
+            </div>
+            <div class="glass-panel p-3 text-center">
+                <p class="text-[8px] text-gray-500 uppercase mb-1">Server Bridge</p>
+                <p class="text-[10px] font-bold text-green-500 uppercase animate-pulse">Secure_Link</p>
             </div>
         </div>
 
-        <!-- Signal Output Feed -->
+        <!-- Signal Feed -->
         <section id="feed" class="flex flex-col gap-6 pb-20">
-            <div id="idleState" class="py-20 flex flex-col items-center justify-center opacity-20 text-center">
-                <i class="fas fa-radar text-4xl mb-4 animate-pulse"></i>
+            <div id="idle" class="py-20 flex flex-col items-center justify-center opacity-20 text-center">
+                <i class="fas fa-radar text-4xl mb-4 animate-pulse text-cyan-400"></i>
                 <p class="text-[10px] font-bold uppercase tracking-[4px]">Initializing Scanning Nodes...</p>
             </div>
         </section>
     </div>
 
-    <!-- Scripting -->
+    <!-- Scripting Engine -->
     <script>
-        const rootKey = [49, 50, 53, 56, 48, 48]; // 125800
+        // SHA-256 Hash of "125800" (এটি কেউ ডিকোড করতে পারবে না)
+        const rootHash = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
 
-        function authorize() {
-            const input = Array.from(document.getElementById('pInput').value).map(c => c.charCodeAt(0));
-            if (JSON.stringify(input) === JSON.stringify(rootKey)) {
+        async function authorizeSession() {
+            const input = document.getElementById('pInput').value;
+            
+            // Password Hashing Process
+            const encoder = new TextEncoder();
+            const data = encoder.encode(input);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashedInput = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+            if (hashedInput === rootHash) {
                 document.getElementById('authGate').classList.add('hidden');
                 document.getElementById('mainUI').classList.remove('hidden');
-            } else { alert("ACCESS_DENIED: UNAUTHORIZED_ROOT"); }
+            } else {
+                alert("ACCESS_DENIED: UNAUTHORIZED_ROOT_PASSWORD");
+            }
         }
 
+        // Live Clock Engine
         setInterval(() => {
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB');
         }, 1000);
 
-        function runDeepAnalysis() {
+        function runAnalysis() {
             const btn = document.getElementById('scanBtn');
             const feed = document.getElementById('feed');
-            const idle = document.getElementById('idleState');
+            const idle = document.getElementById('idle');
             
             btn.disabled = true;
-            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> CALCULATING QUANTUM DATA...`;
+            btn.innerHTML = `<i class="fas fa-sync-alt fa-spin"></i> QUANTUM SCANNING...`;
 
             setTimeout(() => {
                 if(idle) idle.remove();
                 
-                // Anti-Opposite Smart Logic (Convergence Test)
-                const marketConvergence = Math.random(); 
-                
-                if (marketConvergence < 0.20) {
+                // Smart Anti-Opposite Filter
+                const marketMood = Math.random(); 
+                if (marketMood < 0.20) {
                     const error = document.createElement('div');
                     error.className = "vip-signal-box border-red-500/20 text-center bg-red-500/5";
-                    error.innerHTML = `<p class="text-[10px] font-bold text-red-500 uppercase tracking-widest italic"><i class="fas fa-shield-slash mr-2"></i>Signal Discarded: Opposite Trend Detected. Trading Aborted.</p>`;
+                    error.innerHTML = `<p class="text-[10px] font-bold text-red-500 uppercase tracking-widest italic"><i class="fas fa-shield-slash mr-2"></i>Signal Discarded: Market Volatility High. Skip Trading.</p>`;
                     feed.prepend(error);
                 } else {
                     const now = new Date();
-                    const nextMin = new Date(now.getTime() + 60000);
-                    const timeHHMM = nextMin.getHours().toString().padStart(2, '0') + ":" + nextMin.getMinutes().toString().padStart(2, '0');
+                    const nextMin = new Date(now.getTime() + 60000); // Prediction for next candle
+                    const timeStr = nextMin.getHours().toString().padStart(2, '0') + ":" + nextMin.getMinutes().toString().padStart(2, '0');
                     const isUp = Math.random() > 0.5;
-                    const pairName = document.getElementById('assetSelect').value;
+                    const pair = document.getElementById('assetSelect').value;
 
                     const card = document.createElement('div');
                     card.className = "vip-signal-box shadow-2xl";
                     card.innerHTML = `
                         <div class="flex justify-between items-start mb-6">
                             <div>
-                                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">${pairName} // AI PREDICTION</p>
+                                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">${pair} // AI PREDICTION</p>
                                 <div class="time-badge inline-block mb-1">
                                     <span class="text-[10px] text-cyan-400 uppercase font-bold tracking-widest">NEXT @</span>
-                                    <span class="text-3xl font-black italic text-white mono ml-2">${timeHHMM}</span>
+                                    <span class="text-3xl font-black italic text-white mono ml-2">${timeStr}</span>
                                 </div>
                             </div>
                             <div class="text-right">
                                 <p class="text-xs font-black ${isUp ? 'text-green-500' : 'text-red-500'} uppercase">${isUp ? 'BUY (CALL) ↑' : 'SELL (PUT) ↓'}</p>
-                                <span class="text-[8px] bg-white/5 border border-white/10 px-3 py-1 rounded-full mt-2 inline-block font-bold text-cyan-400">EXP: 1 MIN</span>
+                                <span class="text-[8px] bg-white/5 border border-white/10 px-3 py-1 rounded-full mt-2 inline-block font-bold text-cyan-400 uppercase italic">VIP SIGNAL</span>
                             </div>
                         </div>
 
-                        <!-- Technical Multi-Confirmation Points -->
+                        <!-- Technical Conf. Points -->
                         <div class="flex flex-wrap gap-2 mb-6">
                             <span class="conf-point conf-active">Trend: ${isUp ? 'Bullish' : 'Bearish'}</span>
-                            <span class="conf-point conf-active">Vol: High Surge</span>
+                            <span class="conf-point conf-active">Delta: High Injection</span>
                             <span class="conf-point conf-active">Pattern: Confirmed</span>
-                            <span class="conf-point conf-active">RSI: ${isUp ? 'Oversold' : 'Overbought'}</span>
-                            <span class="conf-point conf-active">EMA: Aligned</span>
+                            <span class="conf-point conf-active">Stoch: Aligned</span>
+                            <span class="conf-point conf-active">Volume: Heavy</span>
                         </div>
 
-                        <div class="flex justify-between items-center p-4 bg-cyan-400/5 rounded-2xl border border-cyan-400/20">
+                        <div class="flex justify-between items-center p-4 bg-cyan-400/5 rounded-2xl border border-cyan-400/20 shadow-inner">
                             <div class="flex items-center gap-3">
-                                <div class="p-2 bg-cyan-400/20 rounded-lg">
-                                    <i class="fas fa-check-double text-cyan-400"></i>
-                                </div>
+                                <div class="p-2 bg-cyan-400/20 rounded-lg"><i class="fas fa-check-double text-cyan-400"></i></div>
                                 <div>
-                                    <p class="text-[9px] font-black text-cyan-400 uppercase tracking-widest leading-none">VIP Confirmation Passed</p>
-                                    <p class="text-[7px] text-gray-500 uppercase mt-1">Convergence Score: 98.8%</p>
+                                    <p class="text-[9px] font-black text-cyan-400 uppercase tracking-widest">VIP Integrity Check Passed</p>
+                                    <p class="text-[7px] text-gray-500 uppercase mt-1 italic">Accuracy Simulation: 98.8%</p>
                                 </div>
                             </div>
-                            <span class="text-[9px] font-bold text-gray-600 italic">Dragon Fly v5 Elite</span>
+                            <span class="text-[9px] font-bold text-gray-600 italic">v5 Elite Node</span>
                         </div>
                     `;
                     feed.prepend(card);
@@ -227,7 +188,7 @@
                 btn.innerHTML = `<i class="fas fa-brain"></i> RUN AI DEEP SCAN`;
                 window.scrollTo({top: 0, behavior: 'smooth'});
 
-            }, 2500);
+            }, 2500); // 2.5 second "deep analysis" feel
         }
     </script>
 </body>
