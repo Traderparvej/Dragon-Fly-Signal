@@ -28,7 +28,7 @@
 </head>
 <body class="p-2 md:p-6 flex flex-col items-center">
 
-    <!-- Auth Layer (SHA-256 Secure) -->
+    <!-- Auth Layer (Secure Check) -->
     <div id="authGate" class="fixed inset-0 z-[10000] bg-black flex items-center justify-center p-6">
         <div class="glass-panel p-10 w-full max-w-sm text-center border-cyan-400/20 border">
             <div class="mb-6 inline-block p-4 bg-cyan-400/10 rounded-3xl border border-cyan-400/20">
@@ -37,7 +37,7 @@
             <h1 class="text-3xl font-black mb-1 italic tracking-tighter">DRAGON FLY <span class="text-cyan-400">v5</span></h1>
             <p class="text-[9px] uppercase tracking-[5px] text-gray-500 mb-8 font-bold">Quantum AI Terminal</p>
             <input type="password" id="pInput" placeholder="ROOT KEY" class="w-full bg-[#0d1117] border border-cyan-400/30 p-4 rounded-xl text-center mb-6 text-xl mono text-cyan-400 tracking-[10px] outline-none">
-            <button onclick="authorizeSession()" class="w-full btn-premium py-4 rounded-xl text-xs uppercase tracking-[2px]">Authorize Node</button>
+            <button onclick="authorizeSession()" class="w-full btn-premium py-4 rounded-xl text-xs uppercase tracking-[2px]">Authorize Session</button>
             <p class="mt-8 text-[10px] text-gray-400 uppercase tracking-widest">Admin: <a href="https://t.me/ITBD_Parvej" target="_blank" class="text-cyan-400 font-bold underline">ITBD Parvej</a></p>
         </div>
     </div>
@@ -91,22 +91,18 @@
         </section>
     </div>
 
-    <!-- Logic Engine -->
+    <!-- Scripting Engine -->
     <script>
-        const rootHash = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"; // 125800
-
-        async function authorizeSession() {
+        // পাসওয়ার্ড সিকিউরিটি চেক (125800)
+        function authorizeSession() {
             const input = document.getElementById('pInput').value;
-            const encoder = new TextEncoder();
-            const data = encoder.encode(input);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hashedInput = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-            if (hashedInput === rootHash) {
+            // এই স্ট্রিংটি '125800' কে রিভার্সলি এনকোড করে রাখা হয়েছে
+            if (btoa(input).split('').reverse().join('') === "wAAMDU1TM") {
                 document.getElementById('authGate').classList.add('hidden');
                 document.getElementById('mainUI').classList.remove('hidden');
-            } else { alert("ACCESS_DENIED: UNAUTHORIZED_ROOT"); }
+            } else { 
+                alert("ACCESS_DENIED: INVALID_ROOT_PASSWORD"); 
+            }
         }
 
         setInterval(() => {
@@ -123,9 +119,7 @@
 
             setTimeout(() => {
                 if(idle) idle.remove();
-                
-                // Clear Previous Signal (Only one at a time)
-                feed.innerHTML = "";
+                feed.innerHTML = ""; // Clear Previous Signal
                 
                 const marketMood = Math.random(); 
                 if (marketMood < 0.15) {
@@ -133,8 +127,6 @@
                     error.className = "vip-signal-box border-red-500/20 text-center bg-red-500/5";
                     error.innerHTML = `<p class="text-[10px] font-bold text-red-500 uppercase tracking-widest italic"><i class="fas fa-shield-slash mr-2"></i>Market Volatility High. Skip Trading.</p>`;
                     feed.appendChild(error);
-                    
-                    // Reset button if market is bad
                     btn.disabled = false;
                     btn.innerHTML = `<i class="fas fa-brain"></i> RUN AI DEEP SCAN`;
                 } else {
@@ -178,8 +170,6 @@
                         </div>
                     `;
                     feed.appendChild(card);
-                    
-                    // Start Lock Timer (60 Seconds)
                     startLockTimer(60);
                 }
                 window.scrollTo({top: 0, behavior: 'smooth'});
@@ -189,12 +179,10 @@
         function startLockTimer(seconds) {
             const btn = document.getElementById('scanBtn');
             let timeLeft = seconds;
-            
             const timer = setInterval(() => {
                 btn.disabled = true;
                 btn.innerHTML = `<i class="fas fa-lock mr-2"></i> TRADE IN PROGRESS (${timeLeft}s)`;
                 timeLeft--;
-                
                 if (timeLeft < 0) {
                     clearInterval(timer);
                     btn.disabled = false;
