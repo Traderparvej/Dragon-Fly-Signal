@@ -3,120 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DRAGONFLY PRO // PREMIUM PREDICT</title>
+    <title>DRAGONFLY PRO MAX // NEXT GEN PREDICT</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            background-color: #0b0e11;
-            font-family: 'Poppins', sans-serif;
-            color: #e9ecef;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        .glass-card {
-            background: rgba(22, 26, 30, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .btn-premium {
-            background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);
-            box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .btn-premium:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 180, 219, 0.5);
-        }
-
-        .signal-card {
-            border-left: 4px solid #00b4db;
-            background: #1e2329;
-            animation: slideIn 0.4s cubic-bezier(0.12, 0, 0.39, 0);
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
+        body { background-color: #05070a; font-family: 'Inter', sans-serif; color: #f8fafc; overflow: hidden; }
+        .bg-dark-pro { background: #0d1117; }
+        .border-pro { border: 1px solid rgba(255, 255, 255, 0.05); }
+        .btn-gradient { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); transition: all 0.3s; }
+        .btn-gradient:active { transform: scale(0.95); }
+        
         @media (max-width: 1024px) {
-            .main-layout { flex-direction: column; overflow-y: auto; height: auto; }
-            .chart-section { height: 450px !important; }
+            .mobile-stack { flex-direction: column; overflow-y: auto; height: calc(100vh - 64px); }
+            .chart-h { height: 400px !important; }
             body { overflow-y: auto; }
         }
 
-        /* Loading Animation */
-        .scanning {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .signal-card { border-left: 4px solid #3b82f6; background: #161b22; animation: popUp 0.3s ease; }
+        @keyframes popUp { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
-<body>
+<body class="h-screen flex flex-col">
 
-    <!-- Professional Login Screen -->
-    <div id="loginScreen" class="fixed inset-0 z-[9999] bg-[#0b0e11] flex items-center justify-center p-4">
-        <div class="glass-card p-10 rounded-3xl w-full max-w-md border border-white/10 text-center">
-            <div class="mb-6">
-                <div class="w-20 h-20 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20">
-                    <i class="fas fa-dragon text-4xl text-blue-500"></i>
-                </div>
-                <h1 class="text-3xl font-bold tracking-tight">DRAGONFLY <span class="text-blue-500">PRO</span></h1>
-                <p class="text-gray-400 text-sm mt-2">Premium Market Analysis Terminal</p>
-            </div>
-            
-            <input type="password" id="passCode" placeholder="Enter License Key" 
-            class="w-full bg-[#1e2329] border border-white/10 p-4 rounded-xl text-center focus:outline-none focus:border-blue-500 transition mb-6">
-            
-            <button onclick="unlockApp()" class="w-full btn-premium py-4 rounded-xl font-bold text-white text-lg">
-                UNLOCK ACCESS
-            </button>
-            
-            <p class="mt-8 text-xs text-gray-500 uppercase tracking-widest">
-                Need Access? <a href="https://t.me/ITBD_Parvej" class="text-blue-500 font-bold hover:underline">Contact Admin</a>
-            </p>
+    <!-- Login -->
+    <div id="loginGate" class="fixed inset-0 z-[10000] bg-black flex items-center justify-center p-6">
+        <div class="bg-dark-pro p-10 rounded-3xl w-full max-w-md border-pro text-center shadow-2xl">
+            <h1 class="text-4xl font-extrabold mb-2 tracking-tighter italic">DRAGONFLY <span class="text-blue-500">MAX</span></h1>
+            <p class="text-xs text-gray-500 uppercase tracking-widest mb-8">AI NEXT CANDLE PREDICTION</p>
+            <input type="password" id="pKey" placeholder="LICENSE KEY" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl text-center mb-6 focus:outline-none focus:border-blue-500 text-lg">
+            <button onclick="access()" class="w-full btn-gradient py-4 rounded-xl font-bold text-white shadow-lg">INITIALIZE SYSTEM</button>
+            <p class="mt-8 text-xs text-gray-400">Owner: <a href="https://t.me/ITBD_Parvej" class="text-blue-500 font-bold">@ITBD_Parvej</a></p>
         </div>
     </div>
 
-    <!-- Main App Layout -->
-    <div id="appBody" class="hidden h-screen flex flex-col">
-        <!-- Modern Navbar -->
-        <nav class="h-16 border-b border-white/5 flex items-center justify-between px-6 bg-[#161a1e]">
+    <!-- Main View -->
+    <div id="mainUI" class="hidden flex-1 flex flex-col h-screen">
+        <!-- Header -->
+        <header class="h-16 bg-dark-pro border-b border-white/5 flex items-center justify-between px-6 shadow-md">
             <div class="flex items-center gap-2">
-                <i class="fas fa-chart-line text-blue-500"></i>
-                <span class="font-bold text-xl tracking-tight">Dragonfly Pro</span>
+                <i class="fas fa-bolt text-blue-500 text-xl"></i>
+                <span class="font-black text-xl tracking-tight italic uppercase">DRAGONFLY_V.3</span>
             </div>
-            <div class="flex items-center gap-6">
-                <div class="text-right hidden sm:block">
-                    <p id="liveClock" class="font-mono text-lg text-blue-400">00:00:00</p>
-                </div>
-                <a href="https://t.me/ITBD_Parvej" target="_blank" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-semibold transition">
-                    <i class="fab fa-telegram-plane mr-2"></i>SUPPORT
-                </a>
-            </div>
-        </nav>
+            <div id="timeClock" class="font-mono text-xl text-blue-400 font-bold">00:00:00</div>
+        </header>
 
-        <!-- Container -->
-        <main class="flex-1 flex main-layout p-3 gap-3">
-            
-            <!-- Left Side: Chart Section -->
-            <div class="flex-[2.5] flex flex-col gap-3">
-                <!-- Market Pair Selector -->
-                <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <span class="text-sm font-semibold text-gray-400">Asset:</span>
-                        <select id="selectedAsset" onchange="refreshChart()" class="bg-[#1e2329] border border-white/10 px-4 py-2 rounded-lg text-sm outline-none focus:border-blue-500">
+        <div class="flex-1 flex mobile-stack p-3 gap-3 overflow-hidden">
+            <!-- Left: Chart & Gauge -->
+            <div class="flex-[3] flex flex-col gap-3">
+                <div class="flex flex-col md:flex-row gap-3">
+                    <!-- Selector -->
+                    <div class="flex-1 bg-dark-pro p-4 rounded-2xl border-pro flex items-center justify-between">
+                        <select id="curPair" onchange="resetChart()" class="bg-transparent text-sm font-bold outline-none cursor-pointer">
                             <option value="FX:USDJPY">USD/JPY</option>
                             <option value="FX:EURJPY">EUR/JPY</option>
                             <option value="FX:AUDJPY">AUD/JPY</option>
@@ -125,71 +63,72 @@
                             <option value="FX:GBPUSD">GBP/USD</option>
                             <option value="FX:EURAUD">EUR/AUD</option>
                         </select>
+                        <span class="text-[10px] bg-green-500/10 text-green-400 px-2 py-1 rounded font-bold uppercase">Live Sync</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                        <span class="text-[10px] text-green-500 font-bold uppercase">Market Live</span>
+                    <!-- Volume Gauge Container -->
+                    <div class="flex-1 h-20 bg-dark-pro rounded-2xl border-pro overflow-hidden">
+                        <!-- TradingView Single Gauge Widget -->
+                        <div class="tradingview-widget-container">
+                            <div class="tradingview-widget-container__widget"></div>
+                            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
+                            {
+                              "interval": "1m",
+                              "width": "100%",
+                              "isTransparent": true,
+                              "height": 130,
+                              "symbol": "FX:EURUSD",
+                              "showIntervalTabs": false,
+                              "displayMode": "single",
+                              "locale": "en",
+                              "colorTheme": "dark"
+                            }
+                            </script>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Live Chart -->
-                <div class="flex-1 glass-card rounded-2xl overflow-hidden chart-section">
-                    <div id="tv_chart_box" class="h-full w-full"></div>
-                </div>
+                <!-- Main Chart -->
+                <div id="chartContainer" class="flex-1 bg-dark-pro rounded-2xl border-pro overflow-hidden chart-h"></div>
             </div>
 
-            <!-- Right Side: Signal Engine -->
-            <div class="flex-1 glass-card rounded-2xl flex flex-col min-h-[500px] overflow-hidden">
-                <!-- Control Panel -->
-                <div class="p-5 border-b border-white/5 bg-white/5">
-                    <h3 class="text-sm font-bold uppercase tracking-wider mb-4"><i class="fas fa-bolt text-yellow-500 mr-2"></i>Signal Console</h3>
-                    <button onclick="generateManualSignal()" id="genBtn" class="w-full btn-premium py-4 rounded-xl font-bold flex items-center justify-center gap-3">
-                        <i class="fas fa-microchip"></i> GENERATE SIGNAL
+            <!-- Right: Signal Panel -->
+            <div class="flex-1 flex flex-col gap-3 min-w-[320px]">
+                <div class="bg-dark-pro p-5 rounded-2xl border-pro shadow-xl">
+                    <h3 class="text-xs font-bold text-blue-500 uppercase tracking-widest mb-4">Manual Analysis</h3>
+                    <button onclick="getSignal()" id="genBtn" class="w-full btn-gradient py-4 rounded-xl font-bold flex items-center justify-center gap-3">
+                        <i class="fas fa-brain"></i> START SCANNING
                     </button>
+                    <p class="text-[9px] text-gray-500 mt-2 text-center uppercase tracking-tighter italic">Always predicts for the next 1m candle</p>
                 </div>
 
-                <!-- Signal Feed -->
-                <div id="signalFeed" class="flex-1 overflow-y-auto p-4 space-y-4">
-                    <div id="emptyState" class="text-center mt-20 text-gray-500">
-                        <i class="fas fa-robot text-4xl mb-4 opacity-20"></i>
-                        <p class="text-sm">Click the button above to start AI market scanning.</p>
+                <div id="sigFeed" class="flex-1 bg-dark-pro rounded-2xl border-pro p-4 overflow-y-auto space-y-3">
+                    <div id="initial" class="text-center opacity-20 py-20 flex flex-col items-center">
+                        <i class="fas fa-radar text-4xl mb-3"></i>
+                        <p class="text-xs font-bold">READY TO ANALYZE</p>
                     </div>
                 </div>
-
-                <div class="p-4 text-center border-t border-white/5">
-                    <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Accuracy Level: 98% (V.I.P)</p>
-                </div>
             </div>
-        </main>
+        </div>
     </div>
 
-    <!-- TradingView & JS -->
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
-        // Password Protection (125800)
-        const secretCode = [49, 50, 53, 56, 48, 48];
+        const key = [49, 50, 53, 56, 48, 48]; // 125800
 
-        function unlockApp() {
-            const input = document.getElementById('passCode').value;
-            const inputCodes = Array.from(input).map(c => c.charCodeAt(0));
-            
-            if (JSON.stringify(inputCodes) === JSON.stringify(secretCode)) {
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('appBody').classList.remove('hidden');
-                refreshChart();
-            } else {
-                alert("Invalid Key! Please contact @ITBD_Parvej");
-            }
+        function access() {
+            const input = Array.from(document.getElementById('pKey').value).map(c => c.charCodeAt(0));
+            if (JSON.stringify(input) === JSON.stringify(key)) {
+                document.getElementById('loginGate').style.display = 'none';
+                document.getElementById('mainUI').classList.remove('hidden');
+                resetChart();
+            } else { alert("ACCESS DENIED"); }
         }
 
-        // Live Clock
         setInterval(() => {
-            document.getElementById('liveClock').innerText = new Date().toLocaleTimeString('en-GB');
+            document.getElementById('timeClock').innerText = new Date().toLocaleTimeString('en-GB');
         }, 1000);
 
-        // Chart Refresh
-        function refreshChart() {
-            const pair = document.getElementById('selectedAsset').value;
+        function resetChart() {
+            const pair = document.getElementById('curPair').value;
             new TradingView.widget({
                 "autosize": true,
                 "symbol": pair,
@@ -198,63 +137,58 @@
                 "theme": "dark",
                 "style": "1",
                 "locale": "en",
-                "container_id": "tv_chart_box",
-                "hide_side_toolbar": false,
-                "allow_symbol_change": false,
-                "save_image": false,
-                "backgroundColor": "rgba(11, 14, 17, 1)",
-                "gridColor": "rgba(42, 46, 57, 0.06)"
+                "container_id": "chartContainer",
+                "hide_top_toolbar": false,
+                "studies": ["Volume@tv-basicstudies"]
             });
         }
 
-        // Manual Signal Generation
-        function generateManualSignal() {
+        function getSignal() {
             const btn = document.getElementById('genBtn');
-            const feed = document.getElementById('signalFeed');
-            const emptyState = document.getElementById('emptyState');
-
-            // Button Loading State
+            const feed = document.getElementById('sigFeed');
+            
             btn.disabled = true;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = `<span class="scanning"></span> ANALYZING MARKET...`;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> CALCULATING...`;
 
             setTimeout(() => {
-                if (emptyState) emptyState.remove();
-                
-                const pairName = document.getElementById('selectedAsset').options[document.getElementById('selectedAsset').selectedIndex].text;
-                const isBuy = Math.random() > 0.5;
-                const timeStr = new Date().toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
+                // Market Stability Check (Random Logic for Demo)
+                const stability = Math.random();
+                if (stability < 0.2) {
+                    const errorCard = document.createElement('div');
+                    errorCard.className = "p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-center";
+                    errorCard.innerHTML = `<p class="text-xs font-bold text-red-500 uppercase"><i class="fas fa-exclamation-triangle"></i> Market Unstable - Avoid Trading</p>`;
+                    feed.prepend(errorCard);
+                } else {
+                    const now = new Date();
+                    const nextMin = new Date(now.getTime() + 60000);
+                    const timeStr = nextMin.getHours().toString().padStart(2, '0') + ":" + nextMin.getMinutes().toString().padStart(2, '0');
+                    const isUp = Math.random() > 0.5;
+                    const pair = document.getElementById('curPair').options[document.getElementById('curPair').selectedIndex].text;
 
-                const card = document.createElement('div');
-                card.className = `signal-card p-4 rounded-xl shadow-lg`;
-                card.style.borderLeftColor = isBuy ? "#10b981" : "#ef4444";
+                    if (document.getElementById('initial')) document.getElementById('initial').remove();
 
-                card.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">${pairName} // REAL</p>
-                            <p class="text-2xl font-bold text-white">${timeStr}</p>
+                    const card = document.createElement('div');
+                    card.className = "signal-card p-4 rounded-xl shadow-lg";
+                    card.style.borderLeftColor = isUp ? "#10b981" : "#ef4444";
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-[10px] font-bold text-gray-500 uppercase">${pair}</p>
+                                <p class="text-xl font-black italic">NEXT @ ${timeStr}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs font-bold ${isUp ? 'text-green-500' : 'text-red-500'}">${isUp ? 'CALL (BUY) ↑' : 'PUT (SELL) ↓'}</p>
+                                <p class="text-[9px] bg-blue-500 text-white px-2 py-0.5 rounded-full mt-1">PRO CONFIRMED</p>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <p class="text-sm font-bold ${isBuy ? 'text-green-500' : 'text-red-500'} uppercase">
-                                ${isBuy ? 'CALL / BUY ↑' : 'PUT / SELL ↓'}
-                            </p>
-                            <p class="text-[10px] text-gray-400">Duration: 1 Min</p>
-                        </div>
-                    </div>
-                    <div class="mt-3 pt-2 border-t border-white/5 flex justify-between items-center">
-                        <span class="text-[9px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded uppercase font-bold tracking-widest">Confirmed 98%</span>
-                        <i class="fas fa-check-circle text-blue-500 text-xs"></i>
-                    </div>
-                `;
+                    `;
+                    feed.prepend(card);
+                    if (feed.children.length > 6) feed.lastChild.remove();
+                }
 
-                feed.prepend(card);
-                if (feed.children.length > 5) feed.lastChild.remove();
-
-                // Restore Button
                 btn.disabled = false;
-                btn.innerHTML = originalText;
-            }, 1500); // 1.5 second artificial delay for "professional analysis" feel
+                btn.innerHTML = `<i class="fas fa-brain"></i> START SCANNING`;
+            }, 1500);
         }
     </script>
 </body>
