@@ -17,7 +17,8 @@
         .glass-panel { background: rgba(10, 13, 18, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; box-shadow: 0 10px 50px rgba(0,0,0,0.5); }
         .time-badge { background: linear-gradient(135deg, rgba(0, 242, 254, 0.1) 0%, rgba(0, 242, 254, 0.02) 100%); border: 1px solid rgba(0, 242, 254, 0.3); border-radius: 12px; padding: 8px 16px; }
         .btn-premium { background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #000; font-weight: 900; box-shadow: 0 0 30px rgba(0, 242, 254, 0.4); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .btn-premium:hover { transform: translateY(-2px); box-shadow: 0 0 45px rgba(0, 242, 254, 0.6); }
+        .btn-premium:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 0 45px rgba(0, 242, 254, 0.6); }
+        .btn-premium:disabled { background: #1e293b; color: #64748b; box-shadow: none; filter: grayscale(1); cursor: not-allowed; }
         .vip-signal-box { background: #0d1117; border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 28px; padding: 24px; position: relative; animation: slideUp 0.6s cubic-bezier(0.19, 1, 0.22, 1); }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         .conf-point { font-size: 9px; padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: #888; text-transform: uppercase; font-weight: 700; }
@@ -27,7 +28,7 @@
 </head>
 <body class="p-2 md:p-6 flex flex-col items-center">
 
-    <!-- Auth Layer (High Security) -->
+    <!-- Auth Layer (SHA-256 Secure) -->
     <div id="authGate" class="fixed inset-0 z-[10000] bg-black flex items-center justify-center p-6">
         <div class="glass-panel p-10 w-full max-w-sm text-center border-cyan-400/20 border">
             <div class="mb-6 inline-block p-4 bg-cyan-400/10 rounded-3xl border border-cyan-400/20">
@@ -41,7 +42,7 @@
         </div>
     </div>
 
-    <!-- Main Application UI -->
+    <!-- Main UI -->
     <div id="mainUI" class="hidden w-full max-w-xl flex flex-col gap-6">
         <header class="flex items-center justify-between py-4">
             <div class="flex items-center gap-3">
@@ -69,7 +70,7 @@
             </button>
         </section>
 
-        <!-- Node Status -->
+        <!-- Status -->
         <div class="grid grid-cols-2 gap-3">
             <div class="glass-panel p-3 text-center">
                 <p class="text-[8px] text-gray-500 uppercase mb-1">AI Calculation</p>
@@ -82,7 +83,7 @@
         </div>
 
         <!-- Signal Feed -->
-        <section id="feed" class="flex flex-col gap-6 pb-20">
+        <section id="feed" class="flex flex-col gap-6 pb-20 text-center">
             <div id="idle" class="py-20 flex flex-col items-center justify-center opacity-20 text-center">
                 <i class="fas fa-radar text-4xl mb-4 animate-pulse text-cyan-400"></i>
                 <p class="text-[10px] font-bold uppercase tracking-[4px]">Initializing Scanning Nodes...</p>
@@ -90,15 +91,12 @@
         </section>
     </div>
 
-    <!-- Scripting Engine -->
+    <!-- Logic Engine -->
     <script>
-        // SHA-256 Hash of "125800" (এটি কেউ ডিকোড করতে পারবে না)
-        const rootHash = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
+        const rootHash = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"; // 125800
 
         async function authorizeSession() {
             const input = document.getElementById('pInput').value;
-            
-            // Password Hashing Process
             const encoder = new TextEncoder();
             const data = encoder.encode(input);
             const hashBuffer = await crypto.subtle.digest('SHA-256', data);
@@ -108,12 +106,9 @@
             if (hashedInput === rootHash) {
                 document.getElementById('authGate').classList.add('hidden');
                 document.getElementById('mainUI').classList.remove('hidden');
-            } else {
-                alert("ACCESS_DENIED: UNAUTHORIZED_ROOT_PASSWORD");
-            }
+            } else { alert("ACCESS_DENIED: UNAUTHORIZED_ROOT"); }
         }
 
-        // Live Clock Engine
         setInterval(() => {
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB');
         }, 1000);
@@ -129,16 +124,22 @@
             setTimeout(() => {
                 if(idle) idle.remove();
                 
-                // Smart Anti-Opposite Filter
+                // Clear Previous Signal (Only one at a time)
+                feed.innerHTML = "";
+                
                 const marketMood = Math.random(); 
-                if (marketMood < 0.20) {
+                if (marketMood < 0.15) {
                     const error = document.createElement('div');
                     error.className = "vip-signal-box border-red-500/20 text-center bg-red-500/5";
-                    error.innerHTML = `<p class="text-[10px] font-bold text-red-500 uppercase tracking-widest italic"><i class="fas fa-shield-slash mr-2"></i>Signal Discarded: Market Volatility High. Skip Trading.</p>`;
-                    feed.prepend(error);
+                    error.innerHTML = `<p class="text-[10px] font-bold text-red-500 uppercase tracking-widest italic"><i class="fas fa-shield-slash mr-2"></i>Market Volatility High. Skip Trading.</p>`;
+                    feed.appendChild(error);
+                    
+                    // Reset button if market is bad
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-brain"></i> RUN AI DEEP SCAN`;
                 } else {
                     const now = new Date();
-                    const nextMin = new Date(now.getTime() + 60000); // Prediction for next candle
+                    const nextMin = new Date(now.getTime() + 60000);
                     const timeStr = nextMin.getHours().toString().padStart(2, '0') + ":" + nextMin.getMinutes().toString().padStart(2, '0');
                     const isUp = Math.random() > 0.5;
                     const pair = document.getElementById('assetSelect').value;
@@ -159,8 +160,6 @@
                                 <span class="text-[8px] bg-white/5 border border-white/10 px-3 py-1 rounded-full mt-2 inline-block font-bold text-cyan-400 uppercase italic">VIP SIGNAL</span>
                             </div>
                         </div>
-
-                        <!-- Technical Conf. Points -->
                         <div class="flex flex-wrap gap-2 mb-6">
                             <span class="conf-point conf-active">Trend: ${isUp ? 'Bullish' : 'Bearish'}</span>
                             <span class="conf-point conf-active">Delta: High Injection</span>
@@ -168,27 +167,40 @@
                             <span class="conf-point conf-active">Stoch: Aligned</span>
                             <span class="conf-point conf-active">Volume: Heavy</span>
                         </div>
-
-                        <div class="flex justify-between items-center p-4 bg-cyan-400/5 rounded-2xl border border-cyan-400/20 shadow-inner">
-                            <div class="flex items-center gap-3">
+                        <div class="flex justify-between items-center p-4 bg-cyan-400/5 rounded-2xl border border-cyan-400/20">
+                            <div class="flex items-center gap-3 text-left">
                                 <div class="p-2 bg-cyan-400/20 rounded-lg"><i class="fas fa-check-double text-cyan-400"></i></div>
                                 <div>
                                     <p class="text-[9px] font-black text-cyan-400 uppercase tracking-widest">VIP Integrity Check Passed</p>
                                     <p class="text-[7px] text-gray-500 uppercase mt-1 italic">Accuracy Simulation: 98.8%</p>
                                 </div>
                             </div>
-                            <span class="text-[9px] font-bold text-gray-600 italic">v5 Elite Node</span>
                         </div>
                     `;
-                    feed.prepend(card);
-                    if (feed.children.length > 5) feed.lastChild.remove();
+                    feed.appendChild(card);
+                    
+                    // Start Lock Timer (60 Seconds)
+                    startLockTimer(60);
                 }
-
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fas fa-brain"></i> RUN AI DEEP SCAN`;
                 window.scrollTo({top: 0, behavior: 'smooth'});
+            }, 2500);
+        }
 
-            }, 2500); // 2.5 second "deep analysis" feel
+        function startLockTimer(seconds) {
+            const btn = document.getElementById('scanBtn');
+            let timeLeft = seconds;
+            
+            const timer = setInterval(() => {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fas fa-lock mr-2"></i> TRADE IN PROGRESS (${timeLeft}s)`;
+                timeLeft--;
+                
+                if (timeLeft < 0) {
+                    clearInterval(timer);
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-brain"></i> RUN AI DEEP SCAN`;
+                }
+            }, 1000);
         }
     </script>
 </body>
