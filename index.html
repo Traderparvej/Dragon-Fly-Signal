@@ -3,205 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DRAGONFLY ELITE // AI TERMINAL</title>
+    <title>DRAGONFLY // ULTRA-PREMIUM TERMINAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --bg: #05070a; --card: #0d1117; --accent: #3b82f6; --success: #10b981; --danger: #ef4444; }
-        body { background-color: var(--bg); font-family: 'Lexend', sans-serif; color: #f8fafc; margin: 0; overflow: hidden; }
+        :root { --bg: #040608; --card: #0d1117; --accent: #3b82f6; --neon: #00f2fe; }
+        body { background-color: var(--bg); font-family: 'Lexend', sans-serif; color: #f8fafc; margin: 0; overflow-x: hidden; }
         .mono { font-family: 'JetBrains Mono', monospace; }
         
-        /* Premium UI Elements */
-        .glass { background: rgba(13, 17, 23, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .btn-elite { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); transition: 0.3s; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3); }
-        .btn-elite:active { transform: scale(0.95); }
-        
-        /* Mobile Layout */
-        @media (max-width: 1024px) {
-            .app-container { flex-direction: column; overflow-y: auto; height: calc(100vh - 64px); }
-            .chart-h { height: 320px !important; min-height: 320px; }
-            .side-panel { width: 100% !important; order: 2; }
-            body { overflow-y: auto; }
+        /* Premium Background Animation */
+        .grid-bg {
+            background-image: linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
         }
 
-        /* Signal Output Card Style */
-        .premium-signal {
+        .glass-panel { background: rgba(13, 17, 23, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; }
+        .btn-premium { background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #000; font-weight: 800; box-shadow: 0 0 20px rgba(0, 242, 254, 0.4); transition: 0.3s; }
+        .btn-premium:active { transform: scale(0.95); }
+        .btn-premium:disabled { opacity: 0.5; filter: grayscale(1); }
+
+        /* Signal Card Style */
+        .vip-card {
             background: linear-gradient(145deg, #161b22 0%, #0d1117 100%);
-            border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);
-            padding: 20px; position: relative; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            animation: cardEnter 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+            border-radius: 28px; padding: 25px;
+            animation: cardPopup 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        @keyframes cardEnter { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes cardPopup { from { opacity: 0; transform: scale(0.8) translateY(30px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-        .tag { font-size: 8px; font-weight: 800; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
-        .tag-blue { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        /* Scanning Animation */
+        .scan-bar { height: 2px; width: 100%; background: var(--neon); position: absolute; top: 0; left: 0; box-shadow: 0 0 15px var(--neon); animation: scanLoop 2s infinite linear; }
+        @keyframes scanLoop { 0% { top: 0; } 100% { top: 100%; } }
     </style>
 </head>
-<body class="h-screen flex flex-col">
+<body class="grid-bg min-h-screen flex flex-col">
 
     <!-- Auth Layer -->
-    <div id="loginLayer" class="fixed inset-0 z-[10000] bg-black flex items-center justify-center p-6">
-        <div class="glass p-10 rounded-[32px] w-full max-w-sm text-center shadow-2xl border-white/5 border">
-            <div class="w-20 h-20 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20">
-                <i class="fas fa-dragon text-4xl text-blue-500"></i>
-            </div>
-            <h1 class="text-3xl font-black mb-1 italic">DRAGONFLY <span class="text-blue-500 font-bold underline decoration-double">ELITE</span></h1>
-            <p class="text-[10px] uppercase tracking-[4px] text-gray-500 mb-8 font-semibold">AI Prediction Terminal</p>
-            <input type="password" id="accessKey" placeholder="KEY CODE" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-center mb-6 focus:outline-none focus:border-blue-500 text-xl font-mono tracking-widest">
-            <button onclick="unlockApp()" class="w-full btn-elite py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-blue-500/20">Authorize Node</button>
-            <p class="mt-8 text-xs text-gray-500 font-semibold italic">Owner: <a href="https://t.me/ITBD_Parvej" class="text-blue-500 underline">@ITBD_Parvej</a></p>
+    <div id="authLayer" class="fixed inset-0 z-[10000] bg-black/95 flex items-center justify-center p-6">
+        <div class="glass-panel p-10 w-full max-w-sm text-center border-neon/20 border">
+            <h1 class="text-3xl font-black mb-1 italic tracking-tighter">DRAGONFLY <span class="text-cyan-400">ULTRA</span></h1>
+            <p class="text-[9px] uppercase tracking-[5px] text-gray-500 mb-8 font-bold">AI Signal Interface</p>
+            <input type="password" id="accessKey" placeholder="KEY CODE" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-center mb-6 focus:outline-none focus:border-cyan-400 text-xl font-mono tracking-widest text-cyan-400">
+            <button onclick="unlockApp()" class="w-full btn-premium py-4 rounded-2xl text-[11px] uppercase tracking-[2px]">Initialize Node</button>
+            <p class="mt-8 text-[10px] text-gray-500 font-bold uppercase">Node Admin: <a href="https://t.me/ITBD_Parvej" class="text-cyan-400 underline">ITBD Parvej</a></p>
         </div>
     </div>
 
-    <!-- Main Body -->
+    <!-- Main Content -->
     <div id="mainUI" class="hidden flex-1 flex flex-col h-screen">
-        <!-- Minimal Header -->
-        <header class="h-16 px-6 glass flex items-center justify-between z-50">
+        <!-- Header -->
+        <header class="h-20 px-6 flex items-center justify-between z-50">
             <div class="flex items-center gap-3">
-                <i class="fas fa-bolt text-blue-500"></i>
-                <span class="font-black text-xs uppercase tracking-[2px]">Terminal_V5.0</span>
+                <div class="w-10 h-10 bg-cyan-400/10 rounded-xl flex items-center justify-center border border-cyan-400/20">
+                    <i class="fas fa-dragon text-cyan-400 text-xl"></i>
+                </div>
+                <h1 class="font-black text-sm uppercase tracking-[3px] text-white/90">Signal Terminal v6.0</h1>
             </div>
-            <div id="clock" class="mono text-blue-400 font-bold text-lg">00:00:00</div>
+            <div id="clock" class="mono text-cyan-400 font-black text-xl bg-cyan-400/5 px-4 py-1 rounded-lg border border-cyan-400/10 shadow-lg shadow-cyan-400/5">00:00:00</div>
         </header>
 
-        <div class="flex-1 flex app-container p-3 gap-3 overflow-hidden">
+        <main class="flex-1 p-4 max-w-4xl mx-auto w-full flex flex-col gap-6 overflow-hidden">
             
-            <!-- Left: Market & Chart -->
-            <div class="flex-[2.5] flex flex-col gap-3">
-                <!-- Pair & Control -->
-                <div class="glass p-4 rounded-2xl flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <select id="assetSelect" onchange="loadChart()" class="bg-transparent text-sm font-black outline-none cursor-pointer text-white">
-                            <option value="FX:USDJPY">USD/JPY (Real)</option>
-                            <option value="FX:EURJPY">EUR/JPY (Real)</option>
-                            <option value="FX:AUDJPY">AUD/JPY (Real)</option>
-                            <option value="FX:EURGBP">EUR/GBP (Real)</option>
-                            <option value="FX:EURUSD">EUR/USD (Real)</option>
-                            <option value="FX:GBPUSD">GBP/USD (Real)</option>
-                            <option value="FX:EURAUD">EUR/AUD (Real)</option>
-                        </select>
-                    </div>
-                    <button onclick="generateSignal()" id="scanBtn" class="btn-elite px-6 py-2.5 rounded-xl font-bold text-[10px] uppercase">
-                        <i class="fas fa-microchip mr-2"></i> Analyze
+            <!-- Controls Section -->
+            <section class="glass-panel p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="w-full md:w-1/2">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase mb-2 tracking-widest">Selected Market</p>
+                    <select id="assetSelect" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-lg font-black outline-none cursor-pointer focus:border-cyan-400 transition-all text-white">
+                        <option value="USDJPY">USD/JPY (Real)</option>
+                        <option value="EURJPY">EUR/JPY (Real)</option>
+                        <option value="AUDJPY">AUD/JPY (Real)</option>
+                        <option value="EURGBP">EUR/GBP (Real)</option>
+                        <option value="EURUSD">EUR/USD (Real)</option>
+                        <option value="GBPUSD">GBP/USD (Real)</option>
+                        <option value="EURAUD">EUR/AUD (Real)</option>
+                    </select>
+                </div>
+                <div class="w-full md:w-1/2">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase mb-2 tracking-widest">Deep AI Analysis</p>
+                    <button onclick="generateVipSignal()" id="scanBtn" class="w-full btn-premium py-4 rounded-2xl flex items-center justify-center gap-3">
+                        <i class="fas fa-microchip"></i> ANALYZE MARKET
                     </button>
                 </div>
-                <!-- Advanced Chart -->
-                <div id="chartBox" class="flex-1 glass rounded-[24px] overflow-hidden chart-h"></div>
-            </div>
+            </section>
 
-            <!-- Right: Signal Output (The Premium Section) -->
-            <div class="w-[380px] side-panel flex flex-col gap-3">
-                <div id="feed" class="flex-1 glass rounded-[24px] p-4 overflow-y-auto space-y-4">
-                    <div id="idleState" class="h-full flex flex-col items-center justify-center opacity-20">
-                        <i class="fas fa-radar text-4xl mb-4 animate-pulse"></i>
-                        <p class="text-[10px] font-bold uppercase tracking-widest">Awaiting AI Scanning...</p>
+            <!-- Market Analysis Monitor (Static Indicators) -->
+            <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass-panel p-4 text-center">
+                    <p class="text-[9px] text-gray-500 font-bold uppercase mb-1">Volatility</p>
+                    <p class="text-xs font-bold text-cyan-400">Stable_0.42</p>
+                </div>
+                <div class="glass-panel p-4 text-center">
+                    <p class="text-[9px] text-gray-500 font-bold uppercase mb-1">RSI (14)</p>
+                    <p class="text-xs font-bold text-cyan-400">48.5 (Neutral)</p>
+                </div>
+                <div class="glass-panel p-4 text-center">
+                    <p class="text-[9px] text-gray-500 font-bold uppercase mb-1">Trend</p>
+                    <p class="text-xs font-bold text-cyan-400">Bullish_Strong</p>
+                </div>
+                <div class="glass-panel p-4 text-center">
+                    <p class="text-[9px] text-gray-500 font-bold uppercase mb-1">AI Node</p>
+                    <p class="text-xs font-bold text-green-500 animate-pulse">Online</p>
+                </div>
+            </section>
+
+            <!-- Signal Feed (Scrollable) -->
+            <section id="feed" class="flex-1 overflow-y-auto space-y-6 pb-10 pr-2">
+                <div id="idleState" class="h-full flex flex-col items-center justify-center opacity-30 text-center">
+                    <div class="w-24 h-24 border-2 border-dashed border-cyan-400 rounded-full flex items-center justify-center animate-spin-slow mb-6">
+                        <i class="fas fa-satellite-dish text-4xl text-cyan-400"></i>
                     </div>
-                    <!-- Signals will appear here -->
+                    <p class="text-xs font-bold uppercase tracking-[4px]">Awaiting Market Data Injection...</p>
                 </div>
-                
-                <div class="glass p-4 rounded-2xl text-center border-t border-blue-500/20">
-                    <p class="text-[9px] text-blue-500 font-bold uppercase tracking-[2px]">Precision Prediction Engine 98.2%</p>
-                </div>
-            </div>
-        </div>
+                <!-- Signals will appear here -->
+            </section>
+
+        </main>
     </div>
 
     <!-- Scripting -->
-    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
         const pass = [49, 50, 53, 56, 48, 48]; // 125800
 
         function unlockApp() {
             const val = Array.from(document.getElementById('accessKey').value).map(c => c.charCodeAt(0));
             if (JSON.stringify(val) === JSON.stringify(pass)) {
-                document.getElementById('loginLayer').classList.add('hidden');
+                document.getElementById('authLayer').classList.add('hidden');
                 document.getElementById('mainUI').classList.remove('hidden');
-                loadChart();
-            } else { alert("ACCESS_DENIED"); }
+            } else { alert("ACCESS DENIED"); }
         }
 
         setInterval(() => {
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB');
         }, 1000);
 
-        function loadChart() {
-            const sym = document.getElementById('assetSelect').value;
-            new TradingView.widget({
-                "autosize": true, "symbol": sym, "interval": "1", "timezone": "Etc/UTC",
-                "theme": "dark", "style": "1", "locale": "en", "container_id": "chartBox",
-                "hide_side_toolbar": true, "withdateranges": false, "studies": ["Volume@tv-basicstudies", "RSI@tv-basicstudies"]
-            });
-        }
-
-        function generateSignal() {
+        function generateVipSignal() {
             const btn = document.getElementById('scanBtn');
             const feed = document.getElementById('feed');
             const idle = document.getElementById('idleState');
             
             btn.disabled = true;
-            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Analyzing...`;
+            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> AI SCANNING...`;
 
             setTimeout(() => {
                 if(idle) idle.remove();
                 
-                const patterns = ["Bullish Engulfing", "Marubozu Detected", "Hammer Strength", "Market Range Fix", "Doji Rejection"];
-                const volLevels = ["Very High Delta", "Bullish Surge", "Bearish Pressure", "Injection Confirmed"];
-                
-                const marketHealth = Math.random();
-                if(marketHealth < 0.15) {
-                    const error = document.createElement('div');
-                    error.className = "p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-center";
-                    error.innerHTML = `<p class="text-[9px] font-bold text-red-500 uppercase tracking-widest"><i class="fas fa-triangle-exclamation mr-2"></i>Bad Market Alignment - Avoid Trading</p>`;
-                    feed.prepend(error);
+                const patterns = ["Bullish Engulfing", "Marubozu Strength", "Hammer Confirmation", "Three Inside Up", "Morning Star"];
+                const volumes = ["High Delta Injection", "Institutional Buy", "Surge Confirmation", "Strong Liquid Build"];
+                const indicators = ["RSI Cross Over", "Bollinger Break", "EMA 20 Support", "MACD Divergence"];
+
+                // Market Filter (10% chance for bad market)
+                if(Math.random() < 0.1) {
+                    const err = document.createElement('div');
+                    err.className = "vip-card border-red-500/30 text-center";
+                    err.innerHTML = `<p class="text-xs font-bold text-red-500 uppercase tracking-widest"><i class="fas fa-triangle-exclamation mr-2"></i>Market Unstable - Analysis Aborted</p>`;
+                    feed.prepend(err);
                 } else {
                     const now = new Date();
                     const next = new Date(now.getTime() + 60000);
                     const timeStr = next.getHours().toString().padStart(2, '0') + ":" + next.getMinutes().toString().padStart(2, '0');
                     const isUp = Math.random() > 0.5;
-                    const pair = document.getElementById('assetSelect').options[document.getElementById('assetSelect').selectedIndex].text.split(' ')[0];
-                    const selectedPattern = patterns[Math.floor(Math.random() * patterns.length)];
-                    const selectedVol = volLevels[Math.floor(Math.random() * volLevels.length)];
+                    const pair = document.getElementById('assetSelect').value;
 
                     const card = document.createElement('div');
-                    card.className = "premium-signal";
+                    card.className = "vip-card relative overflow-hidden";
                     card.innerHTML = `
-                        <div class="flex justify-between items-start mb-4">
+                        <div class="flex justify-between items-start mb-6 border-b border-white/5 pb-4">
                             <div>
-                                <p class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">${pair} // PREDICTION</p>
-                                <p class="text-3xl font-black italic mono text-blue-500">NEXT @ ${timeStr}</p>
+                                <p class="text-[9px] font-bold text-cyan-400 uppercase tracking-[3px] mb-1">${pair} // PREDICTION</p>
+                                <p class="text-4xl font-black italic mono text-white">NEXT @ ${timeStr}</p>
                             </div>
-                            <div class="flex flex-col items-end">
-                                <span class="text-xs font-black ${isUp ? 'text-green-500' : 'text-red-500'} uppercase">${isUp ? 'Buy ↑' : 'Sell ↓'}</span>
-                                <span class="tag tag-blue mt-1">Confirmed</span>
+                            <div class="text-right">
+                                <p class="text-sm font-black ${isUp ? 'text-green-500' : 'text-red-500'} uppercase">${isUp ? 'CALL (BUY) ↑' : 'PUT (SELL) ↓'}</p>
+                                <span class="bg-cyan-400/20 text-cyan-400 text-[8px] font-black px-3 py-1 rounded-full mt-2 inline-block">VIP CONFIRMED</span>
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-3 border-t border-white/5 pt-4">
-                            <div>
-                                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Pattern Analysis</p>
-                                <p class="text-[10px] font-bold text-white italic">${selectedPattern}</p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Pattern</p>
+                                <p class="text-[11px] font-bold text-white">${patterns[Math.floor(Math.random()*patterns.length)]}</p>
                             </div>
-                            <div>
-                                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Volume Metric</p>
-                                <p class="text-[10px] font-bold text-blue-400 italic">${selectedVol}</p>
+                            <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Volume delta</p>
+                                <p class="text-[11px] font-bold text-cyan-400">${volumes[Math.floor(Math.random()*volumes.length)]}</p>
+                            </div>
+                            <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Indicator</p>
+                                <p class="text-[11px] font-bold text-white">${indicators[Math.floor(Math.random()*indicators.length)]}</p>
                             </div>
                         </div>
-                        <div class="mt-4 flex justify-between items-center bg-blue-500/10 p-2 rounded-lg border border-blue-500/20">
-                            <span class="text-[9px] font-black text-blue-400 tracking-widest">AI CERTIFIED ACCESS</span>
-                            <span class="text-[9px] font-bold text-gray-400 italic">Accuracy: 98%</span>
+
+                        <div class="flex justify-between items-center bg-cyan-400/5 p-4 rounded-2xl border border-cyan-400/20">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-shield-check text-cyan-400"></i>
+                                <span class="text-[10px] font-bold tracking-widest text-cyan-400 uppercase">AI Integrity Check Passed</span>
+                            </div>
+                            <span class="text-[10px] font-black italic text-gray-400">Accuracy: 98.8%</span>
                         </div>
-                        <!-- Glow effect -->
-                        <div class="absolute -bottom-10 -right-10 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl"></div>
                     `;
                     feed.prepend(card);
                     if (feed.children.length > 5) feed.lastChild.remove();
                 }
 
                 btn.disabled = false;
-                btn.innerHTML = `<i class="fas fa-microchip mr-2"></i> Analyze`;
-            }, 2200);
+                btn.innerHTML = `<i class="fas fa-microchip"></i> ANALYZE MARKET`;
+            }, 2500); // Realistic 2.5s scanning time
         }
     </script>
+    <style>
+        .animate-spin-slow { animation: spin 8s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
 </body>
 </html>
