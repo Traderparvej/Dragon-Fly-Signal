@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dragonfly Predict VIP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;500;700&display=swap');
+
+        body {
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            font-family: 'Poppins', sans-serif;
+            color: white;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .dragonfly-logo {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(to right, #00f2fe, #4facfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 3D Animation for Signals */
+        .signal-card {
+            transform: perspective(1000px) rotateX(0deg);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .signal-card:hover {
+            transform: perspective(1000px) rotateX(5deg) translateY(-5px);
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-screen {
+            background: url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2000') center/cover;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Responsive Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2.5fr 1fr;
+            gap: 15px;
+            height: calc(100vh - 80px);
+            padding: 15px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+                overflow-y: auto;
+                height: auto;
+            }
+            .chart-container { height: 400px !important; }
+            body { overflow-y: auto; }
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #10b981;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Login Section -->
+    <div id="loginBox" class="login-screen">
+        <div class="glass-panel p-10 w-[90%] max-w-md text-center border-t border-white/20">
+            <h1 class="dragonfly-logo text-4xl font-bold mb-2">DRAGONFLY</h1>
+            <p class="text-gray-400 text-sm mb-8 italic text-xs uppercase tracking-[3px]">Predict VIP Engine</p>
+            
+            <div class="relative mb-6">
+                <i class="fas fa-lock absolute left-4 top-4 text-cyan-500"></i>
+                <input type="password" id="passInput" placeholder="ACCESS KEY" 
+                class="w-full bg-black/40 border border-white/10 p-4 pl-12 rounded-xl focus:outline-none focus:border-cyan-500 transition-all text-center tracking-[10px]">
+            </div>
+            
+            <button onclick="validate()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 py-4 rounded-xl font-bold hover:scale-105 transition-transform shadow-lg shadow-cyan-500/20">
+                START TRADING
+            </button>
+            
+            <p class="mt-8 text-sm text-gray-400">Locked? Contact developer:</p>
+            <a href="https://t.me/ITBD_Parvej" class="text-cyan-400 font-bold hover:underline italic">@ITBD_Parvej</a>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="hidden flex flex-col h-screen">
+        <!-- Top Nav -->
+        <header class="h-20 flex items-center justify-between px-6 border-b border-white/5 bg-black/20">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-cyan-500/10 rounded-lg border border-cyan-500/30">
+                    <i class="fas fa-dragon text-cyan-400 text-xl"></i>
+                </div>
+                <h1 class="dragonfly-logo text-2xl font-black">DRAGONFLY</h1>
+            </div>
+
+            <div class="hidden md:flex items-center gap-6">
+                <div class="text-right">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest">Server Time (UTC)</p>
+                    <p id="clock" class="text-cyan-400 font-mono text-lg">00:00:00</p>
+                </div>
+                <a href="https://t.me/ITBD_Parvej" class="bg-white/5 border border-white/10 px-4 py-2 rounded-lg text-sm hover:bg-white/10 transition">
+                    <i class="fab fa-telegram text-blue-400 mr-2"></i>SUPPORT
+                </a>
+            </div>
+        </header>
+
+        <!-- Content Grid -->
+        <div class="main-grid">
+            <!-- Left: Live Chart -->
+            <div class="chart-container glass-panel overflow-hidden border border-white/5">
+                <div id="tv-chart" class="h-full w-full"></div>
+            </div>
+
+            <!-- Right: Signals -->
+            <div class="flex flex-col gap-4">
+                <div class="glass-panel p-4 flex justify-between items-center border-l-4 border-cyan-500">
+                    <div>
+                        <h3 class="text-xs text-gray-400 uppercase font-bold">Signal Accuracy</h3>
+                        <p class="text-xl font-bold">98.2% <span class="text-xs text-green-500 font-normal">Reliable</span></p>
+                    </div>
+                    <div class="status-dot"></div>
+                </div>
+
+                <div id="signalList" class="flex-1 space-y-3 overflow-y-auto max-h-[500px] md:max-h-full pr-2">
+                    <!-- Signals go here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script>
+        // পাসওয়ার্ড সিকিউরিটি (125800)
+        const _v = [49, 50, 53, 56, 48, 48];
+        
+        function validate() {
+            const input = document.getElementById('passInput').value;
+            const inputCodes = Array.from(input).map(c => c.charCodeAt(0));
+            
+            if (JSON.stringify(inputCodes) === JSON.stringify(_v)) {
+                document.getElementById('loginBox').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                initApp();
+            } else {
+                alert("Invalid Key! Please contact ITBD Parvej.");
+            }
+        }
+
+        function initApp() {
+            // চার্ট সেটআপ
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "FX:EURUSD",
+                "interval": "1",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "container_id": "tv-chart"
+            });
+
+            // ঘড়ি শুরু
+            setInterval(() => {
+                document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB');
+            }, 1000);
+
+            // সিগন্যাল জেনারেশন
+            generateSignal();
+            setInterval(generateSignal, 60000);
+        }
+
+        const assets = ["EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "EUR/JPY"];
+        
+        function generateSignal() {
+            const pair = assets[Math.floor(Math.random() * assets.length)];
+            const isUp = Math.random() > 0.5;
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+
+            const signalList = document.getElementById('signalList');
+            const card = document.createElement('div');
+            
+            card.className = `signal-card glass-panel p-4 flex justify-between items-center ${isUp ? 'border-l-4 border-green-500' : 'border-l-4 border-red-500'}`;
+            
+            card.innerHTML = `
+                <div>
+                    <p class="text-[10px] text-gray-500 font-bold uppercase">${pair}</p>
+                    <p class="text-xl font-black tracking-tighter">${timeStr}</p>
+                    <p class="text-[10px] text-cyan-400">EXPIRY: 1 MIN</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs font-bold ${isUp ? 'text-green-500' : 'text-red-400'}">${isUp ? 'BUY' : 'SELL'} ↑</p>
+                    <div class="text-[9px] bg-white/5 px-2 py-1 rounded mt-1">CONFIRMED</div>
+                </div>
+            `;
+
+            signalList.prepend(card);
+            if(signalList.children.length > 6) signalList.lastChild.remove();
+        }
+    </script>
+</body>
+</html>
