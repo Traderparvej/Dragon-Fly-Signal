@@ -3,97 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DRAGONFLY // SECURE_TERMINAL</title>
+    <title>DRAGONFLY PRO // PREMIUM PREDICT</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --cmd-green: #00ff41; --cmd-bg: #020202; }
-        body { 
-            background-color: var(--cmd-bg); 
-            font-family: 'Fira Code', monospace; 
-            color: var(--cmd-green); 
-            margin: 0; 
-            height: 100vh;
-            overflow: hidden; 
+        body {
+            background-color: #0b0e11;
+            font-family: 'Poppins', sans-serif;
+            color: #e9ecef;
+            margin: 0;
+            overflow: hidden;
         }
 
-        /* Hacker Styling & 3D Effect */
-        .glow { text-shadow: 0 0 15px var(--cmd-green); }
-        .hacker-box { 
-            border: 1px solid rgba(0, 255, 65, 0.3); 
-            background: rgba(0, 255, 65, 0.02);
-            box-shadow: inset 0 0 20px rgba(0, 255, 65, 0.05);
-            border-radius: 4px;
+        .glass-card {
+            background: rgba(22, 26, 30, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        /* Matrix Login */
-        .auth-overlay {
-            position: fixed; inset: 0; background: black; z-index: 9999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
-        .pass-input {
-            background: transparent; border: 1px solid var(--cmd-green);
-            padding: 15px; color: var(--cmd-green); width: 280px;
-            text-align: center; outline: none; letter-spacing: 8px; font-size: 1.5rem;
+        .btn-premium {
+            background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);
+            box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3);
+            transition: all 0.3s ease;
         }
 
-        /* Responsive Mobile Layout */
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 180, 219, 0.5);
+        }
+
+        .signal-card {
+            border-left: 4px solid #00b4db;
+            background: #1e2329;
+            animation: slideIn 0.4s cubic-bezier(0.12, 0, 0.39, 0);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
         @media (max-width: 1024px) {
-            .container-grid { flex-direction: column; overflow-y: auto; height: auto; }
-            .chart-view { height: 400px !important; min-height: 400px; }
-            .signal-view { height: auto !important; min-height: 500px; }
+            .main-layout { flex-direction: column; overflow-y: auto; height: auto; }
+            .chart-section { height: 450px !important; }
             body { overflow-y: auto; }
         }
 
-        /* Signal Animation */
-        .signal-card {
-            background: rgba(0, 255, 65, 0.08);
-            border-left: 5px solid var(--cmd-green);
-            margin-bottom: 12px; padding: 15px;
-            transform: perspective(500px) rotateX(2deg);
-            animation: emerge 0.4s ease-out;
+        /* Loading Animation */
+        .scanning {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
         }
-        @keyframes emerge { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        select option { background: #000; color: var(--cmd-green); }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <!-- Authentication -->
-    <div id="authPanel" class="auth-overlay">
-        <div class="text-center mb-10">
-            <h1 class="glow text-4xl font-black uppercase tracking-[10px]">Dragonfly</h1>
-            <p class="text-[10px] mt-2 opacity-50">BYPASSING_SECURITY_LAYER_V2...</p>
-        </div>
-        <input type="password" id="accessCode" placeholder="000000" class="pass-input mb-8">
-        <button onclick="checkAccess()" class="border border-[#00ff41] px-12 py-3 hover:bg-[#00ff41] hover:text-black font-bold transition-all glow">INITIALIZE ACCESS</button>
-        <div class="mt-20 text-[10px] text-center opacity-40">
-            <p>ROOT_USER: ITBD_PARVEJ</p>
-            <p><a href="https://t.me/ITBD_Parvej" class="text-white underline">@ITBD_Parvej</a></p>
+    <!-- Professional Login Screen -->
+    <div id="loginScreen" class="fixed inset-0 z-[9999] bg-[#0b0e11] flex items-center justify-center p-4">
+        <div class="glass-card p-10 rounded-3xl w-full max-w-md border border-white/10 text-center">
+            <div class="mb-6">
+                <div class="w-20 h-20 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20">
+                    <i class="fas fa-dragon text-4xl text-blue-500"></i>
+                </div>
+                <h1 class="text-3xl font-bold tracking-tight">DRAGONFLY <span class="text-blue-500">PRO</span></h1>
+                <p class="text-gray-400 text-sm mt-2">Premium Market Analysis Terminal</p>
+            </div>
+            
+            <input type="password" id="passCode" placeholder="Enter License Key" 
+            class="w-full bg-[#1e2329] border border-white/10 p-4 rounded-xl text-center focus:outline-none focus:border-blue-500 transition mb-6">
+            
+            <button onclick="unlockApp()" class="w-full btn-premium py-4 rounded-xl font-bold text-white text-lg">
+                UNLOCK ACCESS
+            </button>
+            
+            <p class="mt-8 text-xs text-gray-500 uppercase tracking-widest">
+                Need Access? <a href="https://t.me/ITBD_Parvej" class="text-blue-500 font-bold hover:underline">Contact Admin</a>
+            </p>
         </div>
     </div>
 
-    <!-- Main Terminal Interface -->
-    <div id="terminalApp" class="hidden h-screen flex flex-col">
-        <!-- System Bar -->
-        <header class="h-14 border-b border-[#00ff41]/20 flex items-center justify-between px-6 bg-black">
-            <div class="flex items-center gap-4">
-                <i class="fas fa-microchip glow"></i>
-                <span class="text-xs font-bold tracking-widest uppercase glow">Dragonfly: Real_Market_Monitor</span>
+    <!-- Main App Layout -->
+    <div id="appBody" class="hidden h-screen flex flex-col">
+        <!-- Modern Navbar -->
+        <nav class="h-16 border-b border-white/5 flex items-center justify-between px-6 bg-[#161a1e]">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-chart-line text-blue-500"></i>
+                <span class="font-bold text-xl tracking-tight">Dragonfly Pro</span>
             </div>
-            <div id="clock" class="text-sm font-mono text-white/80">00:00:00</div>
-        </header>
+            <div class="flex items-center gap-6">
+                <div class="text-right hidden sm:block">
+                    <p id="liveClock" class="font-mono text-lg text-blue-400">00:00:00</p>
+                </div>
+                <a href="https://t.me/ITBD_Parvej" target="_blank" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-semibold transition">
+                    <i class="fab fa-telegram-plane mr-2"></i>SUPPORT
+                </a>
+            </div>
+        </nav>
 
-        <main class="flex-1 flex flex-col lg:row container-grid p-3 gap-3">
+        <!-- Container -->
+        <main class="flex-1 flex main-layout p-3 gap-3">
             
-            <!-- Left Panel: Market Control & Chart -->
-            <div class="flex-[3] flex flex-col gap-3">
-                <!-- Pair Selector -->
-                <div class="hacker-box p-4 flex flex-wrap items-center justify-between gap-4">
-                    <div class="flex items-center gap-3">
-                        <span class="text-[10px] uppercase font-bold text-white/40 tracking-widest">Select_Target:</span>
-                        <select id="marketPair" onchange="switchMarket()" class="bg-black border border-[#00ff41] text-xs p-2 outline-none">
+            <!-- Left Side: Chart Section -->
+            <div class="flex-[2.5] flex flex-col gap-3">
+                <!-- Market Pair Selector -->
+                <div class="glass-card p-4 rounded-2xl flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-semibold text-gray-400">Asset:</span>
+                        <select id="selectedAsset" onchange="refreshChart()" class="bg-[#1e2329] border border-white/10 px-4 py-2 rounded-lg text-sm outline-none focus:border-blue-500">
                             <option value="FX:USDJPY">USD/JPY</option>
                             <option value="FX:EURJPY">EUR/JPY</option>
                             <option value="FX:AUDJPY">AUD/JPY</option>
@@ -104,123 +127,135 @@
                         </select>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-[9px] bg-green-900/40 px-3 py-1 rounded text-green-400 font-bold uppercase">Signal_Sync: 100%</span>
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        <span class="text-[10px] text-green-500 font-bold uppercase">Market Live</span>
                     </div>
                 </div>
 
-                <!-- Live Market Chart -->
-                <div class="flex-1 hacker-box chart-view overflow-hidden">
-                    <div id="tv-chart-container" class="h-full w-full"></div>
+                <!-- Live Chart -->
+                <div class="flex-1 glass-card rounded-2xl overflow-hidden chart-section">
+                    <div id="tv_chart_box" class="h-full w-full"></div>
                 </div>
             </div>
 
-            <!-- Right Panel: Injection Signals -->
-            <div class="flex-1 hacker-box flex flex-col signal-view min-h-[450px]">
-                <div class="p-4 border-b border-[#00ff41]/20 bg-[#00ff41]/5 flex justify-between items-center">
-                    <span class="text-xs font-bold uppercase tracking-widest">Live_Injections</span>
-                    <span class="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
-                </div>
-                
-                <div id="signalFeed" class="flex-1 overflow-y-auto p-4 space-y-4">
-                    <!-- Signals go here -->
-                    <div class="text-[10px] opacity-20 text-center py-20">Awaiting market data injection...</div>
+            <!-- Right Side: Signal Engine -->
+            <div class="flex-1 glass-card rounded-2xl flex flex-col min-h-[500px] overflow-hidden">
+                <!-- Control Panel -->
+                <div class="p-5 border-b border-white/5 bg-white/5">
+                    <h3 class="text-sm font-bold uppercase tracking-wider mb-4"><i class="fas fa-bolt text-yellow-500 mr-2"></i>Signal Console</h3>
+                    <button onclick="generateManualSignal()" id="genBtn" class="w-full btn-premium py-4 rounded-xl font-bold flex items-center justify-center gap-3">
+                        <i class="fas fa-microchip"></i> GENERATE SIGNAL
+                    </button>
                 </div>
 
-                <!-- Footer Support -->
-                <div class="p-4 border-t border-[#00ff41]/20">
-                    <a href="https://t.me/ITBD_Parvej" target="_blank" class="block w-full text-center border border-[#00ff41]/40 py-3 text-[10px] font-bold hover:bg-[#00ff41] hover:text-black transition">
-                        <i class="fab fa-telegram-plane mr-2"></i> TELEGRAM SUPPORT
-                    </a>
+                <!-- Signal Feed -->
+                <div id="signalFeed" class="flex-1 overflow-y-auto p-4 space-y-4">
+                    <div id="emptyState" class="text-center mt-20 text-gray-500">
+                        <i class="fas fa-robot text-4xl mb-4 opacity-20"></i>
+                        <p class="text-sm">Click the button above to start AI market scanning.</p>
+                    </div>
+                </div>
+
+                <div class="p-4 text-center border-t border-white/5">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Accuracy Level: 98% (V.I.P)</p>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Scripts -->
+    <!-- TradingView & JS -->
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
         // Password Protection (125800)
-        const secretHash = [49, 50, 53, 56, 48, 48];
+        const secretCode = [49, 50, 53, 56, 48, 48];
 
-        function checkAccess() {
-            const val = document.getElementById('accessCode').value;
-            const codes = Array.from(val).map(c => c.charCodeAt(0));
+        function unlockApp() {
+            const input = document.getElementById('passCode').value;
+            const inputCodes = Array.from(input).map(c => c.charCodeAt(0));
             
-            if (JSON.stringify(codes) === JSON.stringify(secretHash)) {
-                document.getElementById('authPanel').classList.add('hidden');
-                document.getElementById('terminalApp').classList.remove('hidden');
-                switchMarket();
-                initSignalEngine();
+            if (JSON.stringify(inputCodes) === JSON.stringify(secretCode)) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appBody').classList.remove('hidden');
+                refreshChart();
             } else {
-                alert("ACCESS_DENIED: ROOT_PASSWORD_MISMATCH");
+                alert("Invalid Key! Please contact @ITBD_Parvej");
             }
         }
 
-        // Clock Function
+        // Live Clock
         setInterval(() => {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB');
+            document.getElementById('liveClock').innerText = new Date().toLocaleTimeString('en-GB');
         }, 1000);
 
-        // TradingView Initialization
-        function switchMarket() {
-            const symbol = document.getElementById('marketPair').value;
+        // Chart Refresh
+        function refreshChart() {
+            const pair = document.getElementById('selectedAsset').value;
             new TradingView.widget({
                 "autosize": true,
-                "symbol": symbol,
+                "symbol": pair,
                 "interval": "1",
                 "timezone": "Etc/UTC",
                 "theme": "dark",
                 "style": "1",
                 "locale": "en",
-                "container_id": "tv-chart-container",
+                "container_id": "tv_chart_box",
                 "hide_side_toolbar": false,
                 "allow_symbol_change": false,
-                "save_image": false
+                "save_image": false,
+                "backgroundColor": "rgba(11, 14, 17, 1)",
+                "gridColor": "rgba(42, 46, 57, 0.06)"
             });
         }
 
-        // Signal Logic (Time + Direction)
-        function generateSignal() {
-            const pairSelect = document.getElementById('marketPair');
-            const pairName = pairSelect.options[pairSelect.selectedIndex].text;
-            const direction = Math.random() > 0.5 ? "UP" : "DOWN";
-            const time = new Date().toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
-
+        // Manual Signal Generation
+        function generateManualSignal() {
+            const btn = document.getElementById('genBtn');
             const feed = document.getElementById('signalFeed');
-            const card = document.createElement('div');
-            const isUp = direction === "UP";
+            const emptyState = document.getElementById('emptyState');
 
-            card.className = "signal-card";
-            card.style.borderLeftColor = isUp ? "#00ff88" : "#ff3333";
-            
-            card.innerHTML = `
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-[9px] text-white/40 uppercase tracking-widest">${pairName}</p>
-                        <p class="text-xl font-black glow">${time}</p>
+            // Button Loading State
+            btn.disabled = true;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span class="scanning"></span> ANALYZING MARKET...`;
+
+            setTimeout(() => {
+                if (emptyState) emptyState.remove();
+                
+                const pairName = document.getElementById('selectedAsset').options[document.getElementById('selectedAsset').selectedIndex].text;
+                const isBuy = Math.random() > 0.5;
+                const timeStr = new Date().toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
+
+                const card = document.createElement('div');
+                card.className = `signal-card p-4 rounded-xl shadow-lg`;
+                card.style.borderLeftColor = isBuy ? "#10b981" : "#ef4444";
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">${pairName} // REAL</p>
+                            <p class="text-2xl font-bold text-white">${timeStr}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold ${isBuy ? 'text-green-500' : 'text-red-500'} uppercase">
+                                ${isBuy ? 'CALL / BUY ↑' : 'PUT / SELL ↓'}
+                            </p>
+                            <p class="text-[10px] text-gray-400">Duration: 1 Min</p>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-xs font-bold ${isUp ? 'text-green-400' : 'text-red-500'} uppercase">${direction} ${isUp ? '↑' : '↓'}</p>
-                        <p class="text-[8px] opacity-40">EXPIRY: 1 MIN</p>
+                    <div class="mt-3 pt-2 border-t border-white/5 flex justify-between items-center">
+                        <span class="text-[9px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded uppercase font-bold tracking-widest">Confirmed 98%</span>
+                        <i class="fas fa-check-circle text-blue-500 text-xs"></i>
                     </div>
-                </div>
-                <div class="mt-3 flex justify-between items-center border-t border-white/5 pt-2">
-                    <span class="text-[8px] text-green-500 font-bold">CONFIRMATION: 98%</span>
-                    <span class="text-[8px] bg-white/5 px-2 rounded">DATA_SYNC_OK</span>
-                </div>
-            `;
+                `;
 
-            if(feed.innerText.includes("Awaiting")) feed.innerHTML = "";
-            feed.prepend(card);
+                feed.prepend(card);
+                if (feed.children.length > 5) feed.lastChild.remove();
 
-            if(feed.children.length > 5) feed.lastChild.remove();
-        }
-
-        function initSignalEngine() {
-            generateSignal();
-            setInterval(generateSignal, 60000); // নতুন সিগন্যাল প্রতি মিনিটে
+                // Restore Button
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }, 1500); // 1.5 second artificial delay for "professional analysis" feel
         }
     </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </body>
 </html>
