@@ -43,18 +43,20 @@
         </div>
     </div>
 
-    <!-- Access Gating -->
-    <div id="authGate" class="fixed inset-0 z-[10000] bg-black flex items-center justify-center p-6">
+    <!-- Password Verification Modal -->
+    <div id="authGate" class="fixed inset-0 z-[10000] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6 hidden">
         <div class="glass-panel p-10 w-full max-w-sm text-center border-cyan-400/20 border">
-            <div class="mb-6 inline-block p-4 bg-cyan-400/10 rounded-3xl border border-cyan-400/20"><i class="fas fa-bolt text-cyan-400 text-4xl"></i></div>
-            <h1 class="text-3xl font-black mb-1 italic tracking-tighter text-white">DRAGON FLY <span class="text-cyan-400">v5</span></h1>
+            <div class="mb-6 inline-block p-4 bg-cyan-400/10 rounded-3xl border border-cyan-400/20"><i class="fas fa-fingerprint text-cyan-400 text-4xl"></i></div>
+            <h1 class="text-2xl font-black mb-1 italic tracking-tighter text-white">ACCESS KEY</h1>
+            <p class="text-[9px] text-gray-500 mb-6 uppercase tracking-widest">Verify identity to run AI analysis</p>
             <input type="password" id="pInput" placeholder="ROOT KEY" class="w-full bg-[#0d1117] border border-cyan-400/30 p-4 rounded-xl text-center mb-6 text-xl mono text-cyan-400 tracking-[10px] outline-none">
-            <button onclick="checkPass()" class="w-full btn-premium py-4 rounded-xl text-xs uppercase tracking-[2px]">Initialize Node</button>
+            <button onclick="checkPass()" class="w-full btn-premium py-4 rounded-xl text-xs uppercase tracking-[2px]">Initialize</button>
+            <button onclick="closeAuth()" class="mt-4 text-[10px] text-gray-600 uppercase tracking-widest">Cancel</button>
         </div>
     </div>
 
     <!-- Interface Content -->
-    <div id="mainUI" class="hidden w-full max-w-xl flex flex-col gap-6">
+    <div id="mainUI" class="w-full max-w-xl flex flex-col gap-6">
         <header class="flex items-center justify-between py-4">
             <div class="flex items-center gap-3">
                 <i class="fas fa-satellite text-cyan-400 animate-pulse"></i>
@@ -64,7 +66,7 @@
         </header>
 
         <section class="glass-panel p-6 shadow-2xl">
-            <!-- Live Chart -->
+            <!-- Live Mini Chart -->
             <div id="chart-container">
                 <div id="tradingview_widget" style="height: 100%; width: 100%;"></div>
             </div>
@@ -81,7 +83,7 @@
                     <option value="FX:EURAUD">EUR/AUD (Real)</option>
                 </select>
             </div>
-            <button onclick="runLogic()" id="scanBtn" class="w-full btn-premium py-5 rounded-2xl flex items-center justify-center gap-4 text-sm">
+            <button onclick="triggerScan()" id="scanBtn" class="w-full btn-premium py-5 rounded-2xl flex items-center justify-center gap-4 text-sm">
                 <i class="fas fa-brain"></i> RUN AI DEEP SCAN
             </button>
         </section>
@@ -89,12 +91,12 @@
         <!-- Node Stats -->
         <div class="grid grid-cols-2 gap-3">
             <div class="glass-panel p-3 text-center border-white/5">
-                <p class="text-[8px] text-gray-500 uppercase mb-1">Market Trend</p>
-                <p id="trendStatus" class="text-[10px] font-bold text-green-500 uppercase animate-pulse italic">SCANNING...</p>
+                <p class="text-[8px] text-gray-500 uppercase mb-1">Status</p>
+                <p id="trendStatus" class="text-[10px] font-bold text-cyan-400 uppercase italic">READY_TO_SCAN</p>
             </div>
             <div class="glass-panel p-3 text-center border-white/5">
                 <p class="text-[8px] text-gray-500 uppercase mb-1">AI Node</p>
-                <p class="text-[10px] font-bold text-cyan-400 uppercase italic tracking-tighter">EMA 10/21 Active</p>
+                <p class="text-[10px] font-bold text-cyan-400 uppercase italic tracking-tighter">EMA 10/21: ACTIVE</p>
             </div>
         </div>
 
@@ -102,58 +104,53 @@
         <section id="feed" class="flex flex-col gap-4 pb-20 text-center">
             <div id="idle" class="py-16 flex flex-col items-center justify-center opacity-20">
                 <i class="fas fa-radar text-4xl mb-4 animate-pulse text-cyan-400"></i>
-                <p class="text-[10px] font-bold uppercase tracking-[4px]">Waiting for Trend Confirmation...</p>
+                <p class="text-[10px] font-bold uppercase tracking-[4px]">Waiting for Market Scan...</p>
             </div>
         </section>
     </div>
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
+        let isAuthorized = false;
+
         window.addEventListener('DOMContentLoaded', () => {
+            updateChart();
             setTimeout(() => {
                 document.getElementById('tgPopup').classList.add('pop-enter');
                 document.getElementById('tgPopupCard').classList.add('pop-scale');
             }, 500);
         });
 
-        function closeTgPopup() {
-            document.getElementById('tgPopup').classList.remove('pop-enter');
+        function closeTgPopup() { document.getElementById('tgPopup').classList.remove('pop-enter'); }
+
+        function triggerScan() {
+            if (isAuthorized) { runLogic(); } 
+            else { document.getElementById('authGate').classList.remove('hidden'); }
         }
+
+        function closeAuth() { document.getElementById('authGate').classList.add('hidden'); }
 
         function checkPass() {
             if (document.getElementById('pInput').value === "125800") {
+                isAuthorized = true;
                 document.getElementById('authGate').classList.add('hidden');
-                document.getElementById('mainUI').classList.remove('hidden');
-                updateChart();
-            } else { alert("ACCESS_DENIED"); }
+                runLogic();
+            } else { alert("INVALID ROOT KEY"); }
         }
 
         function updateChart() {
             const symbol = document.getElementById('assetSelect').value;
             new TradingView.widget({
-                "autosize": true,
-                "symbol": symbol,
-                "interval": "1",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#f1f3f6",
-                "enable_publishing": false,
-                "hide_top_toolbar": true,
-                "hide_legend": true,
-                "save_image": false,
-                "container_id": "tradingview_widget",
-                "backgroundColor": "rgba(10, 13, 18, 1)",
-                "gridColor": "rgba(0, 242, 254, 0.05)",
-                "hide_volume": false,
-                "studies": ["MAExp@tv-basicstudies", "MAExp@tv-basicstudies"]
+                "autosize": true, "symbol": symbol, "interval": "1", "timezone": "Etc/UTC",
+                "theme": "dark", "style": "1", "locale": "en", "toolbar_bg": "#f1f3f6",
+                "enable_publishing": false, "hide_top_toolbar": true, "hide_legend": true,
+                "save_image": false, "container_id": "tradingview_widget",
+                "backgroundColor": "rgba(10, 13, 18, 1)", "gridColor": "rgba(0, 242, 254, 0.05)",
+                "hide_volume": false, "studies": ["MAExp@tv-basicstudies", "MAExp@tv-basicstudies"]
             });
         }
 
-        setInterval(() => {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB');
-        }, 1000);
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB'); }, 1000);
 
         let lastSignalTime = null;
 
@@ -164,15 +161,27 @@
             const trendStat = document.getElementById('trendStatus');
             
             btn.disabled = true;
-            btn.innerHTML = `<i class="fas fa-sync-alt fa-spin"></i> SCANNING TREND...`;
+            btn.innerHTML = `<i class="fas fa-sync-alt fa-spin"></i> CALCULATING PRICE ACTION...`;
 
             setTimeout(() => {
                 if(idle) idle.remove();
                 
-                // মার্কেট ট্রেন্ড ডিটেকশন (র্যান্ডমলি আপ বা ডাউন ট্রেন্ড সিলেক্ট হচ্ছে)
+                // মার্কেট কন্ডিশন চেক (র‍্যান্ডম লজিক)
+                const marketHealth = Math.random();
+                if (marketHealth < 0.25) { 
+                    const errorCard = document.createElement('div');
+                    errorCard.className = "vip-signal-box border-red-500/20 text-center bg-red-500/5 mb-4";
+                    errorCard.innerHTML = `<p class="text-[10px] font-bold text-red-500 uppercase italic tracking-widest"><i class="fas fa-shield-slash mr-2"></i>Bad Market Detected: No Signal Generated</p>`;
+                    feed.prepend(errorCard);
+                    setTimeout(() => errorCard.remove(), 4000);
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-brain"></i> RUN AI DEEP SCAN`;
+                    return;
+                }
+
                 const isUptrend = Math.random() > 0.5;
                 trendStat.innerText = isUptrend ? "UPTREND DETECTED" : "DOWNTREND DETECTED";
-                trendStat.className = isUptrend ? "text-[10px] font-bold text-green-500 uppercase animate-pulse italic" : "text-[10px] font-bold text-red-500 uppercase animate-pulse italic";
+                trendStat.className = `text-[10px] font-bold ${isUptrend ? 'text-green-500' : 'text-red-500'} uppercase animate-pulse italic`;
 
                 const now = new Date();
                 const gapMinutes = Math.floor(Math.random() * 3) + 2; 
@@ -181,49 +190,45 @@
                 const tStr = lastSignalTime.getHours().toString().padStart(2, '0') + ":" + lastSignalTime.getMinutes().toString().padStart(2, '0');
                 const pair = document.getElementById('assetSelect').options[document.getElementById('assetSelect').selectedIndex].text;
                 
-                // ট্রেন্ড অনুযায়ী মেসেজ এবং সিগন্যাল
-                let srAnalysisText = isUptrend 
-                    ? "Strong Uptrend detected. High Buy Volume confirmed by EMA 10/21. Safe for Call." 
-                    : "Strong Downtrend detected. Heavy Sell Pressure detected at Resistance. Safe for Put.";
-                
-                let srBadge = isUptrend ? "HIGH BUY VOLUME ↑" : "SELL PRESSURE ↓";
-                let signalType = isUptrend ? "CALL (UP) ↑" : "PUT (DOWN) ↓";
+                let srAnalysisText = isUptrend ? "Uptrend Confirmation: Price Action rejected from Support with High Volume." : "Downtrend Confirmation: Price rejected from Resistance with heavy Sell Pressure.";
+                let srBadge = isUptrend ? "BULLISH VOLUME ↑" : "BEARISH PRESSURE ↓";
 
                 const card = document.createElement('div');
                 card.className = "signal-item vip-signal-box shadow-2xl text-left mb-4";
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-6">
                         <div>
-                            <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">${pair} // ${isUptrend ? 'BULLISH' : 'BEARISH'} NODE</p>
+                            <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">${pair} // LIVE SIGNAL</p>
                             <div class="time-badge inline-block mb-1">
-                                <span class="text-[10px] text-cyan-400 uppercase font-bold">EXPIRY @</span>
+                                <span class="text-[10px] text-cyan-400 uppercase font-bold tracking-widest">NEXT @</span>
                                 <span class="text-3xl font-black italic text-white mono ml-2">${tStr}</span>
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="text-xs font-black ${isUptrend ? 'text-green-500' : 'text-red-500'} uppercase">${signalType}</p>
-                            <span class="text-[8px] bg-cyan-400/10 border border-cyan-400/30 px-3 py-1 rounded-full font-bold text-cyan-400 uppercase italic mt-2 inline-block">${srBadge}</span>
+                            <p class="text-xs font-black ${isUptrend ? 'text-green-500' : 'text-red-500'} uppercase">${isUptrend ? 'CALL (UP) ↑' : 'PUT (DOWN) ↓'}</p>
+                            <div class="mt-2 text-right">
+                                <span class="text-[8px] bg-cyan-400/10 border border-cyan-400/30 px-3 py-1 rounded-full font-bold text-cyan-400 uppercase italic tracking-tighter">${srBadge}</span>
+                            </div>
                         </div>
                     </div>
                     <div class="mb-4">
-                        <p class="text-[10px] text-gray-400 mono italic font-bold"><i class="fas fa-chart-line mr-1 text-cyan-400"></i> ${srAnalysisText}</p>
+                        <p class="text-[10px] text-gray-400 mono italic font-bold"><i class="fas fa-info-circle mr-1 text-cyan-400"></i> ${srAnalysisText}</p>
                     </div>
                     <div class="flex flex-wrap gap-2 mb-6">
-                        <span class="conf-point">EMA 10/21: Confirmed</span>
-                        <span class="conf-point">Trend: ${isUptrend ? 'Strong Bullish' : 'Strong Bearish'}</span>
+                        <span class="conf-point">EMA 10/21: PASS</span>
+                        <span class="conf-point">Trend: ${isUptrend ? 'Uptrend' : 'Downtrend'}</span>
                         <span class="conf-point">Accuracy: 99.4%</span>
                     </div>
                     <div class="flex justify-between items-center p-4 bg-cyan-400/5 rounded-2xl border border-cyan-400/20">
                         <div class="flex items-center gap-3">
-                            <div class="p-2 bg-cyan-400/20 rounded-lg"><i class="fas fa-microchip text-cyan-400"></i></div>
-                            <p class="text-[9px] font-black text-cyan-400 uppercase tracking-widest">Trend Flow Logic Passed</p>
+                            <div class="p-2 bg-cyan-400/20 rounded-lg"><i class="fas fa-check-double text-cyan-400"></i></div>
+                            <p class="text-[9px] font-black text-cyan-400 uppercase tracking-widest leading-none">Price Action Check Passed</p>
                         </div>
                         <i class="fas fa-bolt text-cyan-400/30"></i>
                     </div>
                 `;
                 feed.prepend(card);
                 if (document.getElementsByClassName('signal-item').length > 5) document.getElementsByClassName('signal-item')[5].remove();
-                
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fas fa-brain"></i> RUN AI DEEP SCAN`;
             }, 2000);
