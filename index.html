@@ -18,13 +18,36 @@
         .time-badge { background: linear-gradient(135deg, rgba(0, 242, 254, 0.1) 0%, rgba(0, 242, 254, 0.02) 100%); border: 1px solid rgba(0, 242, 254, 0.3); border-radius: 12px; padding: 8px 16px; }
         .btn-premium { background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #000; font-weight: 900; box-shadow: 0 0 30px rgba(0, 242, 254, 0.4); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .btn-premium:disabled { background: #1e293b; color: #64748b; box-shadow: none; filter: grayscale(1); cursor: not-allowed; }
-        .vip-signal-box { background: #0d1117; border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 28px; padding: 24px; position: relative; animation: slideUp 0.6s cubic-bezier(0.19, 1, 0.22, 1); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .vip-signal-box { background: #0d1117; border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 28px; padding: 24px; position: relative; animation: slideDown 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
         .conf-point { font-size: 9px; padding: 4px 10px; border-radius: 6px; background: rgba(0, 242, 254, 0.05); border: 1px solid rgba(0, 242, 254, 0.3); color: #00f2fe; text-transform: uppercase; font-weight: 700; }
         #assetSelect { background-color: #161b22 !important; color: #fff !important; border: 1px solid rgba(0, 242, 254, 0.4); border-radius: 12px; outline: none; padding: 15px; width: 100%; cursor: pointer; }
+        
+        /* Telegram Popup Animation Classes */
+        .pop-enter { opacity: 1 !important; pointer-events: auto !important; }
+        .pop-scale { transform: scale(1) !important; }
     </style>
 </head>
 <body class="p-2 md:p-6 flex flex-col items-center">
+
+    <!-- Telegram Join Popup -->
+    <div id="tgPopup" class="fixed inset-0 z-[20000] bg-black/80 backdrop-blur-md flex items-center justify-center p-6 opacity-0 pointer-events-none transition-opacity duration-500">
+        <div id="tgPopupCard" class="glass-panel p-8 w-full max-w-sm text-center border-cyan-400/40 border relative transform scale-90 transition-transform duration-500">
+            <div class="mb-5 inline-block p-4 bg-cyan-400/10 rounded-full border border-cyan-400/30 animate-pulse">
+                <i class="fab fa-telegram-plane text-cyan-400 text-5xl"></i>
+            </div>
+            <h2 class="text-2xl font-black mb-2 tracking-tighter text-white uppercase italic">Join ITBD Dev Core</h2>
+            <p class="text-[11px] text-gray-400 mb-8 tracking-widest leading-relaxed">
+                To get the <span class="text-cyan-400 font-bold">Root Key</span> & latest updates, you must join our official Telegram channel first.
+            </p>
+            <a href="https://t.me/addlist/uzPkdhs-r-BjOGZl" target="_blank" onclick="closeTgPopup()" class="block w-full btn-premium py-4 rounded-xl text-xs uppercase tracking-[2px] mb-3">
+                <i class="fab fa-telegram mr-2 text-lg align-middle"></i> Join Channel Now
+            </a>
+            <button onclick="closeTgPopup()" class="w-full py-3 rounded-xl text-[10px] uppercase tracking-[2px] text-gray-500 hover:text-cyan-400 border border-transparent hover:border-cyan-400/20 transition-all bg-white/5">
+                I Already Joined
+            </button>
+        </div>
+    </div>
 
     <!-- Access Gating -->
     <div id="authGate" class="fixed inset-0 z-[10000] bg-black flex items-center justify-center p-6">
@@ -80,8 +103,8 @@
             </div>
         </div>
 
-        <!-- Signal Display -->
-        <section id="feed" class="flex flex-col gap-6 pb-20 text-center">
+        <!-- Signal Display (Newest on top) -->
+        <section id="feed" class="flex flex-col gap-4 pb-20 text-center">
             <div id="idle" class="py-20 flex flex-col items-center justify-center opacity-20">
                 <i class="fas fa-radar text-4xl mb-4 animate-pulse text-cyan-400"></i>
                 <p class="text-[10px] font-bold uppercase tracking-[4px]">Scanning For S/R Rejections...</p>
@@ -90,6 +113,23 @@
     </div>
 
     <script>
+        // Telegram Popup Logic
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const popup = document.getElementById('tgPopup');
+                const card = document.getElementById('tgPopupCard');
+                popup.classList.add('pop-enter');
+                card.classList.add('pop-scale');
+            }, 500);
+        });
+
+        function closeTgPopup() {
+            const popup = document.getElementById('tgPopup');
+            const card = document.getElementById('tgPopupCard');
+            popup.classList.remove('pop-enter');
+            card.classList.remove('pop-scale');
+        }
+
         // Password: 125800
         function checkPass() {
             var input = document.getElementById('pInput').value;
@@ -106,6 +146,9 @@
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB');
         }, 1000);
 
+        // সিগন্যাল টাইমের ট্র্যাক রাখার ভেরিয়েবল
+        let lastSignalTime = null;
+
         function runLogic() {
             const btn = document.getElementById('scanBtn');
             const feed = document.getElementById('feed');
@@ -113,45 +156,57 @@
             
             btn.disabled = true;
             btn.innerHTML = `<i class="fas fa-sync-alt fa-spin"></i> CALCULATING PRICE ACTION...`;
-            feed.innerHTML = `<div class="py-10 animate-pulse text-cyan-400 text-[10px] font-bold uppercase tracking-widest italic text-center">Checking Support Rejection & Resistance Bounce...</div>`;
+
+            // টেম্পোরারি স্ক্যানিং মেসেজ (সবার উপরে)
+            const tempId = 'temp-' + Date.now();
+            const tempScanMsg = document.createElement('div');
+            tempScanMsg.id = tempId;
+            tempScanMsg.className = "py-6 animate-pulse text-cyan-400 text-[10px] font-bold uppercase tracking-widest italic text-center border border-cyan-400/20 rounded-2xl bg-cyan-400/5";
+            tempScanMsg.innerText = "Checking Support Rejection & Resistance Bounce...";
+            feed.prepend(tempScanMsg);
 
             setTimeout(() => {
                 if(idle) idle.remove();
-                feed.innerHTML = ""; 
+                const temp = document.getElementById(tempId);
+                if(temp) temp.remove();
                 
                 // মার্কেট কন্ডিশন চেক
                 const marketHealth = Math.random(); 
-                if (marketHealth < 0.40) {
-                    const error = document.createElement('div');
-                    error.className = "vip-signal-box border-red-500/20 text-center bg-red-500/5";
-                    error.innerHTML = `<p class="text-[10px] font-bold text-red-500 uppercase tracking-widest italic"><i class="fas fa-shield-slash mr-2"></i>No Rejection Found at S/R Levels. Waiting for clear Price Action.</p>`;
-                    feed.appendChild(error);
+                if (marketHealth < 0.30) { // ৩০% চান্স সিগন্যাল না মেলার
+                    const errorCard = document.createElement('div');
+                    errorCard.className = "vip-signal-box border-red-500/20 text-center bg-red-500/5";
+                    errorCard.innerHTML = `<p class="text-[10px] font-bold text-red-500 uppercase tracking-widest italic"><i class="fas fa-shield-slash mr-2"></i>No Rejection Found at S/R Levels. Waiting for clear Price Action.</p>`;
+                    feed.prepend(errorCard);
+                    
+                    // ৫ সেকেন্ড পর এরর মেসেজ মুছে যাবে যাতে হিস্ট্রি ক্লিন থাকে
+                    setTimeout(() => errorCard.remove(), 5000);
+                    
                     btn.disabled = false;
                     btn.innerHTML = `<i class="fas fa-brain"></i> RUN AI DEEP SCAN`;
                 } else {
                     const now = new Date();
-                    const nextMin = new Date(now.getTime() + 60000);
-                    const tStr = nextMin.getHours().toString().padStart(2, '0') + ":" + nextMin.getMinutes().toString().padStart(2, '0');
                     
-                    // Main Logic: S/R Rejection Simulation
-                    const isUp = Math.random() > 0.5; // ৫০% চান্স সাপোর্ট অথবা রেজিস্ট্যান্স হওয়ার
-                    const pair = document.getElementById('assetSelect').value;
-                    
-                    let srAnalysisText = "";
-                    let srBadge = "";
+                    // মার্কেট কন্ডিশন অনুযায়ী ২ থেকে ৫ মিনিটের একটি টাইম গ্যাপ তৈরি হবে
+                    const gapMinutes = Math.floor(Math.random() * 4) + 2; 
 
-                    if (isUp) {
-                        // Support Rejection / Bounce
-                        srAnalysisText = "Price rejected from Major Support. Bullish bounce confirmed.";
-                        srBadge = "SUPPORT BOUNCE ↑";
+                    // যদি আগের সিগন্যালের টাইম বর্তমান টাইমের চেয়ে বেশি হয়, তাহলে তার সাথে গ্যাপ যোগ হবে
+                    if (lastSignalTime && lastSignalTime > now) {
+                        lastSignalTime = new Date(lastSignalTime.getTime() + (gapMinutes * 60000));
                     } else {
-                        // Resistance Rejection
-                        srAnalysisText = "Price rejected from Resistance zone. Bearish reversal detected.";
-                        srBadge = "RESISTANCE REJECTION ↓";
+                        // আর যদি অনেকক্ষণ পর স্ক্যান করে, তাহলে বর্তমান টাইমের সাথে গ্যাপ যোগ হবে
+                        lastSignalTime = new Date(now.getTime() + (gapMinutes * 60000));
                     }
 
+                    const tStr = lastSignalTime.getHours().toString().padStart(2, '0') + ":" + lastSignalTime.getMinutes().toString().padStart(2, '0');
+                    
+                    const isUp = Math.random() > 0.5; // ৫০% কল অথবা পুট
+                    const pair = document.getElementById('assetSelect').value;
+                    
+                    let srAnalysisText = isUp ? "Price rejected from Major Support. Bullish bounce confirmed." : "Price rejected from Resistance zone. Bearish reversal detected.";
+                    let srBadge = isUp ? "SUPPORT BOUNCE ↑" : "RESISTANCE REJECTION ↓";
+
                     const card = document.createElement('div');
-                    card.className = "vip-signal-box shadow-2xl text-left";
+                    card.className = "signal-item vip-signal-box shadow-2xl text-left";
                     card.innerHTML = `
                         <div class="flex justify-between items-start mb-6">
                             <div>
@@ -193,13 +248,32 @@
                             <i class="fas fa-bolt text-cyan-400/30"></i>
                         </div>
                     `;
-                    feed.appendChild(card);
+                    
+                    // নতুন সিগন্যাল সবার উপরে যুক্ত হবে
+                    feed.prepend(card);
+                    
+                    // সর্বোচ্চ ১০টি সিগন্যাল হিস্ট্রি রাখার লজিক কল করা হলো
+                    maintainSignalHistory();
+                    
+                    // সফল হলে বাটন ৬০ সেকেন্ডের জন্য লক হবে
                     lockButton(60);
                 }
+                // পেজ অটোমেটিক একটু উপরে স্ক্রল হবে যাতে নতুন সিগন্যালটি দেখা যায়
                 window.scrollTo({top: 0, behavior: 'smooth'});
             }, 2500);
         }
 
+        // হিস্ট্রি কন্ট্রোল: ১০টির বেশি হলে শেষেরটি মুছে যাবে
+        function maintainSignalHistory() {
+            const feed = document.getElementById('feed');
+            const signals = feed.getElementsByClassName('signal-item');
+            
+            while (signals.length > 10) {
+                feed.removeChild(signals[signals.length - 1]);
+            }
+        }
+
+        // বাটন লক করার ফাংশন
         function lockButton(seconds) {
             const btn = document.getElementById('scanBtn');
             let tLeft = seconds;
